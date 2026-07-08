@@ -22,13 +22,18 @@
 
 .navbar.scrolled{
 
-    background:rgba(8,8,8,.80);
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,136,0,.06),
+            rgba(8,8,8,.85)
+        );
 
     backdrop-filter:blur(20px);
 
     -webkit-backdrop-filter:blur(20px);
 
-    border-bottom:1px solid var(--surface-border);
+    border-bottom:1px solid rgba(255,136,0,.18);
 
     box-shadow:0 10px 35px rgba(0,0,0,.30);
 
