@@ -1,0 +1,54 @@
+const reveals = document.querySelectorAll(".reveal");
+
+const observer = new IntersectionObserver(
+(entries) => {
+
+    entries.forEach(entry => {
+
+        if(entry.isIntersecting){
+
+            entry.target.classList.add("visible");
+
+        }
+
+    });
+
+},
+{
+    threshold: 0.15
+});
+
+reveals.forEach(item => observer.observe(item));
+
+/* ==========================================================
+   SMOOTH SCROLL
+========================================================== */
+
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+
+    anchor.addEventListener("click", function (e) {
+
+        const targetId = this.getAttribute("href");
+
+        if (targetId === "#") return;
+
+        const target = document.querySelector(targetId);
+
+        if (!target) return;
+
+        e.preventDefault();
+
+        const navbar = document.querySelector(".navbar");
+
+        const offset = navbar ? navbar.offsetHeight : 0;
+
+        const top = target.getBoundingClientRect().top + window.scrollY - offset;
+
+        window.scrollTo({
+            top,
+            behavior: "smooth"
+        });
+
+    });
+
+});

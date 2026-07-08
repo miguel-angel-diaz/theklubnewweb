@@ -1,0 +1,323 @@
+/* ==========================================================
+   HERO
+   The Klub
+   ========================================================== */
+
+.hero {
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100dvh;
+    padding: 8rem 2rem;
+    overflow: hidden;
+    isolation: isolate;
+}
+
+/* ===========================
+   Background Glow
+=========================== */
+
+.hero::before {
+    content: "";
+    inset: 0;
+
+    background:
+        radial-gradient(circle at center,
+            rgba(255, 136, 0, .18) 0%,
+            rgba(255, 136, 0, .08) 30%,
+            transparent 70%);
+
+    z-index: -2;
+}
+
+.hero::after {
+    content: "";
+    inset: 0;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(0,0,0,.15),
+            rgba(0,0,0,.65)
+        );
+
+    z-index: -1;
+}
+
+/* ===========================
+   Hero Content
+=========================== */
+
+.hero-content {
+
+    width: min(900px, 100%);
+    margin: auto;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+
+}
+
+/* ===========================
+   Logo
+=========================== */
+
+.hero-logo{
+
+    width: min(340px,80vw);
+
+    margin-bottom:3rem;
+
+    user-select:none;
+
+    animation:logoFloat 8s ease-in-out infinite;
+
+    filter:
+        drop-shadow(0 0 15px rgba(255,136,0,.25))
+        drop-shadow(0 0 40px rgba(255,136,0,.15));
+
+}
+
+/* ===========================
+   Heading
+=========================== */
+
+.hero h1{
+    font-family:"Space Grotesk",sans-serif;
+
+    font-size:clamp(2.8rem,6vw,5.6rem);
+
+    font-weight:700;
+
+    line-height:1.05;
+
+    letter-spacing:-2px;
+
+    color:#fff;
+
+    margin-bottom:1.5rem;
+
+}
+
+.hero h2{
+    background: linear-gradient(90deg, #ff3b3b 0%, #ff8800 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 25px rgba(255, 100, 0, .35));
+    font-family:"Space Grotesk",sans-serif;
+    font-size:clamp(1.8rem,6vw,5.6rem);
+    font-weight:700;
+    line-height:1.05;
+    letter-spacing:-2px;
+    color:#fff;
+    margin-bottom:1.5rem;
+    margin-top: 0;
+}
+
+
+/* ===========================
+   Paragraph
+=========================== */
+
+.hero p{
+
+    max-width:700px;
+
+    color:#A6A6A6;
+
+    font-size:clamp(1rem,1.3vw,1.75rem);
+
+    line-height:1.8;
+
+    margin-bottom:3rem;
+
+}
+
+/* ===========================
+   Buttons
+=========================== */
+
+.hero-buttons{
+
+    display:flex;
+
+    gap:1.5rem;
+
+    flex-wrap:wrap;
+
+    justify-content:center;
+
+}
+
+/* ===========================
+   Scroll Indicator
+=========================== */
+
+.hero-scroll{
+
+
+    bottom:40px;
+
+    left:50%;
+
+    transform:translateX(-50%);
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    gap:.75rem;
+
+    color:#777;
+
+    font-size:.75rem;
+
+    letter-spacing:3px;
+
+    text-transform:uppercase;
+
+}
+
+.hero-scroll::after{
+
+    content:"";
+
+    width:2px;
+
+    height:60px;
+
+    background:linear-gradient(
+        to bottom,
+        rgba(255,136,0,0),
+        rgba(255,136,0,.85),
+        rgba(255,136,0,0)
+    );
+
+    animation:scrollPulse 2s infinite;
+
+}
+
+/* ===========================
+   Decorative Light
+=========================== */
+
+.hero-light{
+
+
+    width:900px;
+
+    height:900px;
+
+    border-radius:50%;
+
+    background:radial-gradient(circle,
+        rgba(255,136,0,.12),
+        transparent 70%);
+
+    filter:blur(80px);
+
+    pointer-events:none;
+
+    z-index:-3;
+
+}
+
+/* ===========================
+   Animations
+=========================== */
+
+@keyframes logoFloat{
+
+    0%{
+
+        transform:
+        translateY(0px)
+        scale(1);
+
+    }
+
+    50%{
+
+        transform:
+        translateY(-10px)
+        scale(1.015);
+
+    }
+
+    100%{
+
+        transform:
+        translateY(0px)
+        scale(1);
+
+    }
+
+}
+
+@keyframes scrollPulse{
+
+    0%{
+
+        opacity:.2;
+        transform:scaleY(.3);
+
+    }
+
+    50%{
+
+        opacity:1;
+        transform:scaleY(1);
+
+    }
+
+    100%{
+
+        opacity:.2;
+        transform:scaleY(.3);
+
+    }
+
+}
+
+/* ===========================
+   Responsive
+=========================== */
+
+@media (max-width:768px){
+
+    .hero{
+
+        padding:6rem 1.5rem;
+
+    }
+
+    .hero-buttons{
+
+        width:100%;
+
+        flex-direction:column;
+
+    }
+
+    .hero-buttons .btn{
+
+        width:100%;
+
+    }
+
+    .hero-logo{
+
+        width:min(260px,75vw);
+
+    }
+
+}

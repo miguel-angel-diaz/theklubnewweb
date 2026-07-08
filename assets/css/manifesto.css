@@ -1,0 +1,121 @@
+/* ===========================================
+   MANIFESTO
+=========================================== */
+
+.manifesto{
+
+    padding:10rem 0;
+
+}
+
+.section-tag{
+
+    display:inline-flex;
+
+    margin-bottom:1.5rem;
+
+    color:var(--primary);
+
+    letter-spacing:.25em;
+
+    font-size:.8rem;
+
+    font-weight:700;
+
+    text-transform:uppercase;
+
+}
+
+.manifesto h2{
+
+    max-width:700px;
+
+    font-size:clamp(2.5rem,5vw,4.5rem);
+
+    line-height:1.1;
+
+    margin-bottom:2rem;
+
+}
+
+.manifesto-intro{
+
+    max-width:750px;
+
+    color:var(--muted);
+
+    font-size:1.2rem;
+
+    line-height:1.9;
+
+    margin-bottom:5rem;
+
+}
+
+.manifesto-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+
+    gap:2rem;
+
+}
+
+.manifesto-card{
+
+    padding:2.5rem;
+
+    border-radius:20px;
+
+    background:var(--surface);
+
+    border:1px solid var(--surface-border);
+
+    backdrop-filter:blur(18px);
+
+    transition:.35s ease;
+
+}
+
+.manifesto-card:hover{
+
+    transform:translateY(-8px);
+
+    border-color:rgba(255,136,0,.35);
+
+    box-shadow:
+        0 0 25px rgba(255,136,0,.08),
+        0 20px 40px rgba(0,0,0,.35);
+
+}
+
+.number{
+
+    display:block;
+
+    margin-bottom:1.5rem;
+
+    font-size:3rem;
+
+    font-weight:700;
+
+    color:rgba(255,136,0,.15);
+
+}
+
+.manifesto-card h3{
+
+    margin-bottom:1rem;
+
+    font-size:1.5rem;
+
+}
+
+.manifesto-card p{
+
+    color:var(--muted);
+
+    line-height:1.8;
+
+}

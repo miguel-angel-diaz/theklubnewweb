@@ -1,0 +1,379 @@
+/* ==========================================================
+   NAVBAR
+========================================================== */
+
+.navbar{
+    position:fixed;
+    inset:0 0 auto 0;
+    height:90px;
+    width:100%;
+    z-index:1000;
+    transition:
+        background .35s ease,
+        backdrop-filter .35s ease,
+        border-color .35s ease,
+        box-shadow .35s ease;
+
+}
+
+/* ==========================================================
+   SCROLLED
+========================================================== */
+
+.navbar.scrolled{
+
+    background:rgba(8,8,8,.80);
+
+    backdrop-filter:blur(20px);
+
+    -webkit-backdrop-filter:blur(20px);
+
+    border-bottom:1px solid var(--surface-border);
+
+    box-shadow:0 10px 35px rgba(0,0,0,.30);
+
+}
+
+/* ==========================================================
+   CONTAINER
+========================================================== */
+
+.navbar .container{
+    height: 100%;
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+}
+
+/* ==========================================================
+   BRAND
+========================================================== */
+
+.navbar-brand{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:1rem;
+
+    text-decoration:none;
+
+    flex-shrink:0;
+
+}
+
+.navbar-brand img{
+
+    width:56px;
+
+    height:auto;
+
+    transition:transform .35s ease;
+
+    filter:drop-shadow(0 0 18px rgba(255,136,0,.18));
+
+}
+
+.navbar.scrolled .navbar-brand img{
+
+    transform:scale(.90);
+
+}
+
+.brand-text{
+
+    display:flex;
+
+    flex-direction:column;
+
+}
+
+.brand-title{
+
+    font-family:"Space Grotesk",sans-serif;
+
+    font-size:1rem;
+
+    font-weight:700;
+
+    letter-spacing:.18em;
+
+    color:#fff;
+
+    text-transform:uppercase;
+
+}
+
+.brand-subtitle{
+
+    margin-top:.2rem;
+
+    font-size:.88rem;
+
+    color:var(--muted);
+
+    letter-spacing:.18em;
+
+    text-transform:uppercase;
+
+}
+
+/* ==========================================================
+   MENU
+========================================================== */
+
+.navbar-menu{
+    display:flex;
+    align-items:center;
+    gap:1.75rem;
+    margin:0;
+    padding:0;
+    list-style:none;
+}
+
+.navbar-menu li{
+    display:flex;
+}
+
+.navbar-menu a{
+    position:relative; /* AÑADIR */
+    display:flex;
+    align-items:center;
+    height:90px;
+    padding:0 .35rem;
+    color:#fff;
+    text-decoration:none;
+    text-transform:uppercase;
+    font-size:.85rem;
+    font-weight:600;
+    letter-spacing:.12em;
+    transition:color .3s ease;
+    white-space: nowrap;
+
+}
+
+.navbar-menu a::after{
+
+    content:"";
+    position:absolute; /* AÑADIR */
+
+    left:0;
+    bottom:24px;
+    width:0;
+    height:2px;
+    border-radius:999px;
+    background:var(--primary);
+    transition:width .3s ease;
+
+}
+
+.navbar-menu a:hover{
+
+    color:var(--primary);
+
+}
+
+
+.navbar-menu a:hover::after{
+
+    width:100%;
+
+}
+
+/* ==========================================================
+   ACTIONS
+========================================================== */
+
+.navbar-actions{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:1rem;
+
+    flex-shrink:0;
+
+}
+
+/* ==========================================================
+   MOBILE BUTTON
+========================================================== */
+
+.menu-toggle{
+
+    display:none;
+
+    width:48px;
+
+    height:48px;
+
+    padding:0;
+
+    border:none;
+
+    border-radius:14px;
+
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
+
+    cursor:pointer;
+
+    transition:background .3s ease;
+
+}
+
+.menu-toggle:hover{
+
+    background:rgba(255,136,0,.12);
+
+}
+
+.menu-toggle span{
+
+    display:block;
+
+    width:22px;
+
+    height:2px;
+
+    margin:5px auto;
+
+    border-radius:999px;
+
+    background:#fff;
+
+    transition:.3s;
+
+}
+
+/* ==========================================================
+   TABLET
+========================================================== */
+
+@media (max-width:1100px){
+
+    .brand-subtitle{
+
+        display:none;
+
+    }
+
+    .navbar-menu{
+
+        gap:1.2rem;
+
+    }
+
+}
+
+/* ==========================================================
+   MOBILE
+========================================================== */
+
+@media (max-width:900px){
+
+    .menu-toggle{
+
+        display:block;
+
+    }
+
+    .navbar-actions{
+
+        display:none;
+
+    }
+
+    .navbar-menu{
+
+        position:fixed;
+
+        top:90px;
+
+        right:-100%;
+
+        width:300px;
+
+        height:calc(100vh - 90px);
+
+        padding:3rem 2rem;
+
+        background:rgba(8,8,8,.96);
+
+        backdrop-filter:blur(24px);
+
+        -webkit-backdrop-filter:blur(24px);
+
+        flex-direction:column;
+
+        align-items:flex-start;
+
+        gap:2rem;
+
+        transition:right .35s ease;
+
+        border-left:1px solid var(--surface-border);
+
+    }
+
+    .navbar-menu.active{
+
+        right:0;
+
+    }
+
+    .navbar-menu a{
+
+        height:auto;
+
+        padding:0;
+
+        font-size:1rem;
+
+    }
+
+    .navbar-menu a::after{
+
+        display:none;
+
+    }
+
+}
+
+/* ==========================================================
+   SMALL MOBILE
+========================================================== */
+
+@media (max-width:640px){
+
+    .navbar{
+
+        height:78px;
+
+    }
+
+    .navbar-menu{
+
+        top:78px;
+
+        height:calc(100vh - 78px);
+
+    }
+
+    .navbar-brand img{
+
+        width:48px;
+
+    }
+
+    .brand-title{
+
+        font-size:.92rem;
+
+    }
+
+}

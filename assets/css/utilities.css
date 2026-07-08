@@ -1,0 +1,205 @@
+/* ==========================================================
+   DISPLAY
+========================================================== */
+
+.d-none{
+    display:none !important;
+}
+
+.d-block{
+    display:block !important;
+}
+
+.d-flex{
+    display:flex !important;
+}
+
+.d-grid{
+    display:grid !important;
+}
+
+/* ==========================================================
+   FLEX
+========================================================== */
+
+.flex-center{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+}
+
+.flex-between{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+}
+
+.flex-column{
+
+    display:flex;
+
+    flex-direction:column;
+
+}
+
+/* ==========================================================
+   TEXT
+========================================================== */
+
+.text-center{
+
+    text-align:center;
+
+}
+
+.text-left{
+
+    text-align:left;
+
+}
+
+.text-right{
+
+    text-align:right;
+
+}
+
+.uppercase{
+
+    text-transform:uppercase;
+
+}
+
+.text-primary{
+
+    color:var(--primary);
+
+}
+
+.text-muted{
+
+    color:var(--muted);
+
+}
+
+/* ==========================================================
+   WIDTH
+========================================================== */
+
+.w-100{
+
+    width:100%;
+
+}
+
+.h-100{
+
+    height:100%;
+
+}
+
+/* ==========================================================
+   SPACING
+========================================================== */
+
+.mt-xs{margin-top:.5rem;}
+.mt-sm{margin-top:1rem;}
+.mt-md{margin-top:2rem;}
+.mt-lg{margin-top:4rem;}
+.mt-xl{margin-top:6rem;}
+
+.mb-xs{margin-bottom:.5rem;}
+.mb-sm{margin-bottom:1rem;}
+.mb-md{margin-bottom:2rem;}
+.mb-lg{margin-bottom:4rem;}
+.mb-xl{margin-bottom:6rem;}
+
+/* ==========================================================
+   POSITION
+========================================================== */
+
+.relative{
+
+    position:relative;
+
+}
+
+.absolute{
+
+    position:absolute;
+
+}
+
+/* ==========================================================
+   GLASS
+========================================================== */
+
+.glass{
+
+    background: var(--surface);
+    backdrop-filter:blur(20px);
+    border: 1px solid var(--surface-border);
+
+}
+
+/* ==========================================================
+   VISIBILITY
+========================================================== */
+
+.hidden{
+
+    visibility:hidden;
+
+}
+
+.overflow-hidden{
+
+    overflow:hidden;
+
+}
+
+/* ==========================================================
+   ACCESSIBILITY
+========================================================== */
+
+.sr-only{
+
+    position:absolute;
+
+    width:1px;
+
+    height:1px;
+
+    padding:0;
+
+    margin:-1px;
+
+    overflow:hidden;
+
+    clip:rect(0,0,0,0);
+
+    white-space:nowrap;
+
+    border:0;
+
+}
+
+html, body{
+    background: var(--background);
+    color: var(--text);
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    width: min(var(--container), 92%);
+    margin: 0 auto;
+}

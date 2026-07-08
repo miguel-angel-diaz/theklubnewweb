@@ -1,0 +1,101 @@
+/* ==========================================================
+   FOOTER
+========================================================== */
+
+.footer{
+
+    position:relative;
+
+    padding:6rem 0 3rem;
+
+    border-top:1px solid var(--surface-border);
+
+    background:linear-gradient(
+        180deg,
+        transparent,
+        rgba(255,255,255,.02)
+    );
+
+}
+
+.footer-container{
+
+    width:min(var(--container),92%);
+
+    margin:auto;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    text-align:center;
+
+}
+
+.footer-logo{
+
+    width:90px;
+
+    margin-bottom:2rem;
+
+    filter:drop-shadow(0 0 20px rgba(255,136,0,.15));
+
+}
+
+.footer-title{
+
+    font-family:"Space Grotesk",sans-serif;
+
+    font-size:2rem;
+
+    margin-bottom:.5rem;
+
+}
+
+.footer-subtitle{
+
+    color:var(--muted);
+
+    margin-bottom:3rem;
+
+}
+
+.footer-nav{
+
+    display:flex;
+
+    gap:2rem;
+
+    flex-wrap:wrap;
+
+    justify-content:center;
+
+    margin-bottom:3rem;
+
+}
+
+.footer-nav a{
+
+    color:var(--muted);
+
+    text-decoration:none;
+
+    transition:var(--transition);
+
+}
+
+.footer-nav a:hover{
+
+    color:var(--primary);
+
+}
+
+.footer-copy{
+
+    font-size:.85rem;
+
+    color:#666;
+
+}

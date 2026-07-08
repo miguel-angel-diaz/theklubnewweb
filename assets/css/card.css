@@ -1,0 +1,334 @@
+/* ==========================================================
+   CARD COMPONENT
+   ========================================================== */
+
+.card {
+
+    position: relative;
+
+    display: flex;
+
+    flex-direction: column;
+
+    padding: 2.5rem;
+
+    border-radius: 24px;
+
+    overflow: hidden;
+
+    background: var(--surface);
+
+    border: 1px solid var(--surface-border);
+
+    backdrop-filter: blur(20px);
+
+    transition:
+        transform .35s ease,
+        border-color .35s ease,
+        box-shadow .35s ease,
+        background .35s ease;
+
+    box-shadow: 0 10px 30px rgba(0,0,0,.3);  /* sombra propia, no solo en hover */
+}
+
+.card:hover{
+
+    transform: translateY(-8px);
+
+    background: var(--surface-hover);
+    border-color: var(--surface-border-hover);
+
+    box-shadow:
+
+        0 0 30px rgba(255,136,0,.08),
+        0 25px 60px rgba(0,0,0,.35);
+
+}
+
+/* Glow superior */
+
+.card::before{
+
+    content:"";
+
+    position:absolute;
+
+    inset:0;
+
+    background:
+
+        linear-gradient(
+            180deg,
+            rgba(255,136,0,.08),
+            transparent 45%
+        );
+
+    opacity:0;
+
+    transition:opacity .35s;
+
+    pointer-events:none;
+
+}
+
+.card:hover::before{
+
+    opacity:1;
+
+}
+
+/* Línea inferior */
+
+.card::after{
+
+    content:"";
+
+    position:absolute;
+
+    left:50%;
+
+    bottom:0;
+
+    width:0;
+
+    height:2px;
+
+    background:var(--primary);
+
+    transition:.35s;
+
+    transform:translateX(-50%);
+
+}
+
+.card:hover::after{
+
+    width:100%;
+
+}
+
+/* Icon */
+
+.card-icon{
+
+    width:70px;
+
+    height:70px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    margin-bottom:2rem;
+
+    border-radius:18px;
+
+    background: rgba(255,136,0,.14);  /* antes .08 */
+    border: 1px solid rgba(255,136,0,.2);  /* opcional, refuerza el círculo */
+
+}
+
+.card-icon img{
+
+    width:34px;
+
+    height:34px;
+
+}
+
+/* Number */
+
+.card-number{
+
+    font-family:"Space Grotesk",sans-serif;
+
+    font-size:3rem;
+
+    font-weight:700;
+
+    color:rgba(255,136,0,.15);
+
+    margin-bottom:1.5rem;
+
+}
+
+/* Title */
+
+.card-title{
+
+    margin-bottom:1rem;
+
+    font-size:1.5rem;
+
+    color:#fff;
+
+}
+
+/* Body */
+
+.card-text{
+
+    color:var(--muted);
+
+    line-height:1.8;
+
+    flex:1;
+
+}
+
+.card-rule {
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
+}
+
+
+.card-event::before{
+    content:"";
+    position:absolute; /* AÑADIR */
+    inset:0;
+    background:linear-gradient(180deg, rgba(255,136,0,.08), transparent);
+    opacity:0;
+    transition:.35s;
+}
+.card-event a{
+
+    position:relative;
+
+    display:inline-flex;
+
+    align-items:center;
+
+    gap:.5rem;
+
+    margin-top:2rem;
+
+    padding-bottom:.3rem;
+
+    color:var(--primary);
+
+    text-decoration:none;
+
+    font-weight:700;
+
+    font-size:.85rem;
+
+    letter-spacing:.12em;
+
+    text-transform:uppercase;
+
+    overflow:hidden;
+
+}
+
+/* Línea inferior animada */
+.card-event a::before{
+
+    content:"";
+
+    position:absolute;
+
+    left:0;
+
+    bottom:0;
+
+    width:100%;
+
+    height:1px;
+
+    background:var(--primary);
+
+    transform:scaleX(0);
+
+    transform-origin:left;
+
+    transition:transform .35s ease;
+
+}
+
+.card-event a:hover::before{
+
+    transform:scaleX(1);
+
+}
+
+/* Flecha animada */
+.card-event a::after{
+
+    content:"→";
+
+    font-size:1rem;
+
+    transition:transform .35s ease;
+
+}
+
+.card-event a:hover::after{
+
+    transform:translateX(6px);
+
+}
+
+/* Glow sutil al hacer hover, para que "brille" un poco */
+.card-event a:hover{
+
+    color:var(--primary-light);
+
+    text-shadow:0 0 12px rgba(255,136,0,.5);
+
+}
+
+/* Footer */
+
+.card-footer{
+
+    margin-top:2rem;
+
+}
+
+
+.card-event {
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
+}
+
+.card-broadcast {
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
+}
+
+.wall blockquote {
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
+}
+
+.admission-box{
+    background: linear-gradient(180deg, rgba(255,136,0,.10), var(--surface));
+    border: 1px solid rgba(255,136,0,.25);  /* este ya tenía buen contraste naranja */
+}
+
+.btn-secondary {
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
+}
+
+.card-wall{
+
+    text-align:left;
+
+}
+
+.card-wall p{
+
+    font-family:"Space Grotesk", sans-serif;
+
+    font-size:1.3rem;
+
+    line-height:1.4;
+
+    color:#fff;
+
+    margin:0;
+
+}
