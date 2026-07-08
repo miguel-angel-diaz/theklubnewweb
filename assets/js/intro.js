@@ -1,87 +1,51 @@
 /* ==========================================================
-   INTRO
+   INTRO — Fade in + Audio + Botón Enter
 ========================================================== */
-document.addEventListener('DOMContentLoaded', () => {
-  const firstLogo = document.querySelector('.intro-logo--first');
-  const article = document.querySelector('.intro article');
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  const showTime = 1500;   // tiempo que se ve el primer logo solo
-  const glitchTime = 400;  // duración del glitch
-
-  setTimeout(() => {
-    if (!prefersReducedMotion) {
-      firstLogo.classList.add('glitching');
-    }
-
-    setTimeout(() => {
-      firstLogo.classList.add('glitch-out');
-      article.classList.add('fade-in');
-    }, prefersReducedMotion ? 0 : glitchTime);
-
-  }, showTime);
-});
-
-document.addEventListener('DOMContentLoaded', () => {
-  const firstLogo = document.querySelector('.intro-logo--first');
-  const article = document.querySelector('.intro article');
-  const soundToggle = document.querySelector('#sound-toggle');
-  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-  const showTime = 1500;
-  const glitchTime = 400;
-
-  setTimeout(() => {
-    if (!prefersReducedMotion) {
-      firstLogo.classList.add('glitching');
-    }
-
-    setTimeout(() => {
-      firstLogo.classList.add('glitch-out');
-      article.classList.add('fade-in');
-
-      // Mostramos el botón de sonido en el mismo momento que aparece el contenido
-      if (soundToggle) {
-        soundToggle.hidden = false;
-        requestAnimationFrame(() => {
-          soundToggle.classList.add('is-visible');
-        });
-      }
-
-    }, prefersReducedMotion ? 0 : glitchTime);
-
-  }, showTime);
-});
-
 
 document.addEventListener("DOMContentLoaded", () => {
 
     const intro = document.querySelector(".intro");
+    const article = document.querySelector(".intro article");
     const enterButton = document.querySelector(".enter-btn");
     const audio = document.querySelector("#theme");
     const soundToggle = document.querySelector("#sound-toggle");
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     document.body.classList.add("no-scroll");
 
+    // Fade in del contenido (logo con pulso + título + botón)
+    setTimeout(() => {
+
+        article.classList.add("fade-in");
+
+        // Mostramos el botón de sonido en el mismo momento
+        if (soundToggle) {
+            soundToggle.hidden = false;
+            requestAnimationFrame(() => {
+                soundToggle.classList.add("is-visible");
+            });
+        }
+
+    }, prefersReducedMotion ? 0 : 300);
+
+    // Botón ENTER — oculta el intro y arranca el audio
     enterButton.addEventListener("click", () => {
 
         intro.classList.add("intro-hide");
 
         document.body.classList.remove("no-scroll");
 
-        if(audio){
+        if (audio) {
 
             audio.volume = 0;
-
-            audio.play().catch(()=>{});
-
+            audio.play().catch(() => {});
             fadeAudio(audio);
 
         }
 
     });
 
-    // NUEVO — control de silencio/sonido
+    // Botón de silenciar/activar sonido
     if (soundToggle && audio) {
 
         soundToggle.addEventListener("click", () => {
@@ -100,78 +64,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 
-/* ==========================================================
-   AUDIO FADE
-========================================================== */
-
-function fadeAudio(audio){
-
-    let volume = 0;
-
-    const interval = setInterval(()=>{
-
-        volume += 0.02;
-
-        audio.volume = Math.min(volume,1);
-
-        if(volume >= 1){
-
-            clearInterval(interval);
-
-        }
-
-    },100);
-
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-
-    const intro = document.querySelector(".intro");
-    const enterButton = document.querySelector(".enter-btn");
-    const audio = document.querySelector("#theme");
-
-    document.body.classList.add("no-scroll");
-
-    enterButton.addEventListener("click", () => {
-
-        intro.classList.add("intro-hide");
-
-        document.body.classList.remove("no-scroll");
-
-        if(audio){
-
-            audio.volume = 0;
-
-            audio.play().catch(()=>{});
-
-            fadeAudio(audio);
-
-        }
-
-    });
-
-});
 
 /* ==========================================================
    AUDIO FADE
 ========================================================== */
 
-function fadeAudio(audio){
+function fadeAudio(audio) {
 
     let volume = 0;
 
-    const interval = setInterval(()=>{
+    const interval = setInterval(() => {
 
         volume += 0.02;
 
-        audio.volume = Math.min(volume,1);
+        audio.volume = Math.min(volume, 1);
 
-        if(volume >= 1){
-
+        if (volume >= 1) {
             clearInterval(interval);
-
         }
 
-    },100);
+    }, 100);
 
 }
