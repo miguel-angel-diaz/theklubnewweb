@@ -2,6 +2,17 @@
    INTRO — Fade in + Audio + Botón Enter
 ========================================================== */
 
+const AUDIO_MUTED_KEY = 'klub_audio_muted';
+
+function obtenerPreferenciaAudio() {
+    const valor = localStorage.getItem(AUDIO_MUTED_KEY);
+    return valor === 'true'; // por defecto (null), no está muteado
+}
+
+function guardarPreferenciaAudio(muted) {
+    localStorage.setItem(AUDIO_MUTED_KEY, String(muted));
+}
+
 document.addEventListener("DOMContentLoaded", () => {
 
     const intro = document.querySelector(".intro");
@@ -13,12 +24,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.body.classList.add("no-scroll");
 
+    // Aplicamos la preferencia guardada antes de que suene nada
+    if (audio) {
+        audio.muted = obtenerPreferenciaAudio();
+    }
+
+    if (soundToggle && audio) {
+        soundToggle.setAttribute("aria-pressed", String(audio.muted));
+        soundToggle.setAttribute(
+            "aria-label",
+            audio.muted ? "Activar música" : "Silenciar música"
+        );
+    }
+
     // Fade in del contenido (logo con pulso + título + botón)
     setTimeout(() => {
 
         article.classList.add("fade-in");
 
-        // Mostramos el botón de sonido en el mismo momento
         if (soundToggle) {
             soundToggle.hidden = false;
             requestAnimationFrame(() => {
@@ -37,9 +60,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (audio) {
 
+            const volumenObjetivo = audio.muted ? 0 : 1;
+
             audio.volume = 0;
             audio.play().catch(() => {});
-            fadeAudio(audio);
+
+            // Solo hacemos fade-in de volumen si no está muteado
+            if (!audio.muted) {
+                fadeAudio(audio);
+            }
 
         }
 
@@ -52,11 +81,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
             audio.muted = !audio.muted;
 
+            guardarPreferenciaAudio(audio.muted);
+
             soundToggle.setAttribute("aria-pressed", String(audio.muted));
             soundToggle.setAttribute(
                 "aria-label",
                 audio.muted ? "Activar música" : "Silenciar música"
             );
+
+            // Si el usuario reactiva el sonido y el volumen está en 0
+            // (por ejemplo, lo silenció antes de que terminara el fade-in),
+            // lo subimos directamente para que se oiga ya
+            if (!audio.muted && audio.volume === 0) {
+                audio.volume = 1;
+            }
 
         });
 
@@ -74,6 +112,12 @@ function fadeAudio(audio) {
     let volume = 0;
 
     const interval = setInterval(() => {
+
+        // Si el usuario muteó a media transición, paramos el fade
+        if (audio.muted) {
+            clearInterval(interval);
+            return;
+        }
 
         volume += 0.02;
 

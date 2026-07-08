@@ -2,11 +2,13 @@
    REVEAL ANIMATIONS
 ========================================================== */
 
+/* ==========================================================
+   REVEAL ANIMATIONS
+========================================================== */
+
 class Reveal {
 
     constructor() {
-
-        this.elements = document.querySelectorAll("[data-reveal]");
 
         this.observer = new IntersectionObserver(
 
@@ -26,10 +28,17 @@ class Reveal {
 
     init() {
 
-        this.elements.forEach(element => {
-
+        document.querySelectorAll("[data-reveal]").forEach(element => {
             this.observer.observe(element);
+        });
 
+    }
+
+    // NUEVO — permite observar elementos añadidos dinámicamente después
+    observeNew(elements) {
+
+        elements.forEach(element => {
+            this.observer.observe(element);
         });
 
     }
@@ -50,4 +59,5 @@ class Reveal {
 
 }
 
-new Reveal();
+// Guardamos la instancia en window para poder acceder desde otros scripts
+window.revealInstance = new Reveal();

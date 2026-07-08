@@ -180,3 +180,87 @@
     pointer-events: none;
 
 }
+
+.back-to-top{
+
+    position:fixed;
+
+    bottom:2rem;
+
+    right:2rem;
+
+    z-index:999;
+
+    width:52px;
+
+    height:52px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border-radius:50%;
+
+    background:var(--surface);
+
+    border:1px solid var(--surface-border);
+
+    color:#fff;
+
+    cursor:pointer;
+
+    opacity:0;
+
+    transform:translateY(10px);
+
+    transition:
+        opacity .4s ease,
+        transform .4s ease,
+        border-color .3s ease,
+        background .3s ease;
+
+}
+
+.back-to-top.is-visible{
+
+    opacity:1;
+
+    transform:translateY(0);
+
+}
+
+.back-to-top:hover{
+
+    border-color:var(--primary);
+
+    background:var(--surface-hover);
+
+    box-shadow:0 0 20px rgba(255,136,0,.25);
+
+}
+
+.back-to-top:focus-visible{
+
+    outline:2px solid var(--primary);
+
+    outline-offset:3px;
+
+}
+
+/* Si el botón de sonido también está en la esquina, subimos este para que no se solapen */
+.back-to-top{
+    bottom:calc(2rem + 60px); /* 52px del botón de sonido + 8px de aire */
+}
+
+@media(max-width:640px){
+
+    .back-to-top{
+        right:1.25rem;
+        width:46px;
+        height:46px;
+        bottom:calc(1.25rem + 54px);
+    }
+
+}
