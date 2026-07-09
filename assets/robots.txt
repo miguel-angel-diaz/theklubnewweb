@@ -1,5 +1,4 @@
 User-agent: *
-
 Allow: /
 
-Sitemap: https://pngpremodern.com/sitemap.xml
+Sitemap: https://theklubmtg.es/sitemap.xml
