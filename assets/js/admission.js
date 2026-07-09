@@ -1,21 +1,24 @@
-// assets/js/admission.js
+/* ==========================================================
+   ADMISSION FORM
+========================================================== */
 
 const ADMISSION_API_URL = 'https://mydiscordbot-production-3e6a.up.railway.app/api/solicitar-acceso';
-const STORAGE_KEY = 'klub_admission_attempts';
-const MAX_INTENTOS = 2;
+const ADMISSION_STORAGE_KEY = 'klub_admission_attempts';
+const ADMISSION_MAX_INTENTOS = 2;
 
-function obtenerIntentos() {
-    const valor = localStorage.getItem(STORAGE_KEY);
+function obtenerIntentosAdmision() {
+    const valor = localStorage.getItem(ADMISSION_STORAGE_KEY);
     return valor ? parseInt(valor, 10) : 0;
 }
 
-function incrementarIntentos() {
-    const actual = obtenerIntentos();
-    localStorage.setItem(STORAGE_KEY, String(actual + 1));
+function incrementarIntentosAdmision() {
+    const actual = obtenerIntentosAdmision();
+    localStorage.setItem(ADMISSION_STORAGE_KEY, String(actual + 1));
     return actual + 1;
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+function initAdmission() {
+
     const content = document.querySelector('#admission-content');
     const successBox = document.querySelector('#admission-success');
     const blockedBox = document.querySelector('#admission-blocked');
@@ -25,16 +28,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!form) return;
 
-   
+    // Si ya agotó los intentos, bloqueamos directamente al cargar
+    if (obtenerIntentosAdmision() >= ADMISSION_MAX_INTENTOS) {
+        if (content) content.hidden = true;
+        if (blockedBox) blockedBox.hidden = false;
+        return;
+    }
 
     form.addEventListener('submit', async (e) => {
+       // Si ya agotó los intentos, bloqueamos directamente al cargar
+      if (obtenerIntentosAdmision() >= ADMISSION_MAX_INTENTOS) {
+          if (content) content.hidden = true;
+          if (blockedBox) blockedBox.hidden = false;
+          return;
+      }
+
         e.preventDefault();
-         // Al cargar la página, comprobamos si ya agotó los intentos
-        if (obtenerIntentos() >= MAX_INTENTOS) {
-            content.hidden = true;
-            blockedBox.hidden = false;
-            return;
-        }
+
         const discordNick = form.discord_nick.value.trim();
         const email = form.email.value.trim();
         const comentario = form.comentario.value.trim();
@@ -51,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
         status.className = 'form-status';
 
         try {
+
             const res = await fetch(ADMISSION_API_URL, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -63,24 +74,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(data.error || 'Error al enviar la solicitud');
             }
 
-            // Éxito — contamos el intento y mostramos el mensaje
-            const intentos = incrementarIntentos();
+            incrementarIntentosAdmision();
 
             content.hidden = true;
             successBox.hidden = false;
 
-            // Si este envío fue el último permitido, la próxima vez que
-            // cargue la página verá directamente el bloqueo (por el check de arriba)
-            if (intentos >= MAX_INTENTOS) {
-                // No hace falta hacer nada extra aquí — el próximo DOMContentLoaded lo bloqueará
-            }
-
         } catch (err) {
+
             console.error(err);
             status.textContent = 'No se pudo enviar la solicitud. Inténtalo de nuevo más tarde.';
             status.className = 'form-status error';
             submitBtn.disabled = false;
             submitBtn.textContent = 'Solicitar Admisión';
+
         }
+
     });
-});
+
+}

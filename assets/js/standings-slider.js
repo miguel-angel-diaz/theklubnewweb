@@ -1,38 +1,11 @@
-// async function cargarClasificaciones() {
-//   try {
-//     const res = await fetch('https://mydiscordbot-production-3e6a.up.railway.app/api/torneos');
-//     if (!res.ok) throw new Error('Servicio no disponible');
-    
-//     const data = await res.json();
-//     console.log('Última actualización:', data.actualizado);
-    
-//     data.torneos.forEach(torneo => {
-//       console.log(torneo.nombre, torneo.clasificacion);
-//       // aquí pintas cada torneo con tu maquetación
-//     });
-    
-//   } catch (err) {
-//     console.error('Error cargando clasificaciones:', err);
-//   }
-// }
-
-
-
-// document.addEventListener('DOMContentLoaded', () => {
-//     cargarClasificaciones();
-// });
+/* ==========================================================
+   SLIDER DE CLASIFICACIONES
+========================================================== */
 
 const TORNEOS_API = 'https://mydiscordbot-production-3e6a.up.railway.app/api/torneos';
 
 let torneosOrdenados = [];
 let slideActual = 0;
-
-function formatearFecha(fechaStr) {
-    if (!fechaStr) return '';
-    const fecha = new Date(fechaStr);
-    if (isNaN(fecha)) return '';
-    return fecha.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
-}
 
 function formatearDiff(diff) {
     const clase = diff > 0 ? 'diff-positive' : diff < 0 ? 'diff-negative' : 'diff-neutral';
@@ -41,6 +14,7 @@ function formatearDiff(diff) {
 }
 
 function renderSlide(torneo) {
+
     const filas = torneo.clasificacion.map(p => `
         <tr>
             <td class="standings-rank">${p.rank}</td>
@@ -76,15 +50,15 @@ function renderSlide(torneo) {
                         <th>Dif</th>
                     </tr>
                 </thead>
-                <tbody>
-                    ${filas}
-                </tbody>
+                <tbody>${filas}</tbody>
             </table>
         </div>
     `;
+
 }
 
 function renderSlider() {
+
     const track = document.querySelector('#slider-track');
     const dotsContainer = document.querySelector('#slider-dots');
 
@@ -106,16 +80,21 @@ function renderSlider() {
     });
 
     actualizarBotones();
+
 }
 
 function actualizarSlide() {
+
     document.querySelectorAll('.standings-slide').forEach((slide, i) => {
         slide.classList.toggle('is-active', i === slideActual);
     });
+
     document.querySelectorAll('.slider-dot').forEach((dot, i) => {
         dot.classList.toggle('is-active', i === slideActual);
     });
+
     actualizarBotones();
+
 }
 
 function actualizarBotones() {
@@ -124,9 +103,12 @@ function actualizarBotones() {
 }
 
 async function cargarSlider() {
+
     const track = document.querySelector('#slider-track');
+    if (!track) return;
 
     try {
+
         const res = await fetch(TORNEOS_API);
         if (!res.ok) throw new Error('Servicio no disponible');
 
@@ -137,7 +119,6 @@ async function cargarSlider() {
             return;
         }
 
-        // Más reciente primero
         torneosOrdenados = [...data.torneos].sort(
             (a, b) => new Date(b.fecha_fin) - new Date(a.fecha_fin)
         );
@@ -149,9 +130,14 @@ async function cargarSlider() {
         console.error(err);
         track.innerHTML = '<p class="standings-error">No se pudieron cargar las clasificaciones.</p>';
     }
+
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+function initStandingsSlider() {
+
+    const track = document.querySelector('#slider-track');
+    if (!track) return;
+
     cargarSlider();
 
     document.querySelector('#slider-prev').addEventListener('click', () => {
@@ -167,4 +153,5 @@ document.addEventListener('DOMContentLoaded', () => {
             actualizarSlide();
         }
     });
-});
+
+}

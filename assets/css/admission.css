@@ -337,7 +337,8 @@ padding:3rem 2rem;
 @media(max-width:640px){
 
     .bouncer-image{
-        width:120px;
+        width:100%;
+        margin: 0 auto 1rem;
     }
 
 }

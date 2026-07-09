@@ -1,17 +1,26 @@
+/* ==========================================================
+   PODCAST + ARTÍCULOS
+========================================================== */
+
 const PODCAST_API = 'https://mydiscordbot-production-3e6a.up.railway.app/api/podcast';
 const ARTICULOS_API = 'https://mydiscordbot-production-3e6a.up.railway.app/api/articulos';
 
-function formatearFecha(fechaStr) {
-    if (!fechaStr) return '';
-    const fecha = new Date(fechaStr);
-    if (isNaN(fecha)) return '';
-    return fecha.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+function extraerEpisodio(titulo) {
+    const match = titulo.match(/^(Temp\.\s*\d+\s*Ep\.\s*\d+)/i);
+    return match ? match[1] : null;
+}
+
+function limpiarTitulo(titulo) {
+    return titulo.replace(/^Temp\.\s*\d+\s*Ep\.\s*\d+\s*-\s*/i, '');
 }
 
 async function cargarEpisodios() {
+
     const contenedor = document.querySelector('#podcast-episodios');
+    if (!contenedor) return;
 
     try {
+
         const res = await fetch(PODCAST_API);
         const data = await res.json();
 
@@ -21,6 +30,7 @@ async function cargarEpisodios() {
         }
 
         contenedor.innerHTML = data.episodios.map(ep => {
+
             const etiqueta = extraerEpisodio(ep.titulo);
             const tituloLimpio = limpiarTitulo(ep.titulo);
 
@@ -37,24 +47,27 @@ async function cargarEpisodios() {
                     <span class="episode-card-date">${formatearFecha(ep.fecha)}</span>
                 </a>
             `;
+
         }).join('');
 
-          // NUEVO — le decimos al observer que mire estas tarjetas recién creadas
         if (window.revealInstance) {
-            const nuevasTarjetas = contenedor.querySelectorAll('[data-reveal]');
-            window.revealInstance.observeNew(nuevasTarjetas);
+            window.revealInstance.observeNew(contenedor.querySelectorAll('[data-reveal]'));
         }
 
     } catch (err) {
         console.error(err);
         contenedor.innerHTML = '<p class="standings-error">No se pudieron cargar los episodios.</p>';
     }
+
 }
 
 async function cargarArticulos() {
-     const contenedor = document.querySelector('#articulos-lista');
+
+    const contenedor = document.querySelector('#articulos-lista');
+    if (!contenedor) return;
 
     try {
+
         const res = await fetch(ARTICULOS_API);
         const data = await res.json();
 
@@ -72,38 +85,18 @@ async function cargarArticulos() {
             </a>
         `).join('');
 
-        // Igual que hicimos con podcast — reactivamos el reveal para las tarjetas nuevas
         if (window.revealInstance) {
-            const nuevasTarjetas = contenedor.querySelectorAll('[data-reveal]');
-            window.revealInstance.observeNew(nuevasTarjetas);
+            window.revealInstance.observeNew(contenedor.querySelectorAll('[data-reveal]'));
         }
-     } catch (err) {
+
+    } catch (err) {
         console.error(err);
         contenedor.innerHTML = '<p class="standings-error">No se pudieron cargar los artículos.</p>';
     }
+
 }
 
-
-
-function formatearFecha(fechaStr) {
-    if (!fechaStr) return '';
-    const fecha = new Date(fechaStr);
-    if (isNaN(fecha)) return '';
-    return fecha.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
-}
-
-function extraerEpisodio(titulo) {
-    // Busca patrón "Temp. 01 Ep. 23" al inicio del título
-    const match = titulo.match(/^(Temp\.\s*\d+\s*Ep\.\s*\d+)/i);
-    return match ? match[1] : null;
-}
-
-function limpiarTitulo(titulo) {
-    // Quita el prefijo "Temp. 01 Ep. 23 - " dejando solo el nombre del episodio
-    return titulo.replace(/^Temp\.\s*\d+\s*Ep\.\s*\d+\s*-\s*/i, '');
-}
-
-document.addEventListener('DOMContentLoaded', () => {
+function initBroadcast() {
     cargarEpisodios();
     cargarArticulos();
-});
+}
