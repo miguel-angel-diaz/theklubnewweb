@@ -33,7 +33,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="./assets/css/keyrune.css" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" href="assets/css/styles.css">
+       <link rel="stylesheet" href="assets/css/styles.css?v=3">
      <script>
         if ('scrollRestoration' in history) {
             history.scrollRestoration = 'manual';
@@ -41,462 +41,636 @@
     </script>
   </head>
   <body>
- <div class="noise"></div>
-
-  <nav class="navbar">
-      <div class="container">
-          <a href="#home" class="navbar-brand">
-              <img src="./assets/logo/logo.webp" alt="The Klub Logo">
-              <div class="brand-text">
-                  <span class="brand-title">THE KLUB</span>
-                  <span class="brand-subtitle">Where Premodern Never Gives Up</span>
-              </div>
-          </a>
-          <ul class="navbar-menu">
-              <li><a href="#manifesto">Manifiesto</a></li>
-              <li><a href="#events">Eventos</a></li>
-              <li><a href="#torneos">Torneos</a></li>
-              <li><a href="#broadcast">Podcast</a></li>
-              <li><a href="#articulos">Articulos</a></li>
-              <li><a href="#join">Admisión</a></li>
-          </ul>
-          <button class="menu-toggle" aria-label="Open navigation menu" aria-expanded="false">
-              <span></span><span></span><span></span>
-          </button>
-      </div>
-  </nav>
-
-  <header class="hero">
-    <div class="hero-content">
-      <img class="hero-logo" src="./assets/logo/logo.webp" alt="The Klub">
-      <h1>THE KLUB</h1>
-      <h2>Where Premodern Never Gives Up</h2>
-      <p>
-        El klub de Premodern MTG para gente que juega por amor al formato, 
-        no por ganar a toda costa. Torneos semanales de Magic: The Gathering, 
-        clasificaciones en directo, y un Discord donde se juega en serio 
-        sin tomárselo demasiado en serio.
-      </p>
-      <div class="section-divider"><span></span></div>
-      <div class="hero-buttons">
-          <a class="btn btn-primary" href="#join">ENTER THE KLUB</a>
-          <a class="btn btn-secondary" href="#manifesto">EL MANIFIESTO</a>
-      </div>
-    </div>
-  </header>
-  <section class="intro">
-    <article>
-        <img class="intro-logo intro-logo--second"
-            src="./assets/logo/logo.webp"
-            alt="The Klub">
-        <h1>THE KLUB</h1>
-        <p>Where Premodern Never Gives Up</p>
-        <button class="btn btn-primary enter-btn">
-          ENTER THE KLUB
-        </button>
-    </article>
-</section>
-<audio
-    id="theme"
-    src="assets/audio/theme.mp3"
-    preload="auto">
-</audio>
-
-<section class="section code-section" id="manifesto">
-  <div class="container">
-    <header class="section-header" data-reveal="left">
-      <span class="section-tag">
-          EL MANIFIESTO
-      </span>
-      <h2>No es para todo el mundo.</h2>
-      <p class="code-intro">
-        La mayoría de servidores de Discord sobre Premodern mueren de la 
-        misma forma: hype durante un mes, luego silencio, o se llenan de 
-        gente que solo piensa en ganar. The Klub existe para lo contrario: 
-        un sitio donde jugar Premodern siga siendo divertido, con gente que 
-        se presenta, respeta a sus rivales, y disfruta el formato sin 
-        convertirlo en una guerra. Lee el Código a continuación — si 
-        resuena contigo, solicita tu admisión.
-      </p>
-    </header>
-
-        <div class="grid grid-3">
-
-          
-            <article class="card card-rule" data-reveal="left">
-                <div class="event-icon">
-                    <i class="ss ss-4ed"></i>
-                </div>
-                <h3>Admisión</h3>
-                <p>
-                    El acceso a The Klub está regulado por la organización. 
-                    Preferimos diez jugadores con buena onda a cien que solo 
-                    vienen a competir.
-                </p>
-            </article>
-
-            <article class="card card-rule" data-reveal="left">
-                <div class="event-icon">
-                    <i class="ss ss-ice"></i>
-                </div>
-                <h3>Respeto</h3>
-                <p>
-                  Respeta a los demás miembros, a los organizadores y el espíritu 
-                  del klub en todo momento. Aquí se juega para pasarlo bien, no 
-                  para machacar al de enfrente.
-                </p>
-            </article>
-
-            <article class="card card-rule" data-reveal="left">
-                <div class="event-icon">
-                    <i class="ss ss-chr"></i>
-                </div>
-                <h3>Compromiso</h3>
-                <p>
-                  Si te apuntas a una competición, intenta terminarla. No hace 
-                  falta ganar — solo estar, jugar, y disfrutar del formato con el resto.
-                </p>
-            </article>
-
-            <article class="card card-rule" data-reveal="right">
-               <div class="event-icon">
-                    <i class="ss ss-hml"></i>
-                </div>
-               <h3>Sin Abandonos</h3>
-               <p>
-                  Abandonar eventos sin avisar no está bien visto. Tus rivales 
-                  sacaron tiempo para jugar contigo — el mínimo es avisar si no vas a poder.
-                </p>
-            </article>
-
-            <article class="card card-rule" data-reveal="right">
-                 <div class="event-icon">
-                    <i class="ss ss-all"></i>
-                </div>
-                <h3>Programación</h3>
-                <p>
-                  Las partidas deben programarse y reportarse dentro de los 
-                  plazos establecidos. Nada del otro mundo, solo un poco de 
-                  organización para que todos disfrutemos.
-                </p>
-            </article>
-
-            <article class="card card-rule" data-reveal="right">
-                <div class="event-icon">
-                    <i class="ss ss-mir"></i>
-                </div>
-                <h3>Premodern Never Give Up</h3>
-                <p>
-                  Premodern no es nostalgia ni una excusa para el tryhard. 
-                  Es nuestra forma de seguir jugando Magic: The Gathering como 
-                  nos gusta.
-                </p>
-            </article>
-
-        </div>
-
-    </div>
-
-</section>
-
-<section class="section events" id="events">
-    <div class="container">
-        <header class="section-header" data-reveal="left">
-            <span class="section-tag">
-                EVENTOS
-            </span>
-            <h2>
-              Cada mes el gathering empieza de nuevo.
-            </h2>
-            <p>
-              Torneos mensuales y el Battle Royale semestral — dos formas 
-              distintas de vivir Premodern, cada una con sus propias reglas 
-              para que elijas cómo quieres jugar.
-            </p>
-        </header>
-        <div class="grid grid-2">
-            <article class="card card-event" data-reveal="left">
-                <div class="event-icon">
-                  <i class="ss ss-vis"></i>
-                </div>
-                <h3>Torneo Mensual</h3>
-                <p>
-                  Rondas suizas cada mes, abiertas a todos los miembros de 
-                  The Klub. Permitimos gold border y proxies de la Reserved 
-                  List — y aunque haya top en juego, puedes cambiar hasta el 
-                  mazo completo una vez por torneo.
-                </p>
-            
-            </article>
-            <article class="card card-event" data-reveal="left">
-                <div class="event-icon">
-                  <i class="ss ss-5ed"></i>
-                </div>
-                <h3>Battle Royale</h3>
-                <p>
-                  Dos veces al año, todos contra todos. Sin tops, sin 
-                  presión — cambia de mazo cuando quieras y reta a quien 
-                  quieras. Aquí permitimos proxear las 75 cartas: solo 
-                  importa jugar.
-                </p>
-            </article>
-        </div>
-    </div>
-</section>
-<section class="section standings-section" id="torneos">
-    <div class="container">
-
-        <header class="section-header" data-reveal="left">
-            <span class="section-tag">TORNEOS</span>
-            <h2>Cada torneo, cada resultado.</h2>
-            <p>Desliza para ver la clasificación completa de cada torneo jugado en The Klub.</p>
-        </header>
-
-        <div class="standings-slider" id="standings-slider">
-
-            <div class="standings-slider-nav">
-                <button class="slider-arrow" id="slider-prev" aria-label="Torneo anterior">‹</button>
-                <div class="slider-dots" id="slider-dots"></div>
-                <button class="slider-arrow" id="slider-next" aria-label="Torneo siguiente">›</button>
-            </div>
-
-            <div class="standings-slider-track" id="slider-track">
-                <p class="standings-loading">Cargando torneos...</p>
-            </div>
-
-        </div>
-
-    </div>
-</section>
-
-<section class="section broadcast" id="broadcast">
-    <div class="container">
-        <header class="section-header" data-reveal="left">
-            <span class="section-tag">PODCAST</span>
-            <h2>La voz de The Klub.</h2>
-            <p>
-                The KlubCast: conversaciones sobre Premodern, torneos y la 
-                comunidad. Disponible en iVoox y Spotify.
-            </p>
-        </header>
-
-        <div class="broadcast-links" data-reveal="left">
-            <a href="https://www.ivoox.com/podcast-the-klubcast_sq_f12806786_1.html" target="_blank" class="btn btn-secondary">
-                Escuchar en iVoox
-            </a>
-            <a href="https://open.spotify.com/show/1sVKOsmD4qeOVaig8HpjDa" target="_blank" class="btn btn-secondary">
-                Escuchar en Spotify
-            </a>
-        </div>
-
-        <div class="grid grid-3" id="podcast-episodios">
-            
-        </div>
-    </div>
-</section>
-
-<section class="section broadcast-articles" id="articulos">
-    <div class="container">
-        <header class="section-header" data-reveal="left">
-            <span class="section-tag">ARTÍCULOS</span>
-            <h2>Escrito por la comunidad.</h2>
-            <p>
-                Crónicas de torneos, análisis de metajuego y reflexiones 
-                sobre Premodern, publicadas en nuestro Medium.
-            </p>
-        </header>
-
-        <div class="broadcast-links" data-reveal="left">
-            <a href="https://medium.com/@theklubmtg" target="_blank" class="btn btn-secondary">
-                Ver en Medium
-            </a>
-        </div>
-
-        <div class="grid grid-3" id="articulos-lista">
-            <p class="standings-loading">Cargando últimos artículos...</p>
-        </div>
-    </div>
-</section>
-
-<section class="section admission" id="join">
-    <div class="container">
-        <div class="admission-box" data-reveal="top">
-
-            <div id="admission-content">
-
-                <span class="section-tag">ADMISIÓN</span>
-                <h2>¿Te apetece jugar?</h2>
-                <p>
-                    The Klub no busca a los jugadores más competitivos ni a los que 
-                    más torneos ganan. Buscamos gente con la que dé gusto sentarse a 
-                    jugar. Si eso te suena a ti, cuéntanos un poco sobre ti.
-                </p>
-
-                <form id="admission-form" class="admission-form" novalidate>
-                    <div class="form-group">
-                        <label for="discord-nick">Usuario de Discord</label>
-                        <input
-                            type="text"
-                            id="discord-nick"
-                            name="discord_nick"
-                            placeholder="tu_usuario"
-                            required
-                            autocomplete="off">
+    <div id="public-view">
+        <div class="noise"></div>
+        <nav class="navbar">
+            <div class="container">
+                <a href="#home" class="navbar-brand">
+                    <img src="./assets/logo/logo.webp" alt="The Klub Logo">
+                    <div class="brand-text">
+                        <span class="brand-title">THE KLUB</span>
+                        <span class="brand-subtitle">Where Premodern Never Gives Up</span>
                     </div>
-                    <div class="form-group">
-                        <label for="email">Email</label>
-                        <input
-                            type="email"
-                            id="email"
-                            name="email"
-                            placeholder="tucorreo@ejemplo.com"
-                            required
-                            autocomplete="off">
-                    </div>
-                    <div class="form-group">
-                        <label for="comentario">Cuéntanos algo sobre ti</label>
-                        <textarea
-                            id="comentario"
-                            name="comentario"
-                            rows="4"
-                            placeholder="Qué mazos juegas, cómo conociste el Klub, lo que quieras contarnos..."
-                            required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary" id="admission-submit">
-                        Solicitar Admisión
-                    </button>
-                    <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
-                </form>
+                </a>
+                <ul class="navbar-menu">
+                    <li><a href="#manifesto">Manifiesto</a></li>
+                    <li><a href="#events">Eventos</a></li>
+                    <li><a href="#torneos">Torneos</a></li>
+                    <li><a href="#broadcast">Podcast</a></li>
+                    <li><a href="#articulos">Articulos</a></li>
+                    <li><a href="#join">Admisión</a></li>
+                </ul>
 
+                <button id="login-toggle" class="login-nav-btn" aria-label="Acceder con Discord">
+                    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                        <path fill="currentColor" d="M12 12c2.7 0 4.9-2.2 4.9-4.9S14.7 2.2 12 2.2 7.1 4.4 7.1 7.1 9.3 12 12 12zm0 2.4c-3.3 0-9.9 1.7-9.9 5v2.4h19.8v-2.4c0-3.3-6.6-5-9.9-5z"/>
+                    </svg>
+                </button>
+
+                <button class="menu-toggle" aria-label="Open navigation menu" aria-expanded="false">
+                    <span></span><span></span><span></span>
+                </button>
             </div>
-
-            <!-- Se muestra cuando ya se envió con éxito -->
-            <div id="admission-success" class="admission-result" hidden>
-                <div class="result-icon">✓</div>
-                <h3>Solicitud procesada con éxito</h3>
-                <p>Te contactaremos pronto por Discord o email. Gracias por tu interés en The Klub.</p>
+        </nav>
+        <header class="hero">
+            <div class="hero-content">
+            <img class="hero-logo" src="./assets/logo/logo.webp" alt="The Klub">
+            <h1>THE KLUB</h1>
+            <h2>Where Premodern Never Gives Up</h2>
+            <p>
+                El klub de Premodern MTG para gente que juega por amor al formato, 
+                no por ganar a toda costa. Torneos semanales de Magic: The Gathering, 
+                clasificaciones en directo, y un Discord donde se juega en serio 
+                sin tomárselo demasiado en serio.
+            </p>
+            <div class="section-divider"><span></span></div>
+            <div class="hero-buttons">
+                <a class="btn btn-primary" href="#join">ENTER THE KLUB</a>
+                <a class="btn btn-secondary" href="#manifesto">EL MANIFIESTO</a>
             </div>
-
-            <!-- Se muestra cuando se agotan los intentos -->
-            <div id="admission-blocked" class="admission-result admission-blocked" hidden>
-                <img src="./assets/images/elbarbas.webp" alt="barbas-bouncer-image" class="bouncer-image">
-                <h3>No seas brasas.</h3>
-                <p>Has agotado tus intentos de solicitud. Si crees que es un error, contacta con nosotros directamente en Discord.</p>
             </div>
-
-        </div>
-    </div>
-</section>
-<section class="section wall" id="wall">
-    <div class="container">
-
-        <header class="section-header" data-reveal="right">
-            <span class="section-tag">THE WALL</span>
-            <h2>No todo el mundo lo entiende.</h2>
         </header>
-
-        <div class="grid grid-3">
-
-            <article class="card card-wall" data-reveal="left">
-                <div class="event-icon">
-                    <i class="ss ss-wth"></i>
-                </div>
+        <section class="intro">
+            <article>
+                <img class="intro-logo intro-logo--second"
+                    src="./assets/logo/logo.webp"
+                    alt="The Klub">
+                <h1>THE KLUB</h1>
                 <p>Where Premodern Never Gives Up</p>
+                <button class="btn btn-primary enter-btn">
+                ENTER THE KLUB
+                </button>
             </article>
+        </section>
+        <audio
+            id="theme"
+            src="assets/audio/theme.mp3"
+            preload="auto">
+        </audio>
+        <section class="section code-section" id="manifesto">
+        <div class="container">
+            <header class="section-header" data-reveal="left">
+            <span class="section-tag">
+                EL MANIFIESTO
+            </span>
+            <h2>No es para todo el mundo.</h2>
+            <p class="code-intro">
+                La mayoría de servidores de Discord sobre Premodern mueren de la 
+                misma forma: hype durante un mes, luego silencio, o se llenan de 
+                gente que solo piensa en ganar. The Klub existe para lo contrario: 
+                un sitio donde jugar Premodern siga siendo divertido, con gente que 
+                se presenta, respeta a sus rivales, y disfruta el formato sin 
+                convertirlo en una guerra. Lee el Código a continuación — si 
+                resuena contigo, solicita tu admisión.
+            </p>
+            </header>
 
-            <article class="card card-wall" data-reveal="left">
-                <div class="event-icon">
-                    <i class="ss ss-tmp"></i>
-                </div>
-                <p>Buscamos gente, no culos duros.</p>
-            </article>
+                <div class="grid grid-3">
 
-            <article class="card card-wall" data-reveal="left">
-                <div class="event-icon">
-                    <i class="ss ss-sth"></i>
-                </div>
-                <p>No construimos una comunidad. Construimos un Klub.</p>
-            </article>
+                
+                    <article class="card card-rule" data-reveal="left">
+                        <div class="event-icon">
+                            <i class="ss ss-4ed"></i>
+                        </div>
+                        <h3>Admisión</h3>
+                        <p>
+                            El acceso a The Klub está regulado por la organización. 
+                            Preferimos diez jugadores con buena onda a cien que solo 
+                            vienen a competir.
+                        </p>
+                    </article>
 
-            <article class="card card-wall" data-reveal="left">
-                <div class="event-icon">
-                    <i class="ss ss-exo"></i>
-                </div>
-                <p>Se juega para disfrutar, no para machacar.</p>
-            </article>
+                    <article class="card card-rule" data-reveal="left">
+                        <div class="event-icon">
+                            <i class="ss ss-ice"></i>
+                        </div>
+                        <h3>Respeto</h3>
+                        <p>
+                        Respeta a los demás miembros, a los organizadores y el espíritu 
+                        del klub en todo momento. Aquí se juega para pasarlo bien, no 
+                        para machacar al de enfrente.
+                        </p>
+                    </article>
 
-            <article class="card card-wall" data-reveal="left">
-                <div class="event-icon">
-                    <i class="ss ss-usg"></i>
-                </div>
-                <p>Respeta el Código. Siempre.</p>
-            </article>
+                    <article class="card card-rule" data-reveal="left">
+                        <div class="event-icon">
+                            <i class="ss ss-chr"></i>
+                        </div>
+                        <h3>Compromiso</h3>
+                        <p>
+                        Si te apuntas a una competición, intenta terminarla. No hace 
+                        falta ganar — solo estar, jugar, y disfrutar del formato con el resto.
+                        </p>
+                    </article>
 
-            <article class="card card-wall" data-reveal="left">
-                <div class="event-icon">
-                    <i class="ss ss-ulg"></i>
+                    <article class="card card-rule" data-reveal="right">
+                    <div class="event-icon">
+                            <i class="ss ss-hml"></i>
+                        </div>
+                    <h3>Sin Abandonos</h3>
+                    <p>
+                        Abandonar eventos sin avisar no está bien visto. Tus rivales 
+                        sacaron tiempo para jugar contigo — el mínimo es avisar si no vas a poder.
+                        </p>
+                    </article>
+
+                    <article class="card card-rule" data-reveal="right">
+                        <div class="event-icon">
+                            <i class="ss ss-all"></i>
+                        </div>
+                        <h3>Programación</h3>
+                        <p>
+                        Las partidas deben programarse y reportarse dentro de los 
+                        plazos establecidos. Nada del otro mundo, solo un poco de 
+                        organización para que todos disfrutemos.
+                        </p>
+                    </article>
+
+                    <article class="card card-rule" data-reveal="right">
+                        <div class="event-icon">
+                            <i class="ss ss-mir"></i>
+                        </div>
+                        <h3>Premodern Never Give Up</h3>
+                        <p>
+                        Premodern no es nostalgia ni una excusa para el tryhard. 
+                        Es nuestra forma de seguir jugando Magic: The Gathering como 
+                        nos gusta.
+                        </p>
+                    </article>
+
                 </div>
-                <p>No es para todos. Esa es la idea.</p>
-            </article>
+
+            </div>
+
+        </section>
+        <section class="section events" id="events">
+            <div class="container">
+                <header class="section-header" data-reveal="left">
+                    <span class="section-tag">
+                        EVENTOS
+                    </span>
+                    <h2>
+                    Cada mes el gathering empieza de nuevo.
+                    </h2>
+                    <p>
+                    Torneos mensuales y el Battle Royale semestral — dos formas 
+                    distintas de vivir Premodern, cada una con sus propias reglas 
+                    para que elijas cómo quieres jugar.
+                    </p>
+                </header>
+                <div class="grid grid-2">
+                    <article class="card card-event" data-reveal="left">
+                        <div class="event-icon">
+                        <i class="ss ss-vis"></i>
+                        </div>
+                        <h3>Torneo Mensual</h3>
+                        <p>
+                        Rondas suizas cada mes, abiertas a todos los miembros de 
+                        The Klub. Permitimos gold border y proxies de la Reserved 
+                        List — y aunque haya top en juego, puedes cambiar hasta el 
+                        mazo completo una vez por torneo.
+                        </p>
+                    
+                    </article>
+                    <article class="card card-event" data-reveal="left">
+                        <div class="event-icon">
+                        <i class="ss ss-5ed"></i>
+                        </div>
+                        <h3>Battle Royale</h3>
+                        <p>
+                        Dos veces al año, todos contra todos. Sin tops, sin 
+                        presión — cambia de mazo cuando quieras y reta a quien 
+                        quieras. Aquí permitimos proxear las 75 cartas: solo 
+                        importa jugar.
+                        </p>
+                    </article>
+                </div>
+            </div>
+        </section>
+        <section class="section standings-section" id="torneos">
+            <div class="container">
+
+                <header class="section-header" data-reveal="left">
+                    <span class="section-tag">TORNEOS</span>
+                    <h2>Cada torneo, cada resultado.</h2>
+                    <p>Desliza para ver la clasificación completa de cada torneo jugado en The Klub.</p>
+                </header>
+
+                <div class="standings-slider" id="standings-slider">
+
+                    <div class="standings-slider-nav">
+                        <button class="slider-arrow" id="slider-prev" aria-label="Torneo anterior">‹</button>
+                        <div class="slider-dots" id="slider-dots"></div>
+                        <button class="slider-arrow" id="slider-next" aria-label="Torneo siguiente">›</button>
+                    </div>
+
+                    <div class="standings-slider-track" id="slider-track">
+                        <p class="standings-loading">Cargando torneos...</p>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+        <section class="section broadcast" id="broadcast">
+            <div class="container">
+                <header class="section-header" data-reveal="left">
+                    <span class="section-tag">PODCAST</span>
+                    <h2>La voz de The Klub.</h2>
+                    <p>
+                        The KlubCast: conversaciones sobre Premodern, torneos y la 
+                        comunidad. Disponible en iVoox y Spotify.
+                    </p>
+                </header>
+
+                <div class="broadcast-links" data-reveal="left">
+                    <a href="https://www.ivoox.com/podcast-the-klubcast_sq_f12806786_1.html" target="_blank" class="btn btn-secondary">
+                        Escuchar en iVoox
+                    </a>
+                    <a href="https://open.spotify.com/show/1sVKOsmD4qeOVaig8HpjDa" target="_blank" class="btn btn-secondary">
+                        Escuchar en Spotify
+                    </a>
+                </div>
+
+                <div class="grid grid-3" id="podcast-episodios">
+                    
+                </div>
+            </div>
+        </section>
+        <section class="section broadcast-articles" id="articulos">
+            <div class="container">
+                <header class="section-header" data-reveal="left">
+                    <span class="section-tag">ARTÍCULOS</span>
+                    <h2>Escrito por la comunidad.</h2>
+                    <p>
+                        Crónicas de torneos, análisis de metajuego y reflexiones 
+                        sobre Premodern, publicadas en nuestro Medium.
+                    </p>
+                </header>
+
+                <div class="broadcast-links" data-reveal="left">
+                    <a href="https://medium.com/@theklubmtg" target="_blank" class="btn btn-secondary">
+                        Ver en Medium
+                    </a>
+                </div>
+
+                <div class="grid grid-3" id="articulos-lista">
+                    <p class="standings-loading">Cargando últimos artículos...</p>
+                </div>
+            </div>
+        </section>
+        <section class="section admission" id="join">
+            <div class="container">
+                <div class="admission-box" data-reveal="top">
+
+                    <div id="admission-content">
+
+                        <span class="section-tag">ADMISIÓN</span>
+                        <h2>¿Te apetece jugar?</h2>
+                        <p>
+                            The Klub no busca a los jugadores más competitivos ni a los que 
+                            más torneos ganan. Buscamos gente con la que dé gusto sentarse a 
+                            jugar. Si eso te suena a ti, cuéntanos un poco sobre ti.
+                        </p>
+
+                        <form id="admission-form" class="admission-form" novalidate>
+                            <div class="form-group">
+                                <label for="discord-nick">Usuario de Discord</label>
+                                <input
+                                    type="text"
+                                    id="discord-nick"
+                                    name="discord_nick"
+                                    placeholder="tu_usuario"
+                                    required
+                                    autocomplete="off">
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email</label>
+                                <input
+                                    type="email"
+                                    id="email"
+                                    name="email"
+                                    placeholder="tucorreo@ejemplo.com"
+                                    required
+                                    autocomplete="off">
+                            </div>
+                            <div class="form-group">
+                                <label for="comentario">Cuéntanos algo sobre ti</label>
+                                <textarea
+                                    id="comentario"
+                                    name="comentario"
+                                    rows="4"
+                                    placeholder="Qué mazos juegas, cómo conociste el Klub, lo que quieras contarnos..."
+                                    required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary" id="admission-submit">
+                                Solicitar Admisión
+                            </button>
+                            <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
+                        </form>
+
+                    </div>
+
+                    <!-- Se muestra cuando ya se envió con éxito -->
+                    <div id="admission-success" class="admission-result" hidden>
+                        <div class="result-icon">✓</div>
+                        <h3>Solicitud procesada con éxito</h3>
+                        <p>Te contactaremos pronto por Discord o email. Gracias por tu interés en The Klub.</p>
+                    </div>
+
+                    <!-- Se muestra cuando se agotan los intentos -->
+                    <div id="admission-blocked" class="admission-result admission-blocked" hidden>
+                        <img src="./assets/images/elbarbas.webp" alt="barbas-bouncer-image" class="bouncer-image">
+                        <h3>No seas brasas.</h3>
+                        <p>Has agotado tus intentos de solicitud. Si crees que es un error, contacta con nosotros directamente en Discord.</p>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+        <section class="section wall" id="wall">
+            <div class="container">
+
+                <header class="section-header" data-reveal="right">
+                    <span class="section-tag">THE WALL</span>
+                    <h2>No todo el mundo lo entiende.</h2>
+                </header>
+
+                <div class="grid grid-3">
+
+                    <article class="card card-wall" data-reveal="left">
+                        <div class="event-icon">
+                            <i class="ss ss-wth"></i>
+                        </div>
+                        <p>Where Premodern Never Gives Up</p>
+                    </article>
+
+                    <article class="card card-wall" data-reveal="left">
+                        <div class="event-icon">
+                            <i class="ss ss-tmp"></i>
+                        </div>
+                        <p>Buscamos gente, no culos duros.</p>
+                    </article>
+
+                    <article class="card card-wall" data-reveal="left">
+                        <div class="event-icon">
+                            <i class="ss ss-sth"></i>
+                        </div>
+                        <p>No construimos una comunidad. Construimos un Klub.</p>
+                    </article>
+
+                    <article class="card card-wall" data-reveal="left">
+                        <div class="event-icon">
+                            <i class="ss ss-exo"></i>
+                        </div>
+                        <p>Se juega para disfrutar, no para machacar.</p>
+                    </article>
+
+                    <article class="card card-wall" data-reveal="left">
+                        <div class="event-icon">
+                            <i class="ss ss-usg"></i>
+                        </div>
+                        <p>Respeta el Código. Siempre.</p>
+                    </article>
+
+                    <article class="card card-wall" data-reveal="left">
+                        <div class="event-icon">
+                            <i class="ss ss-ulg"></i>
+                        </div>
+                        <p>No es para todos. Esa es la idea.</p>
+                    </article>
+
+                </div>
+
+            </div>
+        </section>
+        <div id="login-modal" class="login-modal" hidden>
+
+            <div class="login-modal-backdrop" data-close-login></div>
+
+            <div class="login-modal-box" role="dialog" aria-modal="true" aria-labelledby="login-modal-title">
+
+                <button id="login-close" class="login-modal-close" aria-label="Cerrar">
+                    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                        <path fill="currentColor" d="M18.3 5.71L12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.3 19.71 2.89 18.3 9.17 12 2.89 5.71 4.3 4.29l6.29 6.3 6.3-6.3z"/>
+                    </svg>
+                </button>
+
+                <div class="login-step" id="login-step-1">
+                    <h3 id="login-modal-title">Accede con tu Discord</h3>
+                    <p>Te enviaremos un código por DM para verificar que eres miembro de The Klub.</p>
+                    <div class="form-group">
+                        <label for="login-nombre">Tu usuario de Discord</label>
+                        <input type="text" id="login-nombre" placeholder="tu usuario" autocomplete="off">
+                    </div>
+                    <button id="login-solicitar" class="btn btn-primary">Enviar código</button>
+                    <p class="form-status" id="login-status-1"></p>
+                </div>
+
+                <div class="login-step" id="login-step-2" hidden>
+                    <h3>Introduce tu código</h3>
+                    <p>Revisa tus mensajes directos en Discord.</p>
+                    <div class="form-group">
+                        <label for="login-codigo">Código de 6 dígitos</label>
+                        <input type="text" id="login-codigo" placeholder="000000" maxlength="6" inputmode="numeric">
+                    </div>
+                    <button id="login-verificar" class="btn btn-primary">Verificar</button>
+                    <p class="form-status" id="login-status-2"></p>
+                </div>
+
+            </div>
 
         </div>
+        <footer class="footer">
+            <div class="footer-container">
 
+                <img
+                    src="./assets/logo/logo.webp"
+                    alt="The Klub"
+                    class="footer-logo">
+
+                <h2 class="footer-title">
+                    THE KLUB
+                </h2>
+
+                <p class="footer-subtitle">
+                    Donde Premodern Nunca Se Rinde.
+                </p>
+
+                <nav class="footer-nav" aria-label="Navegación del pie de página">
+                    <a href="#manifesto">Manifiesto</a>
+                    <a href="#events">Eventos</a>
+                    <a href="#torneos">Torneos</a>
+                    <a href="#broadcast">Podcast</a>
+                    <a href="#articulos">Artículos</a>
+                    <a href="#join">Admisión</a>
+                </nav>
+
+                <p class="footer-copy">
+                    © 2026 THE KLUB · Premodern Never Give Up.
+                </p>
+
+            </div>
+        </footer>
+        <button
+            id="back-to-top"
+            class="back-to-top"
+            aria-label="Volver arriba"
+            hidden>
+            <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                <path fill="currentColor" d="M12 4l-8 8h5v8h6v-8h5z"/>
+            </svg>
+        </button>
+        <button
+            id="sound-toggle"
+            class="sound-toggle"
+            aria-label="Silenciar música"
+            aria-pressed="false"
+            hidden>
+            <svg class="icon-sound-on" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                <path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1-3.29-2.5-4.03v8.05c1.5-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+            </svg>
+            <svg class="icon-sound-off" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+                <path fill="currentColor" d="M16.5 12c0-1.77-1-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.42.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+            </svg>
+        </button>
     </div>
-</section>
- <footer class="footer">
-    <div class="footer-container">
+    <div id="member-view" hidden>
 
-        <img
-            src="./assets/logo/logo.webp"
-            alt="The Klub"
-            class="footer-logo">
+        <nav class="navbar navbar-member">
+            <div class="container">
+                <a href="#" class="navbar-brand">
+                    <img src="./assets/logo/logo.webp" alt="The Klub Logo">
+                    <div class="brand-text">
+                        <span class="brand-title">THE KLUB</span>
+                        <span class="brand-subtitle" id="member-welcome">Bienvenido</span>
+                    </div>
+                </a>
+                <ul class="navbar-menu">
+                    <li><a href="#" data-member-tab="torneos" class="is-active">Mis Torneos</a></li>
+                    <li><a href="#" data-member-tab="decks">Mis Decks</a></li>
+                </ul>
 
-        <h2 class="footer-title">
-            THE KLUB
-        </h2>
-
-        <p class="footer-subtitle">
-            Donde Premodern Nunca Se Rinde.
-        </p>
-
-        <nav class="footer-nav" aria-label="Navegación del pie de página">
-            <a href="#manifesto">Manifiesto</a>
-            <a href="#events">Eventos</a>
-            <a href="#torneos">Torneos</a>
-            <a href="#broadcast">Podcast</a>
-            <a href="#articulos">Artículos</a>
-            <a href="#join">Admisión</a>
+                <button id="logout-btn" class="login-nav-btn" aria-label="Cerrar sesión">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 45 45" width="20" height="20" aria-hidden="true">
+                        <g stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="5" width="20" height="34" rx="3"/>
+                            <line x1="5" y1="5" x2="5" y2="39"/>
+                            <circle cx="17" cy="22" r="2.5" fill="currentColor"/>
+                            <line x1="12" y1="22" x2="42" y2="22"/>
+                            <polyline points="37,17 42,22 37,27"/>
+                        </g>
+                    </svg>
+                </button>
+            </div>
         </nav>
 
-        <p class="footer-copy">
-            © 2026 THE KLUB · Premodern Never Give Up.
-        </p>
+        <main class="member-dashboard">
+            <div class="container">
+
+                <header class="member-dashboard-header">
+                <span class="section-tag">TU RINCÓN</span>
+                <h2>Bienvenido de vuelta<span id="member-welcome-name"></span>.</h2>
+                <p>Consulta tus resultados en torneos y gestiona tus decks subidos.</p>
+                </header>
+                <div id="torneo-banner-container"></div>
+
+                <section id="member-tab-torneos" class="member-tab-content">
+
+                    <div class="member-tab-title">
+                        <h3>Mis Torneos</h3>
+                    </div>
+
+                    <div id="mis-torneos-lista" class="grid grid-2">
+                        <p class="standings-loading">Cargando tus resultados...</p>
+                    </div>
+
+                </section>
+
+                <section id="member-tab-decks" class="member-tab-content" hidden>
+
+                    <div class="member-tab-title">
+                        <h3>Mis Decks</h3>
+                        <button id="nuevo-deck-toggle" class="btn btn-primary">+ Subir nuevo deck</button>
+                    </div>
+
+                    <div id="mis-decks-lista" class="grid grid-2">
+                        <p class="standings-loading">Cargando tus decks...</p>
+                    </div>
+
+                </section>
+            </div>
+        </main>
 
     </div>
-</footer>
-<button
-    id="back-to-top"
-    class="back-to-top"
-    aria-label="Volver arriba"
-    hidden>
-    <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-        <path fill="currentColor" d="M12 4l-8 8h5v8h6v-8h5z"/>
-    </svg>
-</button>
-<button
-    id="sound-toggle"
-    class="sound-toggle"
-    aria-label="Silenciar música"
-    aria-pressed="false"
-    hidden>
-    <svg class="icon-sound-on" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-        <path fill="currentColor" d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1-3.29-2.5-4.03v8.05c1.5-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
-    </svg>
-    <svg class="icon-sound-off" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
-        <path fill="currentColor" d="M16.5 12c0-1.77-1-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.42.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
-    </svg>
-</button>
+    <div id="deck-modal" class="login-modal" hidden>
+
+    <div class="login-modal-backdrop" data-close-deck-modal></div>
+
+    <div class="login-modal-box deck-modal-box" role="dialog" aria-modal="true" aria-labelledby="deck-modal-title">
+
+        <button id="deck-modal-close" class="login-modal-close" aria-label="Cerrar">
+            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                <path fill="currentColor" d="M18.3 5.71L12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.3 19.71 2.89 18.3 9.17 12 2.89 5.71 4.3 4.29l6.29 6.3 6.3-6.3z"/>
+            </svg>
+        </button>
+
+        <h3 id="deck-modal-title">Subir nuevo deck</h3>
+
+        <form id="subir-deck-form" class="admission-form deck-form" novalidate>
+
+            <div class="form-group">
+                <label for="deck-torneo">Torneo</label>
+                <select id="deck-torneo" name="codigo_torneo" required>
+                    <option value="">Cargando torneos...</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="deck-nombre">Nombre del deck</label>
+                <input type="text" id="deck-nombre" name="nombre_deck" placeholder="Mi deck genial" required>
+            </div>
+
+            <div class="form-group">
+                <label for="deck-archetype">Archetype</label>
+                <input type="text" id="deck-archetype" name="archetype" list="arquetipos-lista" placeholder="Escribe para buscar..." required autocomplete="off">
+                <datalist id="arquetipos-lista"></datalist>
+            </div>
+
+            <div class="form-group">
+                <label for="deck-decklist">Decklist (Main, mínimo 60 cartas)</label>
+                <textarea id="deck-decklist" name="decklist" rows="8" placeholder="4 Phyrexian Devourer&#10;4 Altar of Dementia&#10;..." required></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="deck-sideboard">Sideboard (máx 15, o vacío)</label>
+                <textarea id="deck-sideboard" name="sideboard" rows="4" placeholder="3 Hydroblast&#10;3 Pyroblast&#10;..."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary" id="subir-deck-submit">Subir Deck</button>
+            <p class="form-status" id="subir-deck-status"></p>
+
+        </form>
+
+    </div>
+
+</div>
+<script defer src="./assets/js/intro.js?v=1"></script>
+<script defer src="./assets/js/admission.js?v=1"></script>
+<script defer src="./assets/js/back-to-top.js?v=1"></script>
+<script defer src="./assets/js/broadcast.js?v=1"></script>
+<script defer src="./assets/js/navbar.js?v=1"></script>
+<script defer src="./assets/js/reveal.js?v=1"></script>
+<script defer src="./assets/js/smooth-scroll.js?v=1"></script>
+<script defer src="./assets/js/standings-slider.js?v=1"></script>
+<script defer src="./assets/js/utils.js?v=1"></script>
+<script defer src="./assets/js/auth.js?v=1"></script>
+<script defer src="./assets/js/member.js?v=1"></script>
 <script defer src="./assets/js/app.js?v=1"></script>
+
+
+
+
     <script type="application/ld+json">
       {
         "@context":"https://schema.org",

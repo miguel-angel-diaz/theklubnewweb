@@ -6,6 +6,10 @@ html, body{
 *, *::before, *::after{
     box-sizing:border-box;
 }
+   body.is-logged-in .login-nav-btn{
+       border-color:rgba(74,222,128,.4);
+       color:#4ade80;
+   }
 /* ==========================================================
    DISPLAY
 ========================================================== */

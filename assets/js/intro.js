@@ -76,6 +76,7 @@ function initIntro() {
 
     }, prefersReducedMotion ? 0 : 300);
 
+    // ÚNICA declaración del listener, con TODO junto: audio + cambio de vista
     enterButton.addEventListener("click", () => {
 
         intro.classList.add("intro-hide");
@@ -91,6 +92,11 @@ function initIntro() {
                 fadeAudio(audio);
             }
 
+        }
+
+        // Decide a qué vista ir, solo aquí, al pulsar ENTER
+        if (document.body.classList.contains('is-logged-in')) {
+            document.dispatchEvent(new CustomEvent('klub:mostrar-miembro'));
         }
 
     });

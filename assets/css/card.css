@@ -332,3 +332,107 @@
     margin:0;
 
 }
+
+.mi-deck-card{
+
+    padding:1.5rem;
+
+    margin-bottom:1rem;
+
+    border-radius:16px;
+
+    background:var(--surface);
+
+    border:1px solid var(--surface-border);
+
+}
+
+.mi-deck-card h3{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:.75rem;
+
+    color:#fff;
+
+    font-size:1.1rem;
+
+    margin-bottom:.5rem;
+
+}
+
+.deck-archetype{
+
+    padding:.25rem .7rem;
+
+    border-radius:999px;
+
+    background:rgba(255,136,0,.12);
+
+    color:var(--primary);
+
+    font-size:.75rem;
+
+    font-weight:700;
+
+}
+
+.deck-tournament{
+
+    color:var(--muted);
+
+    font-size:.85rem;
+
+    margin-bottom:1rem;
+
+}
+
+.mi-deck-card summary{
+
+    cursor:pointer;
+
+    color:var(--primary);
+
+    font-size:.85rem;
+
+    font-weight:600;
+
+}
+
+.deck-list{
+
+    margin-top:1rem;
+
+    padding:1rem;
+
+    border-radius:10px;
+
+    background:rgba(0,0,0,.3);
+
+    color:var(--muted);
+
+    font-size:.85rem;
+
+    line-height:1.6;
+
+    white-space:pre-line;
+
+    font-family:monospace;
+
+}
+
+.deck-sideboard-title{
+
+    margin-top:1rem;
+
+    color:#fff;
+
+    font-size:.8rem;
+
+    font-weight:700;
+
+    text-transform:uppercase;
+
+}

@@ -1,0 +1,540 @@
+/* ==========================================================
+   NAVBAR DE MIEMBRO
+========================================================== */
+
+.navbar-member{
+
+    position:fixed;
+
+    inset:0 0 auto 0;
+
+    height:90px;
+
+    width:100%;
+
+    z-index:1000;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,136,0,.06),
+            rgba(8,8,8,.85)
+        );
+
+    backdrop-filter:blur(20px);
+
+    -webkit-backdrop-filter:blur(20px);
+
+    border-bottom:1px solid rgba(255,136,0,.18);
+
+    box-shadow:0 10px 35px rgba(0,0,0,.30);
+
+}
+
+.navbar-member .container{
+
+    height:100%;
+
+    margin:auto;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    gap:24px;
+
+}
+
+.navbar-member .navbar-menu a{
+
+    position:relative;
+
+    display:flex;
+
+    align-items:center;
+
+    height:90px;
+
+    padding:0 .35rem;
+
+    color:#fff;
+
+    text-decoration:none;
+
+    text-transform:uppercase;
+
+    font-size:.85rem;
+
+    font-weight:600;
+
+    letter-spacing:.12em;
+
+    transition:color .3s ease;
+
+}
+
+.navbar-member .navbar-menu a::after{
+
+    content:"";
+
+    position:absolute;
+
+    left:0;
+
+    bottom:24px;
+
+    width:0;
+
+    height:2px;
+
+    border-radius:999px;
+
+    background:var(--primary);
+
+    transition:width .3s ease;
+
+}
+
+.navbar-member .navbar-menu a:hover,
+.navbar-member .navbar-menu a.is-active{
+
+    color:var(--primary);
+
+}
+
+.navbar-member .navbar-menu a:hover::after,
+.navbar-member .navbar-menu a.is-active::after{
+
+    width:100%;
+
+}
+
+@media(max-width:900px){
+
+    .navbar-member .navbar-menu{
+
+        display:none;
+
+    }
+
+}
+
+
+/* ==========================================================
+   DASHBOARD DE MIEMBRO
+========================================================== */
+
+.member-dashboard{
+
+    padding:calc(90px + clamp(3rem, 6vw, 5rem)) 0 6rem;
+
+    min-height:100vh;
+
+}
+
+.member-dashboard-header{
+
+    max-width:640px;
+
+    margin-bottom:3rem;
+
+}
+
+.member-dashboard-header h2{
+
+    font-family:"Space Grotesk", sans-serif;
+
+    font-size:clamp(2rem, 4vw, 3rem);
+
+    font-weight:700;
+
+    letter-spacing:-.03em;
+
+    margin-bottom:1rem;
+
+    background:linear-gradient(90deg, #ff3b3b 0%, #ff8800 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    -webkit-text-fill-color:transparent;
+
+    filter:drop-shadow(0 0 20px rgba(255,100,0,.25));
+
+}
+
+.member-dashboard-header p{
+
+    color:var(--muted);
+
+    font-size:1.05rem;
+
+    line-height:1.7;
+
+}
+
+.member-tab-content{
+
+    margin-top:1rem;
+
+}
+
+.member-tab-title{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    flex-wrap:wrap;
+
+    gap:1rem;
+
+    margin-bottom:2rem;
+
+    padding-bottom:1.5rem;
+
+    border-bottom:1px solid var(--surface-border);
+
+}
+
+.member-tab-title h3{
+
+    font-family:"Space Grotesk", sans-serif;
+
+    font-size:1.5rem;
+
+    color:#fff;
+
+}
+
+
+/* ==========================================================
+   TARJETAS — MIS TORNEOS / MIS DECKS
+========================================================== */
+
+.mi-torneo-card{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:1.5rem;
+
+    padding:1.75rem;
+
+    border-radius:20px;
+
+    background:var(--surface);
+
+    border:1px solid var(--surface-border);
+
+    transition:.35s ease;
+
+}
+
+.mi-torneo-card:hover{
+
+    transform:translateY(-6px);
+
+    border-color:var(--surface-border-hover);
+
+    box-shadow:
+        0 0 30px rgba(255,136,0,.08),
+        0 20px 40px rgba(0,0,0,.3);
+
+}
+
+.mi-torneo-rank{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    width:56px;
+
+    height:56px;
+
+    flex-shrink:0;
+
+    border-radius:50%;
+
+    background:rgba(255,136,0,.1);
+
+    color:var(--primary);
+
+    font-family:"Space Grotesk", sans-serif;
+
+    font-size:1.3rem;
+
+    font-weight:700;
+
+}
+
+.mi-torneo-info h3{
+
+    color:#fff;
+
+    font-size:1.05rem;
+
+    margin-bottom:.4rem;
+
+}
+
+.mi-torneo-info p{
+
+    color:var(--muted);
+
+    font-size:.9rem;
+
+}
+
+.mi-deck-card{
+
+    padding:1.75rem;
+
+    border-radius:20px;
+
+    background:var(--surface);
+
+    border:1px solid var(--surface-border);
+
+    transition:.35s ease;
+
+}
+
+.mi-deck-card:hover{
+
+    transform:translateY(-6px);
+
+    border-color:var(--surface-border-hover);
+
+    box-shadow:
+        0 0 30px rgba(255,136,0,.08),
+        0 20px 40px rgba(0,0,0,.3);
+
+}
+
+.mi-deck-card h3{
+
+    display:flex;
+
+    align-items:center;
+
+    flex-wrap:wrap;
+
+    gap:.75rem;
+
+    color:#fff;
+
+    font-family:"Space Grotesk", sans-serif;
+
+    font-size:1.1rem;
+
+    margin-bottom:.5rem;
+
+}
+
+.deck-archetype{
+
+    padding:.3rem .8rem;
+
+    border-radius:999px;
+
+    background:rgba(255,136,0,.12);
+
+    color:var(--primary);
+
+    font-size:.7rem;
+
+    font-weight:700;
+
+    letter-spacing:.05em;
+
+    text-transform:uppercase;
+
+}
+
+.deck-tournament{
+
+    color:var(--muted);
+
+    font-size:.85rem;
+
+    margin-bottom:1.25rem;
+
+}
+
+.mi-deck-card summary{
+
+    cursor:pointer;
+
+    color:var(--primary);
+
+    font-size:.85rem;
+
+    font-weight:600;
+
+    letter-spacing:.03em;
+
+}
+
+.mi-deck-card summary:hover{
+
+    color:var(--primary-light);
+
+}
+
+.deck-list{
+
+    margin-top:1.25rem;
+
+    padding:1.25rem;
+
+    border-radius:14px;
+
+    background:rgba(0,0,0,.3);
+
+    color:var(--muted);
+
+    font-size:.85rem;
+
+    line-height:1.7;
+
+    white-space:pre-line;
+
+    font-family:monospace;
+
+    max-height:280px;
+
+    overflow-y:auto;
+
+}
+
+.deck-sideboard-title{
+
+    margin-top:1.25rem;
+
+    color:#fff;
+
+    font-size:.8rem;
+
+    font-weight:700;
+
+    letter-spacing:.05em;
+
+    text-transform:uppercase;
+
+}
+
+
+/* ==========================================================
+   FORMULARIO DE SUBIDA DE DECK
+========================================================== */
+
+.deck-form{
+
+    max-width:100%;
+
+    margin:2rem 0 3rem;
+
+    padding:2rem;
+
+    border-radius:20px;
+
+    background:linear-gradient(180deg, rgba(255,136,0,.05), var(--surface));
+
+    border:1px solid rgba(255,136,0,.15);
+
+    text-align:left;
+
+}
+
+.deck-form select{
+
+    width:100%;
+
+    padding:1rem 1.2rem;
+
+    border-radius:14px;
+
+    background:var(--surface);
+
+    border:1px solid var(--surface-border);
+
+    color:var(--text);
+
+    font-family:"Inter", sans-serif;
+
+    font-size:1rem;
+
+    cursor:pointer;
+
+    transition:border-color .3s ease, background .3s ease;
+
+}
+
+.deck-form select:focus{
+
+    outline:none;
+
+    border-color:var(--primary);
+
+    background:var(--surface-hover);
+
+}
+
+.deck-form textarea{
+
+    font-family:monospace;
+
+    font-size:.9rem;
+
+    line-height:1.6;
+
+}
+
+.deck-modal-box{
+
+    width:min(560px, 100%);
+
+    max-height:85vh;
+
+    overflow-y:auto;
+
+}
+
+
+@media(max-width:900px){
+
+    .mi-torneo-card{
+
+        flex-direction:column;
+
+        text-align:center;
+
+    }
+
+}
+
+@media(max-width:640px){
+
+    .member-tab-title{
+
+        flex-direction:column;
+
+        align-items:flex-start;
+
+    }
+
+    .member-tab-title button{
+
+        width:100%;
+
+    }
+
+}

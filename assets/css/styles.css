@@ -17,6 +17,7 @@
 @import url('./intro.css');
 @import url('./manifesto.css');
 @import url('./navbar.css');
+@import url('./navbar-member.css');
 @import url('./wall.css');
 @import url('./section-header.css');
 @import url('./sound.css');
@@ -24,6 +25,11 @@
 @import url('./episodes.css');
 
 @import url('./articles.css');
+@import url('./torneo-banner.css');
+
+[hidden] {
+  display: none;
+}
 
 
 
