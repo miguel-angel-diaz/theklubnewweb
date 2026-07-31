@@ -182,11 +182,9 @@ function initLogin() {
 }
 
 async function comprobarSesionActiva() {
-
     const token = sessionStorage.getItem(SESSION_STORAGE_KEY);
     if (!token) return;
 
-    // NUEVO — leemos el username guardado INMEDIATAMENTE, sin esperar al fetch
     const usernameGuardado = sessionStorage.getItem(SESSION_USERNAME_KEY);
     if (usernameGuardado) {
         window.klubUsername = usernameGuardado;
@@ -194,36 +192,36 @@ async function comprobarSesionActiva() {
     }
 
     if (DEV_MODE_FAKE_LOGIN && token === 'dev-fake-session-token') {
-        console.warn('⚠️ DEV_MODE_FAKE_LOGIN activo — sesión simulada como válida');
         window.klubUsername = usernameGuardado || 'Usuario de Prueba';
+        window.klubDiscordId = 'dev-fake-discord-id';
         sessionStorage.setItem(SESSION_USERNAME_KEY, window.klubUsername);
         document.body.classList.add('is-logged-in');
+        // Disparar evento para mostrar la vista de miembro
+        document.dispatchEvent(new CustomEvent('klub:mostrar-miembro'));
         return;
     }
 
-    // Verificación real contra el backend, en segundo plano — confirma que
-    // la sesión sigue siendo válida y refresca el username por si cambió
     try {
-
         const res = await fetch(`${AUTH_API_BASE}/auth/verificar-sesion?session=${token}`);
         const data = await res.json();
 
         if (data.autenticado) {
             document.body.classList.add('is-logged-in');
             window.klubUsername = data.username;
+            window.klubDiscordId = data.discord_id;
             sessionStorage.setItem(SESSION_USERNAME_KEY, data.username);
+            // Disparar evento para mostrar la vista de miembro
+            document.dispatchEvent(new CustomEvent('klub:mostrar-miembro'));
         } else {
-            // El token ya no es válido — limpiamos todo
             sessionStorage.removeItem(SESSION_STORAGE_KEY);
             sessionStorage.removeItem(SESSION_USERNAME_KEY);
             document.body.classList.remove('is-logged-in');
             window.klubUsername = null;
+            window.klubDiscordId = null;
         }
-
     } catch (err) {
         console.error(err);
     }
-
 }
 
 function cerrarSesion() {

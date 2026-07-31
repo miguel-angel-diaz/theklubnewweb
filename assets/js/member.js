@@ -275,9 +275,30 @@ async function cargarClasificacionEnPanel(codigo, container) {
             return;
         }
 
+        const miDiscordId = window.klubDiscordId || null;
+        const miUsername = window.klubUsername || null;
+
+        // Depuración: mostrar IDs en consola
+        console.log('🔍 Mi Discord ID:', miDiscordId);
+        console.log('🔍 Mi Username:', miUsername);
+        console.log('📊 Clasificación:', torneo.clasificacion);
+
         let html = `<table><thead><tr><th>#</th><th>Jugador</th><th>Pts</th><th>W-L-D</th></tr></thead><tbody>`;
         torneo.clasificacion.forEach((j, i) => {
-            html += `<tr><td>${i+1}</td><td>${j.nombre}</td><td>${j.mp}</td><td>${j.wins}-${j.losses}-${j.draws}</td></tr>`;
+            // Comparar por discord_id o por nombre (fallback)
+            let esMiFila = false;
+            if (miDiscordId && j.discord_id === miDiscordId) {
+                esMiFila = true;
+            } else if (miUsername && j.nombre.toLowerCase().includes(miUsername.toLowerCase())) {
+                esMiFila = true;
+            }
+            const claseFila = esMiFila ? 'mi-fila' : '';
+            html += `<tr class="${claseFila}">
+                <td>${i+1}</td>
+                <td>${esMiFila ? '⭐ ' : ''}${j.nombre}${esMiFila ? ' ⭐' : ''}</td>
+                <td>${j.mp}</td>
+                <td>${j.wins}-${j.losses}-${j.draws}</td>
+            </tr>`;
         });
         html += '</tbody></table>';
         container.innerHTML = html;
@@ -302,14 +323,41 @@ async function cargarDeckEnPanel(codigo, container) {
         if (!res.ok) throw new Error('Error al obtener decks');
         const data = await res.json();
 
-        // Buscar deck por codigo_torneo o por codigo_deck
+        // Depuración: mostrar decks recibidos
+        console.log('📦 Decks recibidos:', data.decks);
+        console.log('🔍 Buscando deck para torneo (codigo):', codigo);
+
+        // 1. Búsqueda por codigo_torneo exacto
         let deck = data.decks.find(d => d.codigo_torneo === codigo);
+
+        // 2. Si no, buscar por codigo_deck que empiece con el código (formato: codigo_torneo_<id>)
         if (!deck) {
             deck = data.decks.find(d => d.codigo_deck && d.codigo_deck.startsWith(codigo + '_'));
         }
 
+        // 3. Si aún no, buscar por codigo_torneo que contenga el código (más flexible)
         if (!deck) {
-            container.innerHTML = '<p class="empty-state">No has subido deck para este torneo.</p>';
+            deck = data.decks.find(d => d.codigo_torneo && d.codigo_torneo.includes(codigo));
+        }
+
+        // 4. Último intento: buscar en el nombre del deck o en el torneo (por si el código está en otro campo)
+        if (!deck) {
+            deck = data.decks.find(d => {
+                const txt = (d.nombre_deck + ' ' + (d.codigo_torneo || '') + ' ' + (d.codigo_deck || '')).toLowerCase();
+                return txt.includes(codigo.toLowerCase());
+            });
+        }
+
+        console.log('🎯 Deck encontrado:', deck);
+
+        if (!deck) {
+            // Mostrar mensaje de ayuda con los códigos disponibles
+            const codigosDisponibles = data.decks.map(d => d.codigo_torneo || d.codigo_deck || 'sin código').join(', ');
+            container.innerHTML = `
+                <p class="empty-state">No has subido deck para este torneo.</p>
+                <p style="font-size:.85rem; color:var(--muted);">Códigos de tus decks: ${codigosDisponibles}</p>
+                <p style="font-size:.75rem; color:var(--muted);">Asegúrate de que el deck esté vinculado al torneo <strong>${codigo}</strong>.</p>
+            `;
             return;
         }
 

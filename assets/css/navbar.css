@@ -631,6 +631,18 @@ body.is-logged-in .login-nav-btn{
 
 }
 
+.mi-torneo-panel-content .mi-fila {
+    background: rgba(255, 136, 0, 0.15);
+    border-left: 3px solid var(--primary);
+}
+.mi-torneo-panel-content .mi-fila td:first-child {
+    position: relative;
+}
+.mi-torneo-panel-content .mi-fila td:first-child::after {
+    color: var(--primary);
+    font-size: 1.1rem;
+}
+
 @media(max-width:640px){
 
     .login-modal-box{
