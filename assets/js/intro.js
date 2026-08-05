@@ -49,6 +49,22 @@ function initIntro() {
         return;
     }
 
+    // 1️⃣ Si ya se saltó la intro en esta sesión, ocultarla directamente
+    if (sessionStorage.getItem('intro_skipped') === 'true') {
+        intro.classList.add('intro-hide');
+        document.body.classList.remove('no-scroll');
+        // Manejamos el audio (si existe)
+        if (audio) {
+            audio.muted = obtenerPreferenciaAudio();
+            if (!audio.muted) {
+                audio.volume = 1;
+                audio.play().catch(() => {});
+            }
+        }
+        return;
+    }
+
+    // 2️⃣ Si no se ha saltado, mostramos la intro normalmente
     document.body.classList.add("no-scroll");
 
     if (audio) {
@@ -76,9 +92,10 @@ function initIntro() {
 
     }, prefersReducedMotion ? 0 : 300);
 
-    // ÚNICA declaración del listener, con TODO junto: audio + cambio de vista
+    // 3️⃣ Listener del botón "ENTER"
     enterButton.addEventListener("click", () => {
-
+        // Guardar en sesión que ya se saltó la intro
+        sessionStorage.setItem('intro_skipped', 'true');
         intro.classList.add("intro-hide");
         document.body.classList.remove("no-scroll");
         document.body.style.top = "";
@@ -93,14 +110,9 @@ function initIntro() {
             }
 
         }
-
-        // Decide a qué vista ir, solo aquí, al pulsar ENTER
-        if (document.body.classList.contains('is-logged-in')) {
-            document.dispatchEvent(new CustomEvent('klub:mostrar-miembro'));
-        }
-
     });
 
+    // 4️⃣ Listener del botón de sonido (sin cambios)
     if (soundToggle && audio) {
 
         soundToggle.addEventListener("click", () => {

@@ -276,6 +276,69 @@
 .diff-negative{ color:#ff6b6b; }
 .diff-neutral{ color:var(--muted); }
 
+.enfrentamientos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.enfrentamiento-card {
+    background: var(--card-bg, #1e1e2f);
+    border: 1px solid var(--border-color, #2a2a3a);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.enfrentamiento-torneo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.badge {
+    background: var(--primary, #6c5ce7);
+    color: #fff;
+    font-size: 0.7rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    font-weight: 600;
+}
+
+.torneo-nombre {
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.enfrentamiento-ronda {
+    font-size: 0.85rem;
+    color: var(--muted, #888);
+}
+
+.enfrentamiento-oponente {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.1rem;
+}
+
+.label {
+    color: var(--muted, #888);
+    font-weight: 300;
+}
+
+.oponente-nombre {
+    font-weight: 600;
+    color: var(--text, #fff);
+}
+
+.enfrentamiento-acciones {
+    margin-top: 0.5rem;
+}
+
 @media(max-width:640px){
 
     .standings-slider-nav{

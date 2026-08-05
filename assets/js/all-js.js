@@ -1,3 +1,625 @@
+//admission.js
+
+/* ==========================================================
+   ADMISSION FORM
+========================================================== */
+
+const ADMISSION_API_URL = 'https://mydiscordbot-production-3e6a.up.railway.app/api/solicitar-acceso';
+const ADMISSION_STORAGE_KEY = 'klub_admission_attempts';
+const ADMISSION_MAX_INTENTOS = 2;
+
+function obtenerIntentosAdmision() {
+    const valor = localStorage.getItem(ADMISSION_STORAGE_KEY);
+    return valor ? parseInt(valor, 10) : 0;
+}
+
+function incrementarIntentosAdmision() {
+    const actual = obtenerIntentosAdmision();
+    localStorage.setItem(ADMISSION_STORAGE_KEY, String(actual + 1));
+    return actual + 1;
+}
+
+function initAdmission() {
+
+    const content = document.querySelector('#admission-content');
+    const successBox = document.querySelector('#admission-success');
+    const blockedBox = document.querySelector('#admission-blocked');
+    const form = document.querySelector('#admission-form');
+    const submitBtn = document.querySelector('#admission-submit');
+    const status = document.querySelector('#form-status');
+
+    if (!form) return;
+
+    // Si ya agotó los intentos, bloqueamos directamente al cargar
+    if (obtenerIntentosAdmision() >= ADMISSION_MAX_INTENTOS) {
+        if (content) content.hidden = true;
+        if (blockedBox) blockedBox.hidden = false;
+        return;
+    }
+
+    form.addEventListener('submit', async (e) => {
+       // Si ya agotó los intentos, bloqueamos directamente al cargar
+      if (obtenerIntentosAdmision() >= ADMISSION_MAX_INTENTOS) {
+          if (content) content.hidden = true;
+          if (blockedBox) blockedBox.hidden = false;
+          return;
+      }
+
+        e.preventDefault();
+
+        const discordNick = form.discord_nick.value.trim();
+        const email = form.email.value.trim();
+        const comentario = form.comentario.value.trim();
+
+        if (!discordNick || !email || !comentario) {
+            status.textContent = 'Por favor, rellena todos los campos.';
+            status.className = 'form-status error';
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Enviando...';
+        status.textContent = '';
+        status.className = 'form-status';
+
+        try {
+
+            const res = await fetch(ADMISSION_API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ discord_nick: discordNick, email, comentario })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error || 'Error al enviar la solicitud');
+            }
+
+            incrementarIntentosAdmision();
+
+            content.hidden = true;
+            successBox.hidden = false;
+
+        } catch (err) {
+
+            console.error(err);
+            status.textContent = 'No se pudo enviar la solicitud. Inténtalo de nuevo más tarde.';
+            status.className = 'form-status error';
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Solicitar Admisión';
+
+        }
+
+    });
+
+}
+
+//auth.js
+const AUTH_API_BASE = 'https://mydiscordbot-production-3e6a.up.railway.app';
+const SESSION_STORAGE_KEY = 'klub_session';
+const SESSION_USERNAME_KEY = 'klub_username';   // NUEVO
+const DEV_MODE_FAKE_LOGIN = false;
+
+let nombreEnProceso = '';
+
+function abrirLoginModal() {
+
+    if (document.body.classList.contains('is-logged-in')) {
+        document.dispatchEvent(new CustomEvent('klub:mostrar-miembro'));
+        return;
+    }
+
+    const modal = document.querySelector('#login-modal');
+    if (!modal) return;
+
+    modal.hidden = false;
+    document.body.classList.add('no-scroll');
+
+    setTimeout(() => {
+        const primerInput = document.querySelector('#login-nombre');
+        if (primerInput) primerInput.focus();
+    }, 100);
+
+}
+
+function cerrarLoginModal() {
+
+    const modal = document.querySelector('#login-modal');
+    if (!modal) return;
+
+    modal.hidden = true;
+    document.body.classList.remove('no-scroll');
+
+    const step1 = document.querySelector('#login-step-1');
+    const step2 = document.querySelector('#login-step-2');
+    if (step1) step1.hidden = false;
+    if (step2) step2.hidden = true;
+
+}
+
+function initLoginModal() {
+
+    const toggleBtn = document.querySelector('#login-toggle');
+    const closeBtn = document.querySelector('#login-close');
+    const backdrop = document.querySelector('[data-close-login]');
+    const modal = document.querySelector('#login-modal');
+
+    if (!toggleBtn || !modal) return;
+
+    toggleBtn.addEventListener('click', abrirLoginModal);
+
+    if (closeBtn) closeBtn.addEventListener('click', cerrarLoginModal);
+    if (backdrop) backdrop.addEventListener('click', cerrarLoginModal);
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !modal.hidden) {
+            cerrarLoginModal();
+        }
+    });
+
+}
+
+function loginCompletado(sessionToken, username) {
+
+    sessionStorage.setItem(SESSION_STORAGE_KEY, sessionToken);
+    sessionStorage.setItem(SESSION_USERNAME_KEY, username);   // NUEVO
+    document.body.classList.add('is-logged-in');
+    window.klubUsername = username;
+
+    cerrarLoginModal();
+
+    document.dispatchEvent(new CustomEvent('klub:mostrar-miembro'));
+
+}
+
+function initLogin() {
+
+    const step1 = document.querySelector('#login-step-1');
+    const step2 = document.querySelector('#login-step-2');
+    const nombreInput = document.querySelector('#login-nombre');
+    const codigoInput = document.querySelector('#login-codigo');
+    const btnSolicitar = document.querySelector('#login-solicitar');
+    const btnVerificar = document.querySelector('#login-verificar');
+    const status1 = document.querySelector('#login-status-1');
+    const status2 = document.querySelector('#login-status-2');
+
+    if (!step1) return;
+
+    btnSolicitar.addEventListener('click', async () => {
+
+        const nombre = nombreInput.value.trim();
+        if (!nombre) return;
+
+        btnSolicitar.disabled = true;
+        btnSolicitar.textContent = 'Enviando...';
+        status1.textContent = '';
+        status1.className = 'form-status';
+
+        if (DEV_MODE_FAKE_LOGIN) {
+            console.warn('⚠️ DEV_MODE_FAKE_LOGIN activo — no se está llamando al backend real');
+            setTimeout(() => {
+                nombreEnProceso = nombre;
+                step1.hidden = true;
+                step2.hidden = false;
+                btnSolicitar.disabled = false;
+                btnSolicitar.textContent = 'Enviar código';
+            }, 300);
+            return;
+        }
+
+        try {
+
+            const res = await fetch(`${AUTH_API_BASE}/auth/solicitar-codigo`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) throw new Error(data.error);
+
+            nombreEnProceso = nombre;
+            step1.hidden = true;
+            step2.hidden = false;
+
+        } catch (err) {
+            status1.textContent = err.message || 'Error al solicitar el código';
+            status1.className = 'form-status error';
+        } finally {
+            btnSolicitar.disabled = false;
+            btnSolicitar.textContent = 'Enviar código';
+        }
+
+    });
+
+    btnVerificar.addEventListener('click', async () => {
+
+        const codigo = codigoInput.value.trim();
+        if (!codigo) return;
+
+        btnVerificar.disabled = true;
+        btnVerificar.textContent = 'Verificando...';
+        status2.textContent = '';
+        status2.className = 'form-status';
+
+        if (DEV_MODE_FAKE_LOGIN) {
+            console.warn('⚠️ DEV_MODE_FAKE_LOGIN activo — código aceptado sin verificar');
+            setTimeout(() => {
+                loginCompletado('dev-fake-session-token', nombreEnProceso || 'Usuario de Prueba');
+                btnVerificar.disabled = false;
+                btnVerificar.textContent = 'Verificar';
+            }, 300);
+            return;
+        }
+
+        try {
+
+            const res = await fetch(`${AUTH_API_BASE}/auth/verificar-codigo`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre: nombreEnProceso, codigo })
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) throw new Error(data.error);
+
+            loginCompletado(data.session, data.username);
+
+        } catch (err) {
+            status2.textContent = err.message || 'Código incorrecto';
+            status2.className = 'form-status error';
+            btnVerificar.disabled = false;
+            btnVerificar.textContent = 'Verificar';
+        }
+
+    });
+
+}
+
+async function comprobarSesionActiva() {
+    const token = sessionStorage.getItem(SESSION_STORAGE_KEY);
+    if (!token) return;
+
+    const usernameGuardado = sessionStorage.getItem(SESSION_USERNAME_KEY);
+    if (usernameGuardado) {
+        window.klubUsername = usernameGuardado;
+        document.body.classList.add('is-logged-in');
+    }
+
+    if (DEV_MODE_FAKE_LOGIN && token === 'dev-fake-session-token') {
+        window.klubUsername = usernameGuardado || 'Usuario de Prueba';
+        window.klubDiscordId = 'dev-fake-discord-id';
+        sessionStorage.setItem(SESSION_USERNAME_KEY, window.klubUsername);
+        document.body.classList.add('is-logged-in');
+        // Disparar evento para mostrar la vista de miembro
+        document.dispatchEvent(new CustomEvent('klub:mostrar-miembro'));
+        return;
+    }
+
+    try {
+        const res = await fetch(`${AUTH_API_BASE}/auth/verificar-sesion?session=${token}`);
+        const data = await res.json();
+
+        if (data.autenticado) {
+            document.body.classList.add('is-logged-in');
+            window.klubUsername = data.username;
+            window.klubDiscordId = data.discord_id;
+            sessionStorage.setItem(SESSION_USERNAME_KEY, data.username);
+            // Disparar evento para mostrar la vista de miembro
+            document.dispatchEvent(new CustomEvent('klub:mostrar-miembro'));
+        } else {
+            sessionStorage.removeItem(SESSION_STORAGE_KEY);
+            sessionStorage.removeItem(SESSION_USERNAME_KEY);
+            document.body.classList.remove('is-logged-in');
+            window.klubUsername = null;
+            window.klubDiscordId = null;
+        }
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+function cerrarSesion() {
+
+    sessionStorage.removeItem(SESSION_STORAGE_KEY);
+    sessionStorage.removeItem(SESSION_USERNAME_KEY);   // NUEVO
+    document.body.classList.remove('is-logged-in');
+    window.klubUsername = null;
+
+    document.dispatchEvent(new CustomEvent('klub:logout'));
+
+}
+
+//back-to-top.js
+
+/* ==========================================================
+   BACK TO TOP
+========================================================== */
+
+function initBackToTop() {
+
+    const boton = document.querySelector('#back-to-top');
+    if (!boton) return;
+
+    const UMBRAL_SCROLL = 400;
+
+    function actualizarVisibilidad() {
+
+        const debeVerse = window.scrollY > UMBRAL_SCROLL;
+
+        if (debeVerse && boton.hidden) {
+            boton.hidden = false;
+            requestAnimationFrame(() => {
+                boton.classList.add('is-visible');
+            });
+        } else if (!debeVerse && !boton.hidden) {
+            boton.classList.remove('is-visible');
+            setTimeout(() => {
+                if (!boton.classList.contains('is-visible')) {
+                    boton.hidden = true;
+                }
+            }, 400);
+        }
+
+    }
+
+    window.addEventListener('scroll', actualizarVisibilidad, { passive: true });
+
+    boton.addEventListener('click', () => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    actualizarVisibilidad();
+
+}
+
+//broadcast.js
+/* ==========================================================
+   PODCAST + ARTÍCULOS
+========================================================== */
+
+const PODCAST_API = 'https://mydiscordbot-production-3e6a.up.railway.app/api/podcast';
+const ARTICULOS_API = 'https://mydiscordbot-production-3e6a.up.railway.app/api/articulos';
+
+function extraerEpisodio(titulo) {
+    const match = titulo.match(/^(Temp\.\s*\d+\s*Ep\.\s*\d+)/i);
+    return match ? match[1] : null;
+}
+
+function limpiarTitulo(titulo) {
+    return titulo.replace(/^Temp\.\s*\d+\s*Ep\.\s*\d+\s*-\s*/i, '');
+}
+
+async function cargarEpisodios() {
+
+    const contenedor = document.querySelector('#podcast-episodios');
+    if (!contenedor) return;
+
+    try {
+
+        const res = await fetch(PODCAST_API);
+        const data = await res.json();
+
+        if (data.error || !data.episodios.length) {
+            contenedor.innerHTML = '<p class="standings-error">No se pudieron cargar los episodios.</p>';
+            return;
+        }
+
+        contenedor.innerHTML = data.episodios.map(ep => {
+
+            const etiqueta = extraerEpisodio(ep.titulo);
+            const tituloLimpio = limpiarTitulo(ep.titulo);
+
+            return `
+                <a href="${ep.enlace}" target="_blank" class="episode-card" data-reveal="left">
+                    ${ep.imagen ? `
+                        <div class="episode-card-image">
+                            <img src="${ep.imagen}" alt="${tituloLimpio}" loading="lazy">
+                        </div>
+                    ` : ''}
+                    ${etiqueta ? `<span class="episode-card-tag">${etiqueta}</span>` : ''}
+                    <h3>${tituloLimpio}</h3>
+                    <p>${ep.descripcion}...</p>
+                    <span class="episode-card-date">${formatearFecha(ep.fecha)}</span>
+                </a>
+            `;
+
+        }).join('');
+
+        if (window.revealInstance) {
+            window.revealInstance.observeNew(contenedor.querySelectorAll('[data-reveal]'));
+        }
+
+    } catch (err) {
+        console.error(err);
+        contenedor.innerHTML = '<p class="standings-error">No se pudieron cargar los episodios.</p>';
+    }
+
+}
+
+async function cargarArticulos() {
+
+    const contenedor = document.querySelector('#articulos-lista');
+    if (!contenedor) return;
+
+    try {
+
+        const res = await fetch(ARTICULOS_API);
+        const data = await res.json();
+
+        if (data.error || !data.articulos.length) {
+            contenedor.innerHTML = '<p class="standings-error">No se pudieron cargar los artículos.</p>';
+            return;
+        }
+
+        contenedor.innerHTML = data.articulos.map(art => `
+            <a href="${art.enlace}" target="_blank" class="article-card" data-reveal="left">
+                <div class="article-card-icon">✎</div>
+                <h3>${art.titulo}</h3>
+                <p>${art.descripcion}...</p>
+                <span class="article-card-date">${formatearFecha(art.fecha)}</span>
+            </a>
+        `).join('');
+
+        if (window.revealInstance) {
+            window.revealInstance.observeNew(contenedor.querySelectorAll('[data-reveal]'));
+        }
+
+    } catch (err) {
+        console.error(err);
+        contenedor.innerHTML = '<p class="standings-error">No se pudieron cargar los artículos.</p>';
+    }
+
+}
+
+function initBroadcast() {
+    cargarEpisodios();
+    cargarArticulos();
+}
+
+//intro.js
+/* ==========================================================
+   INTRO — Fade in + Audio + Botón Enter
+========================================================== */
+
+const AUDIO_MUTED_KEY = 'klub_audio_muted';
+
+function obtenerPreferenciaAudio() {
+    const valor = localStorage.getItem(AUDIO_MUTED_KEY);
+    return valor === 'true';
+}
+
+function guardarPreferenciaAudio(muted) {
+    localStorage.setItem(AUDIO_MUTED_KEY, String(muted));
+}
+
+function fadeAudio(audio) {
+
+    let volume = 0;
+
+    const interval = setInterval(() => {
+
+        if (audio.muted) {
+            clearInterval(interval);
+            return;
+        }
+
+        volume += 0.02;
+        audio.volume = Math.min(volume, 1);
+
+        if (volume >= 1) {
+            clearInterval(interval);
+        }
+
+    }, 100);
+
+}
+
+function initIntro() {
+
+    const intro = document.querySelector(".intro");
+    const article = document.querySelector(".intro article");
+    const enterButton = document.querySelector(".enter-btn");
+    const audio = document.querySelector("#theme");
+    const soundToggle = document.querySelector("#sound-toggle");
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (!intro || !article || !enterButton) {
+        document.body.classList.remove("no-scroll");
+        return;
+    }
+
+    // 1️⃣ Si ya se saltó la intro en esta sesión, ocultarla directamente
+    if (sessionStorage.getItem('intro_skipped') === 'true') {
+        intro.classList.add('intro-hide');
+        document.body.classList.remove('no-scroll');
+        // Manejamos el audio (si existe)
+        if (audio) {
+            audio.muted = obtenerPreferenciaAudio();
+            if (!audio.muted) {
+                audio.volume = 1;
+                audio.play().catch(() => {});
+            }
+        }
+        return;
+    }
+
+    // 2️⃣ Si no se ha saltado, mostramos la intro normalmente
+    document.body.classList.add("no-scroll");
+
+    if (audio) {
+        audio.muted = obtenerPreferenciaAudio();
+    }
+
+    if (soundToggle && audio) {
+        soundToggle.setAttribute("aria-pressed", String(audio.muted));
+        soundToggle.setAttribute(
+            "aria-label",
+            audio.muted ? "Activar música" : "Silenciar música"
+        );
+    }
+
+    setTimeout(() => {
+
+        article.classList.add("fade-in");
+
+        if (soundToggle) {
+            soundToggle.hidden = false;
+            requestAnimationFrame(() => {
+                soundToggle.classList.add("is-visible");
+            });
+        }
+
+    }, prefersReducedMotion ? 0 : 300);
+
+    // 3️⃣ Listener del botón "ENTER"
+    enterButton.addEventListener("click", () => {
+        // Guardar en sesión que ya se saltó la intro
+        sessionStorage.setItem('intro_skipped', 'true');
+        intro.classList.add("intro-hide");
+        document.body.classList.remove("no-scroll");
+        document.body.style.top = "";
+
+        if (audio) {
+
+            audio.volume = 0;
+            audio.play().catch(() => {});
+
+            if (!audio.muted) {
+                fadeAudio(audio);
+            }
+
+        }
+    });
+
+    // 4️⃣ Listener del botón de sonido (sin cambios)
+    if (soundToggle && audio) {
+
+        soundToggle.addEventListener("click", () => {
+
+            audio.muted = !audio.muted;
+            guardarPreferenciaAudio(audio.muted);
+
+            soundToggle.setAttribute("aria-pressed", String(audio.muted));
+            soundToggle.setAttribute(
+                "aria-label",
+                audio.muted ? "Activar música" : "Silenciar música"
+            );
+
+            if (!audio.muted && audio.volume === 0) {
+                audio.volume = 1;
+            }
+
+        });
+
+    }
+
+}
+
+//member.js
 // ==========================================================
 // 1. VISTA MIEMBRO
 // ==========================================================
@@ -253,7 +875,6 @@ async function cargarContenidoTab(card, tab) {
 // ------------------------------------------------------------
 // 7a. Clasificación
 // ------------------------------------------------------------
-
 async function cargarClasificacionEnPanel(codigo, container) {
     const token = sessionStorage.getItem(SESSION_STORAGE_KEY);
     if (!token) {
@@ -265,10 +886,6 @@ async function cargarClasificacionEnPanel(codigo, container) {
 
     try {
         const res = await fetch(`${AUTH_API_BASE}/api/clasificacion-torneo?codigo=${codigo}&session=${token}`);
-        if (res.status === 404) {
-            container.innerHTML = '<p class="empty-state">Este torneo aún no tiene clasificación.</p>';
-            return;
-        }
         if (!res.ok) {
             const errorData = await res.json();
             throw new Error(errorData.error || 'Error al cargar clasificación');
@@ -281,13 +898,33 @@ async function cargarClasificacionEnPanel(codigo, container) {
             return;
         }
 
-        // ... resto del renderizado (igual que antes)
+        const miDiscordId = window.klubDiscordId || null;
+        const miUsername = window.klubUsername || null;
+
+        let html = `<table><thead><tr><th>#</th><th>Jugador</th><th>Pts</th><th>W-L-D</th></tr></thead><tbody>`;
+        clasificacion.forEach((j, i) => {
+            let esMiFila = false;
+            if (miDiscordId && j.discord_id === miDiscordId) {
+                esMiFila = true;
+            } else if (miUsername && j.nombre.toLowerCase().includes(miUsername.toLowerCase())) {
+                esMiFila = true;
+            }
+            const claseFila = esMiFila ? 'mi-fila' : '';
+            html += `<tr class="${claseFila}">
+                <td>${j.rank || i+1}</td>
+                <td>${esMiFila ? '⭐ ' : ''}${j.nombre}${esMiFila ? ' ⭐' : ''}</td>
+                <td>${j.mp}</td>
+                <td>${j.wins}-${j.losses}-${j.draws}</td>
+            </tr>`;
+        });
+        html += '</tbody></table>';
+        container.innerHTML = html;
+
     } catch (err) {
         console.error(err);
-        container.innerHTML = `<p class="standings-error">${err.message}</p>`;
+        container.innerHTML = `<p class="standings-error">Error al cargar clasificación: ${err.message}</p>`;
     }
 }
-
 // ------------------------------------------------------------
 // 7b. Deck
 // ------------------------------------------------------------
@@ -338,7 +975,6 @@ async function cargarDeckEnPanel(codigo, container) {
 // ------------------------------------------------------------
 // 7c. Enfrentamientos (con deck del rival)
 // ------------------------------------------------------------
-
 async function cargarEnfrentamientosEnPanel(codigo, container) {
     const token = sessionStorage.getItem(SESSION_STORAGE_KEY);
     if (!token) {
@@ -385,12 +1021,10 @@ async function cargarEnfrentamientosEnPanel(codigo, container) {
                     html += `<li style="padding: 0.2rem 0; color: var(--text-muted);">${p.jugador1} → BYE</li>`;
                 } else {
                     const resultado = p.resultado || '⏳ Pendiente';
-                    // Determinar si esta es mi partida (para mostrar botón de agendar)
-                    const miDiscordId = window.klubDiscordId;
-                    const esMiPartida = (p.jugador1_id == miDiscordId || p.jugador2_id == miDiscordId);
-                    const esClickable = esMiPartida && !p.resultado; // Solo si es mi partida y no tiene resultado
+                    const esMiPartida = p.es_mi_partida || false;
+                    const esClickable = esMiPartida && !p.resultado; // Solo mi partida y sin resultado
 
-                    // Botón agendar (solo para Swiss, pero lo dejamos)
+                    // Si es clickeable, añadimos un botón y data attributes
                     let botonAgendar = '';
                     if (esClickable) {
                         botonAgendar = `
@@ -401,22 +1035,14 @@ async function cargarEnfrentamientosEnPanel(codigo, container) {
                                     data-nombre1="${p.jugador1}" 
                                     data-nombre2="${p.jugador2}"
                                     data-ronda="${rondaNum}">
-                                Agendar
+                                Agendar fecha
                             </button>
                         `;
                     }
 
-                    // Hacemos que el nombre del rival sea clickeable para ver su deck
-                    // Si no tenemos ID del rival (por ejemplo en Challonge si no está en el servidor), evitamos el enlace
-                    const rivalId = p.jugador2_id;
-                    let rivalDisplay = p.jugador2;
-                    if (rivalId && rivalId !== 'null' && rivalId !== 'undefined') {
-                        rivalDisplay = `<a href="#" class="ver-deck-rival" data-codigo="${codigo}" data-rival="${rivalId}" data-nombre="${p.jugador2}">${p.jugador2}</a>`;
-                    }
-
                     html += `
-                        <li style="padding: 0.2rem 0; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                            <span>${p.jugador1} vs ${rivalDisplay} — <strong>${resultado}</strong></span>
+                        <li style="padding: 0.2rem 0; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem;">
+                            <span>${p.jugador1} vs ${p.jugador2} — <strong>${resultado}</strong></span>
                             ${botonAgendar}
                         </li>
                     `;
@@ -431,7 +1057,7 @@ async function cargarEnfrentamientosEnPanel(codigo, container) {
         html += `</div>`;
         container.innerHTML = html;
 
-        // Asignar eventos a los botones de agendar
+        // Asignar evento click a los botones de agendar
         container.querySelectorAll('.agendar-partida').forEach(btn => {
             btn.addEventListener('click', function() {
                 const codigo = this.dataset.codigo;
@@ -441,19 +1067,6 @@ async function cargarEnfrentamientosEnPanel(codigo, container) {
                 const nombre2 = this.dataset.nombre2;
                 const ronda = this.dataset.ronda;
                 abrirModalAgendar(codigo, nombre1, nombre2, ronda, j1, j2);
-            });
-        });
-
-        // Asignar eventos a los enlaces "ver deck rival"
-        container.querySelectorAll('.ver-deck-rival').forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                const codigo = this.dataset.codigo;
-                const rival = this.dataset.rival;
-                const nombre = this.dataset.nombre;
-                if (rival && rival !== 'null') {
-                    verDeckRival(codigo, rival, nombre);
-                }
             });
         });
 
@@ -560,7 +1173,6 @@ function abrirModalReporte(codigo, nombre1, nombre2, ronda, j1, j2) {
     if (status) {
         status.textContent = '';
         status.className = 'form-status';
-        showToast(status.textContent, status.className);
     }
 }
 
@@ -588,7 +1200,6 @@ async function reportarResultado(e) {
     if (!resultado || !resultado.match(/^\d+-\d+$/)) {
         status.textContent = 'Formato incorrecto. Usa X-Y (ej: 2-1)';
         status.className = 'form-status error';
-        showToast(status.textContent, status.className);
         return;
     }
 
@@ -599,7 +1210,6 @@ async function reportarResultado(e) {
     submitBtn.textContent = 'Reportando...';
     status.textContent = '';
     status.className = 'form-status';
-    showToast(status.textContent, status.className);
 
     try {
         const res = await fetch(`${AUTH_API_BASE}/api/reportar-resultado`, {
@@ -618,7 +1228,6 @@ async function reportarResultado(e) {
 
         status.textContent = '✅ ' + data.mensaje;
         status.className = 'form-status success';
-        showToast(status.textContent, status.className);
         setTimeout(() => {
             cerrarModalReporte();
             cargarMisPendientes();
@@ -627,7 +1236,6 @@ async function reportarResultado(e) {
     } catch (err) {
         status.textContent = '❌ ' + err.message;
         status.className = 'form-status error';
-        showToast(status.textContent, status.className);
     } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = 'Reportar';
@@ -750,25 +1358,25 @@ async function cargarEstadoTorneos() {
         torneos.forEach(t => {
             const inscrito = t.inscrito;
             const tieneDeck = t.tiene_deck;
-            const estado = t.estado; // 'abierto' o 'en desarrollo'
+            const estado = t.estado;
             const deckEdited = t.deck_edited || 0;
             const puedeEditar = estado === 'abierto' || (estado === 'en desarrollo' && deckEdited < 1);
-            const statusClass = estado === 'abierto' ? 'abierto' : 'desarrollo';
-            const statusText = estado === 'abierto' ? '✅ Abierto' : '⚔️ En curso';
+            const statusClass = inscrito ? 'inscrito' : 'no-inscrito';
+            const statusText = inscrito ? 'Inscrito' : 'No inscrito';
             const fecha = t.fecha_inicio || 'Sin fecha';
             const inscritos = `${t.total_inscritos || 0}/${t.total_maximo || '∞'}`;
-            const bannerClass = estado === 'abierto' ? 'torneo-abierto' : 'torneo-desarrollo';
 
+            // 🔥 Toggle de expansión (flecha) - único botón en la cabecera
             const toggleHtml = `
                 <button class="mi-torneo-toggle banner-toggle" aria-label="Ver más" data-torneo="${t.codigo}">
                     <svg class="icon-arrow-down" viewBox="0 0 24 24" width="24" height="24">
-                        <path fill="currentColor" d="M7 10l5 5 5-5z"/>
+                        <path fill="currentColor"d="M7 10l5 5 5-5z"></path>
                     </svg>
                 </button>
             `;
 
             html += `
-                <div class="torneo-banner ${bannerClass}" data-torneo="${t.codigo}" data-puede-editar="${puedeEditar}" data-tiene-deck="${tieneDeck}" data-inscrito="${inscrito}" data-estado="${estado}">
+                <div class="torneo-banner" data-torneo="${t.codigo}" data-puede-editar="${puedeEditar}" data-tiene-deck="${tieneDeck}" data-inscrito="${inscrito}" data-estado="${estado}">
                     <div class="torneo-banner-header">
                         <div class="torneo-banner-info">
                             <h3>${t.nombre}</h3>
@@ -825,10 +1433,7 @@ async function cargarEstadoTorneos() {
 
 async function inscribirseEnTorneo(codigoTorneo, btn) {
     const token = sessionStorage.getItem(SESSION_STORAGE_KEY);
-    if (!token) {
-        Toast.error('No hay sesión activa.');
-        return;
-    }
+    if (!token) return;
 
     btn.disabled = true;
     btn.textContent = 'Inscribiendo...';
@@ -842,13 +1447,12 @@ async function inscribirseEnTorneo(codigoTorneo, btn) {
 
         const data = await res.json();
 
-        if (!res.ok) throw new Error(data.error || 'Error al inscribirse');
+        if (!res.ok) throw new Error(data.error);
 
-        Toast.success(data.mensaje || '✅ Inscripción completada');
         cargarEstadoTorneos();
 
     } catch (err) {
-        Toast.error(err.message || 'No se pudo completar la inscripción');
+        alert(err.message || 'No se pudo completar la inscripción');
         btn.disabled = false;
         btn.textContent = 'Apuntarme';
     }
@@ -872,7 +1476,6 @@ function cerrarDeckModal() {
     if (status) {
         status.textContent = '';
         status.className = 'form-status';
-        showToast(status.textContent, status.className);
     }
 }
 
@@ -1040,7 +1643,6 @@ function initSubirDeckForm() {
         if (!token) {
             status.textContent = 'No hay sesión activa.';
             status.className = 'form-status error';
-            showToast(status.textContent, status.className);
             return;
         }
 
@@ -1056,7 +1658,6 @@ function initSubirDeckForm() {
         if (!payload.codigo_torneo || !payload.nombre_deck || !payload.archetype || !payload.decklist) {
             status.textContent = 'Rellena todos los campos obligatorios.';
             status.className = 'form-status error';
-            showToast(status.textContent, status.className);
             return;
         }
 
@@ -1064,7 +1665,6 @@ function initSubirDeckForm() {
         submitBtn.textContent = 'Enviando...';
         status.textContent = '';
         status.className = 'form-status';
-        showToast(status.textContent, status.className);
 
         const esEdicion = form.dataset.edicion === 'true';
 
@@ -1089,7 +1689,6 @@ function initSubirDeckForm() {
 
             status.textContent = esEdicion ? '✅ Deck actualizado con éxito' : '✅ Deck subido con éxito';
             status.className = 'form-status success';
-            showToast(status.textContent, status.className);
 
             // Limpiar estado de edición (si existía)
             delete form.dataset.edicion;
@@ -1105,7 +1704,6 @@ function initSubirDeckForm() {
         } catch (err) {
             status.textContent = '❌ ' + err.message;
             status.className = 'form-status error';
-            showToast(status.textContent, status.className);
         } finally {
             submitBtn.disabled = false;
             submitBtn.textContent = esEdicion ? 'Actualizar Deck' : 'Subir Deck';
@@ -1379,15 +1977,9 @@ async function cargarMisPendientes() {
 
 // Desinscribirse (usada en botones)
 async function desinscribirse(codigo) {
-    const confirmado = await Confirm.show(`¿Quieres desinscribirte del torneo ${codigo}?`, 'Desinscripción');
-    if (!confirmado) return;
-
+    if (!confirm(`¿Quieres desinscribirte del torneo ${codigo}?`)) return;
     const token = sessionStorage.getItem(SESSION_STORAGE_KEY);
-    if (!token) {
-        Toast.error('No hay sesión activa.');
-        return;
-    }
-
+    if (!token) return;
     try {
         const res = await fetch(`${AUTH_API_BASE}/api/desinscribirse`, {
             method: 'POST',
@@ -1396,13 +1988,13 @@ async function desinscribirse(codigo) {
         });
         const data = await res.json();
         if (data.ok) {
-            Toast.success(data.mensaje);
+            alert('✅ ' + data.mensaje);
             cargarEstadoTorneos();
         } else {
-            Toast.error(data.error || 'Error al desinscribirse');
+            alert('❌ ' + data.error);
         }
     } catch (error) {
-        Toast.error('Error al desinscribirse: ' + error.message);
+        alert('Error al desinscribirse: ' + error.message);
     }
 }
 
@@ -1481,7 +2073,6 @@ async function abrirDeckModal(codigoTorneo = null) {
     if (status) {
         status.textContent = '';
         status.className = 'form-status';
-        showToast(status.textContent, status.className);
     }
 
     // Si no hay código, solo abrir el modal vacío para subir nuevo deck
@@ -1506,7 +2097,6 @@ async function abrirDeckModal(codigoTorneo = null) {
     if (!token) {
         status.textContent = 'No hay sesión activa.';
         status.className = 'form-status error';
-        showToast(status.textContent, status.className);
         return;
     }
 
@@ -1548,7 +2138,6 @@ async function abrirDeckModal(codigoTorneo = null) {
         if (status) {
             status.textContent = 'Error al cargar tu deck: ' + err.message;
             status.className = 'form-status error';
-            showToast(status.textContent, status.className);
         }
     }
 }
@@ -1565,17 +2154,9 @@ async function verMiDeck(codigoTorneo, contenedor, puedeEditar = false, tieneDec
     try {
         // 🔥 Si el torneo está EN DESARROLLO → mostrar panel completo con pestañas
         if (estado === 'en desarrollo') {
-        
-            // Opcional: obtener la ronda actual del torneo (desde el dataset o desde la API)
-            // Si no la tienes, puedes omitirla o mostrarla genérica.
-            const rondaActual = '?'; // podrías obtenerlo de algún lado
-
+            // Construir el panel con pestañas
             const panelHtml = `
-                <div class="mi-torneo-panel mi-torneo-panel-desarrollo">
-                    <div class="mi-torneo-panel-header">
-                        <span class="badge-en-curso">⚔️ Torneo en curso</span>
-                        <span style="color: var(--muted); font-size: 0.8rem;">Ronda ${rondaActual}</span>
-                    </div>
+                <div class="mi-torneo-panel" style="display: block; margin-top: 0.5rem; padding-top: 0;">
                     <div class="mi-torneo-tabs">
                         <button class="tab-btn active" data-tab="clasificacion">📊 Clasificación</button>
                         <button class="tab-btn" data-tab="deck">🃏 Deck</button>
@@ -1588,8 +2169,6 @@ async function verMiDeck(codigoTorneo, contenedor, puedeEditar = false, tieneDec
                     </div>
                 </div>
             `;
-
-         
 
             contenedor.innerHTML = panelHtml;
 
@@ -1648,17 +2227,15 @@ async function verMiDeck(codigoTorneo, contenedor, puedeEditar = false, tieneDec
         let deckHtml = '';
 
         // Acciones del torneo
-        if(estado !== 'en desarrollo'){
-            if (inscrito) {
-                if (estado === 'abierto') {
-                    accionesHtml = `<button class="btn btn-sm btn-danger" data-desinscribir="${codigoTorneo}">Desinscribirme</button>`;
-                }
+        if (inscrito) {
+            if (estado === 'abierto') {
+                accionesHtml = `<button class="btn btn-sm btn-danger" data-desinscribir="${codigoTorneo}">Desinscribirme</button>`;
+            }
+        } else {
+            if (estado === 'abierto') {
+                accionesHtml = `<button class="btn btn-sm btn-primary" data-inscribir="${codigoTorneo}">Apuntarme</button>`;
             } else {
-                if (estado === 'abierto') {
-                    accionesHtml = `<button class="btn btn-sm btn-primary" data-inscribir="${codigoTorneo}">Apuntarme</button>`;
-                } else {
-                    accionesHtml = `<button class="btn btn-sm btn-secondary" disabled>Cerrado</button>`;
-                }
+                accionesHtml = `<button class="btn btn-sm btn-secondary" disabled>Cerrado</button>`;
             }
         }
 
@@ -1781,7 +2358,6 @@ function abrirModalAgendar(codigo, nombre1, nombre2, ronda, j1, j2, opciones = {
     if (status) {
         status.textContent = '';
         status.className = 'form-status';
-        showToast(status.textContent, status.className);
     }
 }
 
@@ -1815,13 +2391,11 @@ async function agendarPartida(e) {
     if (!fecha || !fecha.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
         status.textContent = 'Fecha inválida. Usa DD/MM/YYYY.';
         status.className = 'form-status error';
-        showToast(status.textContent, status.className);
         return;
     }
     if (!hora || !hora.match(/^\d{2}:\d{2}$/)) {
         status.textContent = 'Hora inválida. Usa HH:MM.';
         status.className = 'form-status error';
-        showToast(status.textContent, status.className);
         return;
     }
 
@@ -1829,7 +2403,6 @@ async function agendarPartida(e) {
     if (!token) {
         status.textContent = 'No hay sesión activa.';
         status.className = 'form-status error';
-        showToast(status.textContent, status.className);
         return;
     }
 
@@ -1837,7 +2410,6 @@ async function agendarPartida(e) {
     submitBtn.textContent = modo === 'editar' ? 'Guardando...' : 'Agendando...';
     status.textContent = '';
     status.className = 'form-status';
-    showToast(status.textContent, status.className);
 
     try {
         let endpoint, payload;
@@ -1875,7 +2447,7 @@ async function agendarPartida(e) {
 
         status.textContent = '✅ ' + data.mensaje;
         status.className = 'form-status success';
-        showToast(status.textContent, status.className);
+
         setTimeout(() => {
             cerrarModalAgendar();
             cargarMisPartidas();   // recargar tabla de mis partidas
@@ -1885,7 +2457,6 @@ async function agendarPartida(e) {
     } catch (err) {
         status.textContent = '❌ ' + err.message;
         status.className = 'form-status error';
-        showToast(status.textContent, status.className);
     } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = modo === 'editar' ? 'Guardar cambios' : 'Agendar';
@@ -1910,15 +2481,9 @@ function initAgendarModal() {
 }
 
 async function eliminarPartida(fecha, hora, j1, j2) {
-    const confirmado = await Confirm.show(
-        `¿Eliminar la partida del ${fecha} a las ${hora}?`,
-        'Eliminar partida'
-    );
-    if (!confirmado) return;
-
     const token = sessionStorage.getItem(SESSION_STORAGE_KEY);
     if (!token) {
-        Toast.error('No hay sesión activa.');
+        alert('No hay sesión activa.');
         return;
     }
 
@@ -1937,50 +2502,12 @@ async function eliminarPartida(fecha, hora, j1, j2) {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Error al eliminar');
 
-        Toast.success(data.mensaje);
+        alert('✅ ' + data.mensaje);
         cargarMisPartidas();
         cargarTodasPartidas();
     } catch (err) {
-        Toast.error('Error: ' + err.message);
+        alert('❌ ' + err.message);
     }
-}
-function showToast(message, type = 'success') {
-    const container = document.getElementById('toast-container');
-    if (!container) return;
-
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.textContent = message;
-
-    // Estilos en línea (puedes moverlos a CSS)
-    Object.assign(toast.style, {
-        padding: '1rem 1.5rem',
-        borderRadius: '12px',
-        background: type === 'success' ? 'rgba(74, 222, 128, 0.15)' : 'rgba(255, 107, 107, 0.15)',
-        border: `1px solid ${type === 'success' ? 'rgba(74, 222, 128, 0.3)' : 'rgba(255, 107, 107, 0.3)'}`,
-        color: type === 'success' ? '#4ade80' : '#ff6b6b',
-        backdropFilter: 'blur(12px)',
-        boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
-        fontSize: '0.95rem',
-        fontWeight: '500',
-        animation: 'toastIn 0.4s ease',
-        transform: 'translateX(0)',
-        transition: 'opacity 0.4s ease, transform 0.4s ease',
-        opacity: '1',
-        fontFamily: 'var(--font-body)',
-        maxWidth: '100%',
-    });
-
-    container.appendChild(toast);
-
-    // Auto-eliminar después de 4 segundos
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateX(30px)';
-        setTimeout(() => {
-            if (toast.parentNode) toast.remove();
-        }, 400);
-    }, 4000);
 }
 
 window.verDeckRival = verDeckRival;
@@ -1995,3 +2522,317 @@ window.abrirDeckModal = abrirDeckModal;
 window.abrirModalAgendar = abrirModalAgendar;
 window.cerrarModalAgendar = cerrarModalAgendar;
 window.eliminarPartida = eliminarPartida;
+
+//navbar.js
+
+/* ==========================================================
+   NAVBAR — Scroll state + Mobile menu
+========================================================== */
+
+function initNavbar() {
+
+    const navbar = document.querySelector(".navbar");
+    const menuToggle = document.querySelector(".menu-toggle");
+    const navbarMenu = document.querySelector(".navbar-menu");
+
+    // Fondo al hacer scroll
+    if (navbar) {
+        window.addEventListener("scroll", () => {
+            navbar.classList.toggle("scrolled", window.scrollY > 40);
+        }, { passive: true });
+    }
+
+    // Menú móvil
+    if (!menuToggle || !navbarMenu) return;
+
+    menuToggle.addEventListener("click", () => {
+
+        const abierto = navbarMenu.classList.toggle("active");
+
+        menuToggle.classList.toggle("active", abierto);
+        menuToggle.setAttribute("aria-expanded", String(abierto));
+
+    });
+
+    navbarMenu.querySelectorAll("a").forEach(link => {
+        link.addEventListener("click", () => {
+            navbarMenu.classList.remove("active");
+            menuToggle.classList.remove("active");
+            menuToggle.setAttribute("aria-expanded", "false");
+        });
+    });
+
+}
+
+//reveal.js
+
+/* ==========================================================
+   REVEAL ANIMATIONS
+========================================================== */
+
+class Reveal {
+
+    constructor() {
+
+        this.observer = new IntersectionObserver(
+            this.handleIntersect.bind(this),
+            {
+                root: null,
+                rootMargin: "0px 0px -10% 0px",
+                threshold: 0.15
+            }
+        );
+
+    }
+
+    init() {
+        document.querySelectorAll("[data-reveal]").forEach(element => {
+            this.observer.observe(element);
+        });
+    }
+
+    observeNew(elements) {
+        elements.forEach(element => {
+            this.observer.observe(element);
+        });
+    }
+
+    handleIntersect(entries) {
+        entries.forEach(entry => {
+            if (!entry.isIntersecting) return;
+            entry.target.classList.add("is-visible");
+            this.observer.unobserve(entry.target);
+        });
+    }
+
+}
+
+function initReveal() {
+    window.revealInstance = new Reveal();
+    window.revealInstance.init();
+}
+
+//smooth-scroll.js 
+
+/* ==========================================================
+   SMOOTH SCROLL
+========================================================== */
+
+function initSmoothScroll() {
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+
+        anchor.addEventListener("click", function (e) {
+
+            const targetId = this.getAttribute("href");
+            if (targetId === "#") return;
+
+            const target = document.querySelector(targetId);
+            if (!target) return;
+
+            e.preventDefault();
+
+            const navbar = document.querySelector(".navbar");
+            const offset = navbar ? navbar.offsetHeight : 0;
+            const top = target.getBoundingClientRect().top + window.scrollY - offset;
+
+            window.scrollTo({ top, behavior: "smooth" });
+
+        });
+
+    });
+
+}
+
+//standings-slider.js
+
+/* ==========================================================
+   SLIDER DE CLASIFICACIONES
+========================================================== */
+
+
+const TORNEOS_API = 'https://mydiscordbot-production-3e6a.up.railway.app/api/torneos';
+
+let torneosOrdenados = [];
+let slideActual = 0;
+
+function formatearDiff(diff) {
+    const clase = diff > 0 ? 'diff-positive' : diff < 0 ? 'diff-negative' : 'diff-neutral';
+    const signo = diff > 0 ? '+' : '';
+    return `<span class="${clase}">${signo}${diff}</span>`;
+}
+
+function renderSlide(torneo) {
+
+    const filas = torneo.clasificacion.map(p => `
+        <tr>
+            <td class="standings-rank">${p.rank}</td>
+            <td>
+                <div class="standings-player">
+                    ${p.avatar ? `<img src="${p.avatar}" alt="" class="standings-avatar">` : ''}
+                    <span>@${p.nombre}</span>
+                </div>
+            </td>
+            <td>${p.wins}-${p.losses}-${p.draws}</td>
+            <td>${p.mp}</td>
+            <td>${p.omw.toFixed(3)}</td>
+            <td>${p.buchholz.toFixed(5)}</td>
+            <td>${formatearDiff(p.diff)}</td>
+        </tr>
+    `).join('');
+
+    return `
+        <div class="slide-header">
+            <h3>${torneo.nombre}</h3>
+            <span class="slide-meta">${torneo.participantes_count} jugadores · Finalizado el ${formatearFecha(torneo.fecha_fin)}</span>
+        </div>
+        <div class="standings-table-wrap">
+            <table class="standings-table">
+                <thead>
+                    <tr>
+                        <th>Rango</th>
+                        <th>Participante</th>
+                        <th>G-P-E</th>
+                        <th>Pts</th>
+                        <th>OMW%</th>
+                        <th>Buchholz</th>
+                        <th>Dif</th>
+                    </tr>
+                </thead>
+                <tbody>${filas}</tbody>
+            </table>
+        </div>
+    `;
+
+}
+
+function renderSlider() {
+
+    const track = document.querySelector('#slider-track');
+    const dotsContainer = document.querySelector('#slider-dots');
+
+    track.innerHTML = torneosOrdenados.map((torneo, i) => `
+        <div class="standings-slide ${i === slideActual ? 'is-active' : ''}" data-index="${i}">
+            ${renderSlide(torneo)}
+        </div>
+    `).join('');
+
+    dotsContainer.innerHTML = torneosOrdenados.map((_, i) => `
+        <button class="slider-dot ${i === slideActual ? 'is-active' : ''}" data-index="${i}" aria-label="Ir al torneo ${i + 1}"></button>
+    `).join('');
+
+    document.querySelectorAll('.slider-dot').forEach(dot => {
+        dot.addEventListener('click', () => {
+            slideActual = parseInt(dot.dataset.index);
+            actualizarSlide();
+        });
+    });
+
+    actualizarBotones();
+
+}
+
+function actualizarSlide() {
+
+    document.querySelectorAll('.standings-slide').forEach((slide, i) => {
+        slide.classList.toggle('is-active', i === slideActual);
+    });
+
+    document.querySelectorAll('.slider-dot').forEach((dot, i) => {
+        dot.classList.toggle('is-active', i === slideActual);
+    });
+
+    actualizarBotones();
+
+}
+
+function actualizarBotones() {
+    document.querySelector('#slider-prev').disabled = slideActual === 0;
+    document.querySelector('#slider-next').disabled = slideActual === torneosOrdenados.length - 1;
+}
+
+async function cargarSlider() {
+
+    const track = document.querySelector('#slider-track');
+    if (!track) return;
+
+    try {
+
+        const res = await fetch(TORNEOS_API);
+        if (!res.ok) throw new Error('Servicio no disponible');
+
+        const data = await res.json();
+
+        if (!data.torneos || !data.torneos.length) {
+            track.innerHTML = '<p class="standings-error">Todavía no hay torneos finalizados.</p>';
+            return;
+        }
+
+        torneosOrdenados = [...data.torneos].sort(
+            (a, b) => new Date(b.fecha_fin) - new Date(a.fecha_fin)
+        );
+
+        slideActual = 0;
+        renderSlider();
+
+    } catch (err) {
+        console.error(err);
+        track.innerHTML = '<p class="standings-error">No se pudieron cargar las clasificaciones.</p>';
+    }
+
+}
+
+function initStandingsSlider() {
+
+    const track = document.querySelector('#slider-track');
+    if (!track) return;
+
+    cargarSlider();
+
+    document.querySelector('#slider-prev').addEventListener('click', () => {
+        if (slideActual > 0) {
+            slideActual--;
+            actualizarSlide();
+        }
+    });
+
+    document.querySelector('#slider-next').addEventListener('click', () => {
+        if (slideActual < torneosOrdenados.length - 1) {
+            slideActual++;
+            actualizarSlide();
+        }
+    });
+
+}
+
+//utils.js
+
+/* ==========================================================
+   UTILIDADES COMPARTIDAS
+========================================================== */
+
+function formatearFecha(fechaStr) {
+    if (!fechaStr) return '';
+    const fecha = new Date(fechaStr);
+    if (isNaN(fecha)) return '';
+    return fecha.toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+//app.js
+
+document.addEventListener('DOMContentLoaded', () => {
+    window.scrollTo(0, 0);
+
+    if (typeof initReveal === 'function') initReveal();
+    if (typeof initSmoothScroll === 'function') initSmoothScroll();
+    if (typeof initNavbar === 'function') initNavbar();
+    if (typeof initLoginModal === 'function') initLoginModal();
+    if (typeof initLogin === 'function') initLogin();
+    if (typeof comprobarSesionActiva === 'function') comprobarSesionActiva();
+    if (typeof initMemberView === 'function') initMemberView();
+    if (typeof initIntro === 'function') initIntro();
+    if (typeof initBackToTop === 'function') initBackToTop();
+    if (typeof initAdmission === 'function') initAdmission();
+    if (typeof initBroadcast === 'function') initBroadcast();
+    if (typeof initStandingsSlider === 'function') initStandingsSlider();
+});

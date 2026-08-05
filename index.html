@@ -32,6 +32,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=satoshi@300,400,500,700&display=swap" rel="stylesheet">
     <link href="./assets/css/keyrune.css" rel="stylesheet" type="text/css" />
        <link rel="stylesheet" href="assets/css/styles.css?v=3">
      <script>
@@ -363,9 +364,11 @@
                                     placeholder="Qué mazos juegas, cómo conociste el Klub, lo que quieras contarnos..."
                                     required></textarea>
                             </div>
-                            <button type="submit" class="btn btn-primary" id="admission-submit">
+														<div class="form-group-button">
+															<button type="submit" class="btn btn-primary" id="admission-submit">
                                 Solicitar Admisión
-                            </button>
+                            	</button>
+														</div>
                             <p class="form-status" id="form-status" role="status" aria-live="polite"></p>
                         </form>
 
@@ -463,7 +466,9 @@
                         <label for="login-nombre">Tu usuario de Discord</label>
                         <input type="text" id="login-nombre" placeholder="tu usuario" autocomplete="off">
                     </div>
-                    <button id="login-solicitar" class="btn btn-primary">Enviar código</button>
+                    <div class="form-group-button">
+                      <button id="login-solicitar" class="btn btn-primary">Enviar código</button>
+                    </div>
                     <p class="form-status" id="login-status-1"></p>
                 </div>
 
@@ -474,7 +479,9 @@
                         <label for="login-codigo">Código de 6 dígitos</label>
                         <input type="text" id="login-codigo" placeholder="000000" maxlength="6" inputmode="numeric">
                     </div>
-                    <button id="login-verificar" class="btn btn-primary">Verificar</button>
+										<div class="form-group-button">
+											<button id="login-verificar" class="btn btn-primary">Verificar</button>
+										</div>
                     <p class="form-status" id="login-status-2"></p>
                 </div>
 
@@ -547,7 +554,8 @@
                     </div>
                 </a>
                 <ul class="navbar-menu">
-                    <li><a href="#" data-member-tab="torneos" class="is-active">Mis Torneos</a></li>
+                    <li><a href="#" data-member-tab="dashboard" class="is-active">Inicio</a></li>
+                    <li><a href="#" data-member-tab="torneos">Mis Torneos</a></li>
                     <li><a href="#" data-member-tab="decks">Mis Decks</a></li>
                 </ul>
 
@@ -565,108 +573,201 @@
             </div>
         </nav>
 
-        <main class="member-dashboard">
-            <div class="container">
-
-                <header class="member-dashboard-header">
+    <main class="member-dashboard">
+        <div class="container">
+            <header class="member-dashboard-header">
                 <span class="section-tag">TU RINCÓN</span>
                 <h2>Bienvenido de vuelta<span id="member-welcome-name"></span>.</h2>
                 <p>Consulta tus resultados en torneos y gestiona tus decks subidos.</p>
-                </header>
+            </header>
+            <div id="toast-container"></div>
+            <!-- PESTAÑA DASHBOARD -->
+            <section id="member-tab-dashboard" class="member-tab-content">
+                <div class="member-tab-title">
+                    <h3>📊 Inicio</h3>
+                    <p>Resumen rápido de tu actividad en The Klub.</p>
+                </div>
+								<div id="todas-partidas-container"></div>
                 <div id="torneo-banner-container"></div>
-
-                <section id="member-tab-torneos" class="member-tab-content">
-
-                    <div class="member-tab-title">
-                        <h3>Mis Torneos</h3>
-                    </div>
-
-                    <div id="mis-torneos-lista" class="grid grid-2">
-                        <p class="standings-loading">Cargando tus resultados...</p>
-                    </div>
-
-                </section>
-
-                <section id="member-tab-decks" class="member-tab-content" hidden>
-
+                <div id="mis-pendientes-container"></div>
+            </section>
+            <section id="member-tab-torneos" class="member-tab-content" hidden>
+                <div class="member-tab-title">
+                    <h3>Mis Torneos</h3>
+                </div>
+                <div id="mis-torneos-lista" class="grid grid-2">
+                    <p class="standings-loading">Cargando tus resultados...</p>
+                </div>
+            </section>
+            <section id="member-tab-decks" class="member-tab-content" hidden>
                     <div class="member-tab-title">
                         <h3>Mis Decks</h3>
                         <button id="nuevo-deck-toggle" class="btn btn-primary">+ Subir nuevo deck</button>
                     </div>
-
                     <div id="mis-decks-lista" class="grid grid-2">
                         <p class="standings-loading">Cargando tus decks...</p>
                     </div>
-
-                </section>
-            </div>
-        </main>
+            </section>
+        </div>
+    </main>
 
     </div>
     <div id="deck-modal" class="login-modal" hidden>
+        <div class="login-modal-backdrop" data-close-deck-modal></div>
+        <div class="login-modal-box deck-modal-box" role="dialog" aria-modal="true" aria-labelledby="deck-modal-title">
 
-    <div class="login-modal-backdrop" data-close-deck-modal></div>
+            <button id="deck-modal-close" class="login-modal-close" aria-label="Cerrar">
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                    <path fill="currentColor" d="M18.3 5.71L12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.3 19.71 2.89 18.3 9.17 12 2.89 5.71 4.3 4.29l6.29 6.3 6.3-6.3z"/>
+                </svg>
+            </button>
 
-    <div class="login-modal-box deck-modal-box" role="dialog" aria-modal="true" aria-labelledby="deck-modal-title">
+            <h3 id="deck-modal-title">Subir nuevo deck</h3>
 
-        <button id="deck-modal-close" class="login-modal-close" aria-label="Cerrar">
-            <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
-                <path fill="currentColor" d="M18.3 5.71L12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.3 19.71 2.89 18.3 9.17 12 2.89 5.71 4.3 4.29l6.29 6.3 6.3-6.3z"/>
-            </svg>
-        </button>
+            <form id="subir-deck-form" class="admission-form deck-form" novalidate>
 
-        <h3 id="deck-modal-title">Subir nuevo deck</h3>
+                <div class="form-group">
+                    <label for="deck-torneo">Torneo</label>
+                    <select id="deck-torneo" name="codigo_torneo" required>
+                        <option value="">Cargando torneos...</option>
+                    </select>
+                </div>
 
-        <form id="subir-deck-form" class="admission-form deck-form" novalidate>
+                <div class="form-group">
+                    <label for="deck-nombre">Nombre del deck</label>
+                    <input type="text" id="deck-nombre" name="nombre_deck" placeholder="Mi deck genial" required>
+                </div>
 
-            <div class="form-group">
-                <label for="deck-torneo">Torneo</label>
-                <select id="deck-torneo" name="codigo_torneo" required>
-                    <option value="">Cargando torneos...</option>
-                </select>
-            </div>
+                <div class="form-group">
+                    <label for="deck-archetype">Archetype</label>
+                    <input type="text" id="deck-archetype" name="archetype" list="arquetipos-lista" placeholder="Escribe para buscar..." required autocomplete="off">
+                    <datalist id="arquetipos-lista"></datalist>
+                </div>
 
-            <div class="form-group">
-                <label for="deck-nombre">Nombre del deck</label>
-                <input type="text" id="deck-nombre" name="nombre_deck" placeholder="Mi deck genial" required>
-            </div>
+                <div class="form-group">
+                    <label for="deck-decklist">Decklist (Main, mínimo 60 cartas)</label>
+                    <textarea id="deck-decklist" name="decklist" rows="8" placeholder="4 Phyrexian Devourer&#10;4 Altar of Dementia&#10;..." required></textarea>
+                </div>
 
-            <div class="form-group">
-                <label for="deck-archetype">Archetype</label>
-                <input type="text" id="deck-archetype" name="archetype" list="arquetipos-lista" placeholder="Escribe para buscar..." required autocomplete="off">
-                <datalist id="arquetipos-lista"></datalist>
-            </div>
+                <div class="form-group">
+                    <label for="deck-sideboard">Sideboard (máx 15, o vacío)</label>
+                    <textarea id="deck-sideboard" name="sideboard" rows="4" placeholder="3 Hydroblast&#10;3 Pyroblast&#10;..."></textarea>
+                </div>
 
-            <div class="form-group">
-                <label for="deck-decklist">Decklist (Main, mínimo 60 cartas)</label>
-                <textarea id="deck-decklist" name="decklist" rows="8" placeholder="4 Phyrexian Devourer&#10;4 Altar of Dementia&#10;..." required></textarea>
-            </div>
+                <button type="submit" class="btn btn-primary" id="subir-deck-submit">Subir Deck</button>
+                <p class="form-status" id="subir-deck-status"></p>
 
-            <div class="form-group">
-                <label for="deck-sideboard">Sideboard (máx 15, o vacío)</label>
-                <textarea id="deck-sideboard" name="sideboard" rows="4" placeholder="3 Hydroblast&#10;3 Pyroblast&#10;..."></textarea>
-            </div>
+            </form>
 
-            <button type="submit" class="btn btn-primary" id="subir-deck-submit">Subir Deck</button>
-            <p class="form-status" id="subir-deck-status"></p>
 
-        </form>
-
+        </div>
+       
     </div>
 
+     <!-- Modal para ver deck del rival -->
+    <div id="deck-rival-modal" class="login-modal" hidden>
+        <div class="login-modal-backdrop" data-close-deck-rival></div>
+        <div class="login-modal-box deck-modal-box" role="dialog" aria-modal="true" aria-labelledby="deck-rival-title">
+            <button id="deck-rival-close" class="login-modal-close" aria-label="Cerrar">
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                    <path fill="currentColor" d="M18.3 5.71L12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.3 19.71 2.89 18.3 9.17 12 2.89 5.71 4.3 4.29l6.29 6.3 6.3-6.3z"/>
+                </svg>
+            </button>
+            <h3 id="deck-rival-title">🃏 Deck de <span class="modal-rival-nombre"></span></h3>
+            <div class="modal-deck-content">
+                <p class="standings-loading">Cargando deck...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para reportar resultado -->
+    <div id="reporte-modal" class="login-modal" hidden>
+        <div class="login-modal-backdrop" data-close-reporte></div>
+        <div class="login-modal-box deck-modal-box" role="dialog" aria-modal="true" aria-labelledby="reporte-title">
+            <button id="reporte-close" class="login-modal-close" aria-label="Cerrar">
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                    <path fill="currentColor" d="M18.3 5.71L12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.3 19.71 2.89 18.3 9.17 12 2.89 5.71 4.3 4.29l6.29 6.3 6.3-6.3z"/>
+                </svg>
+            </button>
+            <h3 id="reporte-title">📊 Reportar resultado</h3>
+            <p><strong>Torneo:</strong> <span class="modal-codigo"></span> — <strong>Ronda</strong> <span class="modal-ronda"></span></p>
+            <p><span class="modal-j1"></span> vs <span class="modal-j2"></span></p>
+            <form id="reporte-form">
+                <input type="hidden" id="reporte-codigo">
+                <input type="hidden" id="reporte-j1">
+                <input type="hidden" id="reporte-j2">
+                <div class="form-group">
+                    <label for="reporte-resultado">Resultado (ej: 2-1):</label>
+                    <input type="text" id="reporte-resultado" placeholder="X-Y" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Reportar</button>
+                <p class="form-status" id="reporte-status"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal para agendar partida -->
+    <div id="agendar-modal" class="login-modal" hidden>
+        <div class="login-modal-backdrop" data-close-agendar></div>
+        <div class="login-modal-box deck-modal-box" role="dialog" aria-modal="true" aria-labelledby="agendar-title">
+            <button id="agendar-close" class="login-modal-close" aria-label="Cerrar">
+                <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true">
+                    <path fill="currentColor" d="M18.3 5.71L12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.3 19.71 2.89 18.3 9.17 12 2.89 5.71 4.3 4.29l6.29 6.3 6.3-6.3z"/>
+                </svg>
+            </button>
+            <h3 id="agendar-title">📅 Agendar partida</h3>
+            <p><strong>Partida:</strong> <span class="agendar-j1"></span> vs <span class="agendar-j2"></span></p>
+            <p><strong>Torneo:</strong> <span class="agendar-codigo"></span> — <strong>Ronda</strong> <span class="agendar-ronda"></span></p>
+            <form id="agendar-form">
+                <input type="hidden" id="agendar-codigo">
+                <input type="hidden" id="agendar-j1">
+                <input type="hidden" id="agendar-j2">
+                <input type="hidden" id="agendar-fecha-actual">
+                <input type="hidden" id="agendar-hora-actual">
+                <input type="hidden" id="agendar-modo" value="nuevo">
+                <p class="agendar-info-actual" style="font-size:.85rem; color:var(--muted);"></p>
+                <div class="form-group">
+                    <label for="agendar-fecha">Fecha (dd/mm/yyyy)</label>
+                    <input type="text" id="agendar-fecha" placeholder="ej: 15/08/2026" required>
+                </div>
+                <div class="form-group">
+                    <label for="agendar-hora">Hora (hh:mm)</label>
+                    <input type="text" id="agendar-hora" placeholder="ej: 20:30" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Agendar</button>
+                <p class="form-status" id="agendar-status"></p>
+            </form>
+        </div>
+    </div>
+    <!-- Toast container -->
+
+
+<!-- Modal de confirmación -->
+<div id="confirm-modal" class="login-modal" hidden>
+    <div class="login-modal-backdrop" data-close-confirm></div>
+    <div class="login-modal-box" style="max-width: 480px;">
+        <h3 id="confirm-title">Confirmar</h3>
+        <p id="confirm-message">¿Estás seguro?</p>
+        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 2rem;">
+            <button id="confirm-cancel" class="btn btn-secondary">Cancelar</button>
+            <button id="confirm-accept" class="btn btn-primary">Aceptar</button>
+        </div>
+    </div>
 </div>
-<script defer src="./assets/js/intro.js?v=2"></script>
-<script defer src="./assets/js/admission.js?v=2"></script>
-<script defer src="./assets/js/back-to-top.js?v=2"></script>
-<script defer src="./assets/js/broadcast.js?v=2"></script>
-<script defer src="./assets/js/navbar.js?v=2"></script>
-<script defer src="./assets/js/reveal.js?v=2"></script>
-<script defer src="./assets/js/smooth-scroll.js?v=2"></script>
-<script defer src="./assets/js/standings-slider.js?v=2"></script>
-<script defer src="./assets/js/utils.js?v=2"></script>
-<script defer src="./assets/js/auth.js?v=2"></script>
-<script defer src="./assets/js/member.js?v=2"></script>
-<script defer src="./assets/js/app.js?v=2"></script>
+<script defer src="./assets/js/intro.js?v=3"></script>
+<script defer src="./assets/js/admission.js?v=3"></script>
+<script defer src="./assets/js/back-to-top.js?v=3"></script>
+<script defer src="./assets/js/broadcast.js?v=3"></script>
+<script defer src="./assets/js/navbar.js?v=3"></script>
+<script defer src="./assets/js/reveal.js?v=3"></script>
+<script defer src="./assets/js/smooth-scroll.js?v=3"></script>
+<script defer src="./assets/js/standings-slider.js?v=3"></script>
+<script defer src="./assets/js/utils.js?v=3"></script>
+<script defer src="./assets/js/auth.js?v=3"></script>
+<script defer src="./assets/js/member.js?v=3"></script>
+<script defer src="./assets/js/toast.js?v=3"></script>
+<script src="./assets/js/confirm.js"></script>
+<script defer src="./assets/js/app.js?v=3"></script>
 
 
 

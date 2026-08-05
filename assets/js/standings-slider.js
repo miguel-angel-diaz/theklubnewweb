@@ -2,6 +2,7 @@
    SLIDER DE CLASIFICACIONES
 ========================================================== */
 
+
 const TORNEOS_API = 'https://mydiscordbot-production-3e6a.up.railway.app/api/torneos';
 
 let torneosOrdenados = [];

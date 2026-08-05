@@ -254,6 +254,8 @@
     bottom:calc(2rem + 60px); /* 52px del botón de sonido + 8px de aire */
 }
 
+
+
 @media(max-width:640px){
 
     .back-to-top{

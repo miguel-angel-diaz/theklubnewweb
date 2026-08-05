@@ -11,14 +11,17 @@
     --background-card:rgba(255,255,255,.025);
 
     /* NUEVO — Superficies con contraste real */
-    --surface:var(--surface-border);
+    --surface: rgba(255,255,255,.05);  
     --surface-hover:rgba(255,255,255,.09);
-    --surface-border:rgba(255,255,255,.14);
+    --surface-border: rgba(255,255,255,.14);   
     --surface-border-hover:rgba(255,136,0,.35);
 
     /* Text */
     --text:#ffffff;
     --muted:#9b9b9b;
+    :root {
+        --text-muted: var(--muted);
+    }
 
     /* Border */
     --border:rgba(255,255,255,.08);
