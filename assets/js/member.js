@@ -896,119 +896,6 @@ function initDeckModal() {
     });
 }
 
-async function cargarTodasPartidas() {
-    const contenedor = document.querySelector('#todas-partidas-container');
-    if (!contenedor) return;
-
-    const token = sessionStorage.getItem(SESSION_STORAGE_KEY);
-    if (!token) {
-        contenedor.innerHTML = `<p class="empty-state">Debes iniciar sesión.</p>`;
-        return;
-    }
-
-    contenedor.innerHTML = `<p class="standings-loading">Cargando todas las partidas...</p>`;
-
-    try {
-        const res = await fetch(`${AUTH_API_BASE}/api/todas-partidas?session=${token}`);
-        if (!res.ok) {
-            const errorData = await res.json();
-            throw new Error(errorData.error || 'Error al cargar partidas');
-        }
-        const data = await res.json();
-        const partidas = data.partidas || [];
-
-        if (!partidas.length) {
-            contenedor.innerHTML = `
-                <div class="partidas-container">
-                    <h3>📅 Todas las partidas agendadas</h3>
-                    <div class="partidas-empty">
-                        <div class="empty-icon">📭</div>
-                        <p>No hay partidas agendadas en el servidor.</p>
-                    </div>
-                </div>
-            `;
-            return;
-        }
-
-        let html = `
-            <div class="partidas-container">
-                <h3>📅 Todas las partidas agendadas</h3>
-                <div class="partidas-table-wrap">
-                    <table class="partidas-table">
-                        <thead>
-                            <tr>
-                                <th>Fecha</th>
-                                <th>Hora</th>
-                                <th>Jugador 1</th>
-                                <th>Jugador 2</th>
-                                <th>Agendado por</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-        `;
-
-        partidas.forEach(p => {
-            html += `
-                <tr>
-                    <td><strong>${p.fecha}</strong></td>
-                    <td>${p.hora}</td>
-                    <td>${p.jugador1}</td>
-                    <td>${p.jugador2}</td>
-                    <td><span style="color:var(--muted); font-size:.85rem;">${p.agendado_por || 'Desconocido'}</span></td>
-                </tr>
-            `;
-        });
-
-        html += `
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        `;
-
-        contenedor.innerHTML = html;
-                // ============================================================
-        // EVENTOS: Editar partida
-        // ============================================================
-        contenedor.querySelectorAll('.editar-partida-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const fecha = this.dataset.fecha;
-                const hora = this.dataset.hora;
-                const j1 = this.dataset.j1;
-                const j2 = this.dataset.j2;
-                const nombre1 = this.dataset.nombre1;
-                const nombre2 = this.dataset.nombre2;
-                abrirModalAgendar(null, nombre1, nombre2, null, j1, j2, {
-                    modo: 'editar',
-                    fecha_actual: fecha,
-                    hora_actual: hora
-                });
-            });
-        });
-
-        // ============================================================
-        // EVENTOS: Eliminar partida (AÑADIR AQUÍ)
-        // ============================================================
-        contenedor.querySelectorAll('.eliminar-partida-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const fecha = this.dataset.fecha;
-                const hora = this.dataset.hora;
-                const j1 = this.dataset.j1;
-                const j2 = this.dataset.j2;
-                const nombre1 = this.dataset.nombre1;
-                const nombre2 = this.dataset.nombre2;
-                if (confirm(`¿Eliminar la partida del ${fecha} a las ${hora} entre ${nombre1} y ${nombre2}?`)) {
-                    eliminarPartida(fecha, hora, j1, j2);
-                }
-            });
-        });
-
-    } catch (err) {
-        console.error(err);
-        contenedor.innerHTML = `<p class="standings-error">Error al cargar partidas: ${err.message}</p>`;
-    }
-}
-
 async function cargarArquetipos() {
     const datalist = document.querySelector('#arquetipos-lista');
     if (!datalist) return;
@@ -1159,41 +1046,47 @@ async function cargarTodasPartidas() {
                         </thead>
                         <tbody>
         `;
-        partidas.forEach(p => {
-            const rol = p.jugador1_id == window.klubDiscordId ? 'Jugador 1' : 'Jugador 2';
-            const rolClass = rol === 'Jugador 1' ? 'jugador1' : 'jugador2';
+       partidas.forEach(p => {
+            const esMiPartida = (p.jugador1_id == window.klubDiscordId || p.jugador2_id == window.klubDiscordId);
+            let accionesHtml = '';
+            if (esMiPartida) {
+                accionesHtml = `
+                    <button class="btn btn-sm btn-secondary editar-partida-btn" 
+                            data-fecha="${p.fecha}" 
+                            data-hora="${p.hora}" 
+                            data-j1="${p.jugador1_id}" 
+                            data-j2="${p.jugador2_id}"
+                            data-nombre1="${p.jugador1}"
+                            data-nombre2="${p.jugador2}"
+                            title="Editar fecha/hora">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                            <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                        </svg>
+                    </button>
+                    <button class="btn btn-sm btn-danger eliminar-partida-btn" 
+                            data-fecha="${p.fecha}" 
+                            data-hora="${p.hora}" 
+                            data-j1="${p.jugador1_id}" 
+                            data-j2="${p.jugador2_id}"
+                            data-nombre1="${p.jugador1}"
+                            data-nombre2="${p.jugador2}"
+                            title="Eliminar partida">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                            <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                        </svg>
+                    </button>
+                `;
+            } else {
+                accionesHtml = `<span style="color: var(--muted); font-size:0.8rem;"></span>`;
+            }
+
             html += `
                 <tr>
                     <td><strong>${p.fecha}</strong></td>
                     <td>${p.hora}</td>
                     <td>${p.jugador1}</td>
                     <td>${p.jugador2}</td>
-                    <td>
-                        <button class="btn btn-sm btn-secondary editar-partida-btn" 
-                                data-fecha="${p.fecha}" 
-                                data-hora="${p.hora}" 
-                                data-j1="${p.jugador1_id}" 
-                                data-j2="${p.jugador2_id}"
-                                data-nombre1="${p.jugador1}"
-                                data-nombre2="${p.jugador2}"
-                                title="Editar fecha/hora">
-                            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                                <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-                            </svg>
-                        </button>
-                        <button class="btn btn-sm btn-danger eliminar-partida-btn" 
-                                data-fecha="${p.fecha}" 
-                                data-hora="${p.hora}" 
-                                data-j1="${p.jugador1_id}" 
-                                data-j2="${p.jugador2_id}"
-                                data-nombre1="${p.jugador1}"
-                                data-nombre2="${p.jugador2}"
-                                title="Eliminar partida">
-                            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
-                                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-                            </svg>
-                        </button>
-                    </td>
+                    <td>${accionesHtml}</td>
                 </tr>
             `;
         });
@@ -1212,6 +1105,19 @@ async function cargarTodasPartidas() {
                     fecha_actual: fecha,
                     hora_actual: hora
                 });
+            });
+        });
+        contenedor.querySelectorAll('.eliminar-partida-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const fecha = this.dataset.fecha;
+                const hora = this.dataset.hora;
+                const j1 = this.dataset.j1;
+                const j2 = this.dataset.j2;
+                const nombre1 = this.dataset.nombre1;
+                const nombre2 = this.dataset.nombre2;
+              
+                eliminarPartida(fecha, hora, j1, j2);
+                
             });
         });
 
@@ -1256,11 +1162,9 @@ async function cargarMisPendientes() {
 
         // Filtrar: solo nos quedamos con los torneos que tengan al menos una partida tuya
         const misTorneos = torneos.map(t => {
-            // Filtrar los emparejamientos: solo los que son tuyos
             const misPendientes = t.pendientes.filter(p => 
                 p.jugador1_id == miDiscordId || p.jugador2_id == miDiscordId
             );
-            // Si no hay partidas tuyas, este torneo no se muestra
             if (misPendientes.length === 0) return null;
             return {
                 ...t,
@@ -1279,43 +1183,57 @@ async function cargarMisPendientes() {
             return;
         }
 
+        // 🔹 Generar HTML con tablas en lugar de listas
         let html = `<h3>⚔️ Mis partidas pendientes</h3>`;
 
         misTorneos.forEach(t => {
             html += `
                 <div class="torneo-pendiente-card">
                     <h4>${t.nombre} (${t.codigo}) — Ronda ${t.ronda}</h4>
-                    <ul class="pendientes-lista">
+                    <div class="partidas-table-wrap">
+                        <table class="partidas-table pendientes-table">
+                            <thead>
+                                <tr>
+                                    <th>Jugador 1</th>
+                                    <th>Jugador 2</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
             `;
             t.pendientes.forEach(p => {
-                // Ya sabemos que es mi partida (porque lo filtramos)
-                const esMiPartida = true;
-                const dataAttrs = `
-                    data-codigo="${t.codigo}"
-                    data-j1="${p.jugador1_id}"
-                    data-j2="${p.jugador2_id}"
-                    data-nombre1="${p.jugador1}"
-                    data-nombre2="${p.jugador2}"
-                    data-ronda="${t.ronda}"
-                    data-es-mi-partida="true"
-                `;
+                const estaAgendada = p.agendada || false;
+                const estado = estaAgendada ? '✅ Agendada' : '⏳ Pendiente';
+                const botonAgendar = !estaAgendada ? `
+                    <button class="btn btn-sm btn-primary agendar-pendiente" 
+                            data-codigo="${t.codigo}" 
+                            data-j1="${p.jugador1_id}" 
+                            data-j2="${p.jugador2_id}" 
+                            data-nombre1="${p.jugador1}" 
+                            data-nombre2="${p.jugador2}"
+                            data-ronda="${t.ronda}">
+                        Agendar
+                    </button>
+                ` : '';
 
                 if (p.jugador2 === 'BYE') {
-                    html += `<li class="pendiente-bye">${p.jugador1} → BYE</li>`;
+                    html += `
+                        <tr>
+                            <td>${p.jugador1}</td>
+                            <td>BYE</td>
+                            <td><span style="color: var(--muted);">—</span></td>
+                            <td>—</td>
+                        </tr>
+                    `;
                 } else {
                     html += `
-                        <li class="pendiente-item" ${dataAttrs}>
-                            <span>${p.jugador1} vs ${p.jugador2} ⏳</span>
-                            <div class="pendiente-actions">
-                                <button class="btn btn-sm btn-primary agendar-pendiente" 
-                                        data-codigo="${t.codigo}" 
-                                        data-j1="${p.jugador1_id}" 
-                                        data-j2="${p.jugador2_id}" 
-                                        data-nombre1="${p.jugador1}" 
-                                        data-nombre2="${p.jugador2}"
-                                        data-ronda="${t.ronda}">
-                                    Agendar
-                                </button>
+                        <tr>
+                            <td>${p.jugador1}</td>
+                            <td>${p.jugador2}</td>
+                            <td>${estado}</td>
+                            <td>
+                                ${botonAgendar}
                                 <button class="btn btn-sm btn-success reportar-pendiente" 
                                         data-codigo="${t.codigo}" 
                                         data-j1="${p.jugador1_id}" 
@@ -1325,20 +1243,22 @@ async function cargarMisPendientes() {
                                         data-ronda="${t.ronda}">
                                     Reportar
                                 </button>
-                            </div>
-                        </li>
+                            </td>
+                        </tr>
                     `;
                 }
             });
             html += `
-                    </ul>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             `;
         });
 
         contenedor.innerHTML = html;
 
-        // Asignar eventos (igual que antes)
+        // 🔹 Asignar eventos a los botones
         contenedor.querySelectorAll('.agendar-pendiente').forEach(btn => {
             btn.addEventListener('click', function(e) {
                 e.stopPropagation();
@@ -1878,8 +1798,7 @@ async function agendarPartida(e) {
         showToast(status.textContent, status.className);
         setTimeout(() => {
             cerrarModalAgendar();
-            cargarMisPartidas();   // recargar tabla de mis partidas
-            cargarTodasPartidas(); // recargar todas las partidas
+            cargarTodasPartidas();
         }, 1500);
 
     } catch (err) {
@@ -1910,15 +1829,11 @@ function initAgendarModal() {
 }
 
 async function eliminarPartida(fecha, hora, j1, j2) {
-    const confirmado = await Confirm.show(
-        `¿Eliminar la partida del ${fecha} a las ${hora}?`,
-        'Eliminar partida'
-    );
-    if (!confirmado) return;
+    if (!confirm(`¿Eliminar la partida del ${fecha} a las ${hora}?`)) return;
 
     const token = sessionStorage.getItem(SESSION_STORAGE_KEY);
     if (!token) {
-        Toast.error('No hay sesión activa.');
+        showToast('No hay sesión activa.', 'error');
         return;
     }
 
@@ -1928,8 +1843,8 @@ async function eliminarPartida(fecha, hora, j1, j2) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 session: token,
-                jugador1_id: parseInt(j1),
-                jugador2_id: parseInt(j2),
+                jugador1_id: j1,
+                jugador2_id: j2,
                 fecha: fecha,
                 hora: hora
             })
@@ -1937,13 +1852,13 @@ async function eliminarPartida(fecha, hora, j1, j2) {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Error al eliminar');
 
-        Toast.success(data.mensaje);
-        cargarMisPartidas();
+        showToast(data.mensaje, 'success');
         cargarTodasPartidas();
     } catch (err) {
-        Toast.error('Error: ' + err.message);
+        showToast('Error: ' + err.message, 'error');
     }
 }
+
 function showToast(message, type = 'success') {
     const container = document.getElementById('toast-container');
     if (!container) return;

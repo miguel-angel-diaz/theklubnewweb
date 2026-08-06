@@ -2842,3 +2842,44 @@ body.is-logged-in .login-nav-btn {
         font-size: 0.85rem;
     }
 }
+
+/* Para que la tabla de pendientes herede los estilos de la de partidas */
+.pendientes-table {
+    min-width: auto;
+}
+
+.pendientes-table th,
+.pendientes-table td {
+    padding: 0.6rem 1rem;
+    text-align: left;
+}
+
+.pendientes-table .btn-sm {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.6rem;
+}
+
+/* Espaciado entre torneos */
+.torneo-pendiente-card {
+    margin-bottom: 2rem;
+}
+
+.torneo-pendiente-card h4 {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    color: #fff;
+    margin-bottom: 0.75rem;
+}
+
+/* Responsive para móviles */
+@media (max-width: 640px) {
+    .pendientes-table th,
+    .pendientes-table td {
+        padding: 0.4rem 0.5rem;
+        font-size: 0.75rem;
+    }
+    .pendientes-table .btn-sm {
+        font-size: 0.6rem;
+        padding: 0.2rem 0.4rem;
+    }
+}
