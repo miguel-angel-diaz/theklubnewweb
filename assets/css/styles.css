@@ -2883,3 +2883,117 @@ body.is-logged-in .login-nav-btn {
         padding: 0.2rem 0.4rem;
     }
 }
+
+/* ==========================================================
+   MODAL DECK
+   ========================================================== */
+.deck-modal-box {
+    width: min(600px, 95%);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+.deck-form .form-group {
+    width: 100%;
+    margin-bottom: 1.25rem;
+}
+.deck-form .form-group label {
+    display: block;
+    margin-bottom: 0.4rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+}
+.deck-form .form-group select,
+.deck-form .form-group input,
+.deck-form .form-group textarea {
+    width: 100% !important;
+    box-sizing: border-box;
+    padding: 0.9rem 1.2rem;
+    border-radius: 14px;
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
+    color: var(--text);
+    font-size: 1rem;
+    font-family: var(--font-body);
+    transition: border-color 0.3s, background 0.3s;
+}
+
+
+.deck-form .form-group select:focus,
+.deck-form .form-group input:focus,
+.deck-form .form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: var(--surface-hover);
+    box-shadow: 0 0 0 3px rgba(255, 136, 0, 0.15);
+}
+.deck-form .form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+    font-family: monospace;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+.deck-form .btn-primary {
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .deck-modal-box {
+        padding: 2rem 1.5rem;
+        width: 98%;
+    }
+    .deck-form .form-group select,
+    .deck-form .form-group input,
+    .deck-form .form-group textarea {
+        font-size: 0.95rem;
+        padding: 0.75rem 1rem;
+    }
+}
+/* Estilos base para selects */
+.deck-form .form-group select {
+    width: 100% !important;
+    box-sizing: border-box;
+    padding: 0.9rem 1.2rem; /* Quitamos el padding-right: 3rem */
+    border-radius: 14px;
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
+    color: var(--text);
+    font-size: 1rem;
+    font-family: var(--font-body);
+    appearance: auto; /* Esto dejará la flecha nativa del navegador (un solo pico) */
+    cursor: pointer;
+    transition: border-color 0.3s, background 0.3s;
+}
+
+.deck-form .form-group select:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: var(--surface-hover);
+    box-shadow: 0 0 0 3px rgba(255, 136, 0, 0.15);
+}
+
+/* Estilos para el dropdown (las opciones) */
+.deck-form .form-group select option {
+    background-color: #1a1a1a !important; /* Fondo oscuro */
+    color: #ffffff !important;           /* Texto blanco */
+    padding: 0.5rem 1rem;
+}
+
+/* Para navegadores basados en WebKit (Chrome, Edge, Safari) */
+.deck-form .form-group select::-webkit-listbox,
+.deck-form .form-group select::-webkit-listbox option {
+    background-color: #1a1a1a !important;
+    color: #ffffff !important;
+}
+
+/* Para Firefox */
+.deck-form .form-group select:-moz-listbox,
+.deck-form .form-group select:-moz-listbox option {
+    background-color: #1a1a1a !important;
+    color: #ffffff !important;
+}

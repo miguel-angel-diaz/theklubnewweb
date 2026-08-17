@@ -34,7 +34,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
     <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=satoshi@300,400,500,700&display=swap" rel="stylesheet">
     <link href="./assets/css/keyrune.css" rel="stylesheet" type="text/css" />
-       <link rel="stylesheet" href="assets/css/styles.css?v=3">
+       <link rel="stylesheet" href="assets/css/styles.css?v=4">
      <script>
         if ('scrollRestoration' in history) {
             history.scrollRestoration = 'manual';
@@ -583,11 +583,7 @@
             <div id="toast-container"></div>
             <!-- PESTAÑA DASHBOARD -->
             <section id="member-tab-dashboard" class="member-tab-content">
-                <div class="member-tab-title">
-                    <h3>📊 Inicio</h3>
-                    <p>Resumen rápido de tu actividad en The Klub.</p>
-                </div>
-								<div id="todas-partidas-container"></div>
+				<div id="todas-partidas-container"></div>
                 <div id="torneo-banner-container"></div>
                 <div id="mis-pendientes-container"></div>
             </section>
@@ -640,8 +636,9 @@
 
                 <div class="form-group">
                     <label for="deck-archetype">Archetype</label>
-                    <input type="text" id="deck-archetype" name="archetype" list="arquetipos-lista" placeholder="Escribe para buscar..." required autocomplete="off">
-                    <datalist id="arquetipos-lista"></datalist>
+                    <select id="deck-archetype" name="archetype" required>
+                        <option value="">Selecciona un arquetipo...</option>
+                    </select>
                 </div>
 
                 <div class="form-group">

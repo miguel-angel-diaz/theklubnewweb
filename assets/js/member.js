@@ -281,7 +281,24 @@ async function cargarClasificacionEnPanel(codigo, container) {
             return;
         }
 
-        // ... resto del renderizado (igual que antes)
+        let html = `<table><thead><tr><th>#</th><th>Jugador</th><th>Pts</th><th>W-L-D</th></tr></thead><tbody>`;
+        const miDiscordId = window.klubDiscordId;
+        clasificacion.forEach((j, i) => {
+            // Comparar por discord_id o por nombre (fallback)
+            let esMiFila = false;
+            if (miDiscordId && j.discord_id === miDiscordId) {
+                esMiFila = true;
+            }
+            const claseFila = esMiFila ? 'mi-fila' : '';
+            html += `<tr class="${claseFila}">
+                <td>${i+1}</td>
+                <td>${esMiFila ? '⭐ ' : ''}${j.nombre}${esMiFila ? ' ⭐' : ''}</td>
+                <td>${j.mp}</td>
+                <td>${j.wins}-${j.losses}-${j.draws}</td>
+            </tr>`;
+        });
+        html += '</tbody></table>';
+        container.innerHTML = html;
     } catch (err) {
         console.error(err);
         container.innerHTML = `<p class="standings-error">${err.message}</p>`;
@@ -410,16 +427,16 @@ async function cargarEnfrentamientosEnPanel(codigo, container) {
                     // Si no tenemos ID del rival (por ejemplo en Challonge si no está en el servidor), evitamos el enlace
                     const rivalId = p.jugador2_id;
                     let rivalDisplay = p.jugador2;
-                    if (rivalId && rivalId !== 'null' && rivalId !== 'undefined') {
+                    if (rivalId && rivalId !== 'null' && rivalId !== 'undefined' && r.completa) {
                         rivalDisplay = `<a href="#" class="ver-deck-rival" data-codigo="${codigo}" data-rival="${rivalId}" data-nombre="${p.jugador2}">${p.jugador2}</a>`;
                     }
 
-                    html += `
+                    html += esMiPartida?`
                         <li style="padding: 0.2rem 0; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
                             <span>${p.jugador1} vs ${rivalDisplay} — <strong>${resultado}</strong></span>
                             ${botonAgendar}
                         </li>
-                    `;
+                    `:``;
                 }
             });
             html += `
@@ -896,20 +913,40 @@ function initDeckModal() {
     });
 }
 
-async function cargarArquetipos() {
-    const datalist = document.querySelector('#arquetipos-lista');
-    if (!datalist) return;
+async function cargarArquetipos(seleccionado = null) {
+    const select = document.querySelector('#deck-archetype');
+    if (!select) return;
+
+    select.innerHTML = '<option value="">Cargando arquetipos...</option>';
 
     try {
         const res = await fetch(`${AUTH_API_BASE}/api/arquetipos`);
+        if (!res.ok) throw new Error('Error al cargar arquetipos');
         const data = await res.json();
+        const arquetipos = data.arquetipos || [];
 
-        datalist.innerHTML = (data.arquetipos || [])
-            .map(a => `<option value="${a}"></option>`)
-            .join('');
+        select.innerHTML = '';
+        if (!arquetipos.length) {
+            select.innerHTML = '<option value="">No hay arquetipos disponibles</option>';
+            return;
+        }
 
+        arquetipos.forEach(a => {
+            const opt = document.createElement('option');
+            opt.value = a;
+            opt.textContent = a;
+            if (seleccionado && a === seleccionado) {
+                opt.selected = true;
+            }
+            select.appendChild(opt);
+        });
+
+        if (seleccionado) {
+            select.value = seleccionado;
+        }
     } catch (err) {
-        console.error(err);
+        console.error('Error cargando arquetipos:', err);
+        select.innerHTML = '<option value="">Error al cargar arquetipos</option>';
     }
 }
 
@@ -933,7 +970,7 @@ function initSubirDeckForm() {
 
         const payload = {
             session: token,
-            codigo_torneo: form.codigo_torneo.value,
+            codigo_torneo: form.codigo_torneo.value.trim(),
             nombre_deck: form.nombre_deck.value.trim(),
             archetype: form.archetype.value.trim(),
             decklist: form.decklist.value.trim(),
@@ -1189,7 +1226,7 @@ async function cargarMisPendientes() {
         misTorneos.forEach(t => {
             html += `
                 <div class="torneo-pendiente-card">
-                    <h4>${t.nombre} (${t.codigo}) — Ronda ${t.ronda}</h4>
+                    <h4>${t.nombre} — Ronda ${t.ronda}</h4>
                     <div class="partidas-table-wrap">
                         <table class="partidas-table pendientes-table">
                             <thead>
@@ -1419,6 +1456,7 @@ async function abrirDeckModal(codigoTorneo = null) {
     
     // Cargar torneos disponibles y arquetipos
     await cargarTorneosDisponibles(codigoTorneo);
+    // Al iniciar, añadir este listener al input
     await cargarArquetipos();
 
     // Cargar los decks del usuario para encontrar el de este torneo
@@ -1470,6 +1508,50 @@ async function abrirDeckModal(codigoTorneo = null) {
             status.className = 'form-status error';
             showToast(status.textContent, status.className);
         }
+    }
+}
+
+async function cargarTorneosDisponibles(seleccionado = null) {
+    const select = document.querySelector('#deck-torneo');
+    if (!select) return;
+
+    const token = sessionStorage.getItem(SESSION_STORAGE_KEY);
+    if (!token) {
+        select.innerHTML = '<option value="">No hay sesión</option>';
+        return;
+    }
+
+    select.innerHTML = '<option value="">Cargando torneos...</option>';
+
+    try {
+        const res = await fetch(`${AUTH_API_BASE}/api/torneos-disponibles?session=${token}`);
+        if (!res.ok) throw new Error('Error al cargar torneos');
+        const data = await res.json();
+        const torneos = data.torneos || [];
+
+        select.innerHTML = '';
+        if (!torneos.length) {
+            select.innerHTML = '<option value="">No estás inscrito en ningún torneo</option>';
+            return;
+        }
+
+        torneos.forEach(t => {
+            const opt = document.createElement('option');
+            opt.value = t.codigo;
+            const nombreMostrado = t.nombre;
+            opt.textContent = nombreMostrado;
+            if (seleccionado && t.codigo === seleccionado) {
+                opt.selected = true;
+            }
+            select.appendChild(opt);
+        });
+
+        if (seleccionado) {
+            select.value = seleccionado;
+        }
+    } catch (err) {
+        console.error('Error cargando torneos:', err);
+        select.innerHTML = '<option value="">Error al cargar torneos</option>';
     }
 }
 
@@ -1910,3 +1992,4 @@ window.abrirDeckModal = abrirDeckModal;
 window.abrirModalAgendar = abrirModalAgendar;
 window.cerrarModalAgendar = cerrarModalAgendar;
 window.eliminarPartida = eliminarPartida;
+window.cargarTorneosDisponibles = cargarTorneosDisponibles;
