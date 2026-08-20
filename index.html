@@ -573,40 +573,50 @@
             </div>
         </nav>
 
-    <main class="member-dashboard">
-        <div class="container">
-            <header class="member-dashboard-header">
-                <span class="section-tag">TU RINCÓN</span>
-                <h2>Bienvenido de vuelta<span id="member-welcome-name"></span>.</h2>
-                <p>Consulta tus resultados en torneos y gestiona tus decks subidos.</p>
-            </header>
-            <div id="toast-container"></div>
-            <!-- PESTAÑA DASHBOARD -->
-            <section id="member-tab-dashboard" class="member-tab-content">
-				<div id="todas-partidas-container"></div>
-                <div id="torneo-banner-container"></div>
-                <div id="mis-pendientes-container"></div>
-            </section>
-            <section id="member-tab-torneos" class="member-tab-content" hidden>
-                <div class="member-tab-title">
-                    <h3>Mis Torneos</h3>
-                </div>
-                <div id="mis-torneos-lista" class="grid grid-2">
-                    <p class="standings-loading">Cargando tus resultados...</p>
-                </div>
-            </section>
-            <section id="member-tab-decks" class="member-tab-content" hidden>
+        <main class="member-dashboard">
+            <div class="container">
+                <header class="member-dashboard-header">
+                    <span class="section-tag">TU RINCÓN</span>
+                    <h2>Bienvenido de vuelta<span id="member-welcome-name"></span>.</h2>
+                    <p>Consulta tus resultados en torneos y gestiona tus decks subidos.</p>
+                </header>
+            
+                <!-- PESTAÑA DASHBOARD -->
+                <section id="member-tab-dashboard" class="member-tab-content">
+                    <div id="todas-partidas-container"></div>
+                    <div id="torneo-banner-container"></div>
+                    <div id="mis-pendientes-container"></div>
+                </section>
+                <section id="member-tab-torneos" class="member-tab-content" hidden>
                     <div class="member-tab-title">
-                        <h3>Mis Decks</h3>
-                        <button id="nuevo-deck-toggle" class="btn btn-primary">+ Subir nuevo deck</button>
+                        <h3>Mis Torneos</h3>
                     </div>
-                    <div id="mis-decks-lista" class="grid grid-2">
-                        <p class="standings-loading">Cargando tus decks...</p>
+                    <div id="mis-torneos-lista" class="grid grid-2">
+                        <p class="standings-loading">Cargando tus resultados...</p>
                     </div>
-            </section>
+                </section>
+                <section id="member-tab-decks" class="member-tab-content" hidden>
+                        <div class="member-tab-title">
+                            <h3>Mis Decks</h3>
+                            <button id="nuevo-deck-toggle" class="btn btn-primary"></button>
+                        </div>
+                        <div id="mis-decks-lista" class="grid grid-2">
+                            <p class="standings-loading">Cargando tus decks...</p>
+                        </div>
+                </section>
+            </div>
+          
+        </main>
+        <div id="loading-screen">
+            <!-- Capa de fondo independiente -->
+            <div class="loading-backdrop"></div>
+            
+            <!-- Contenedor de la imagen y texto (al mismo nivel que la capa de fondo) -->
+            <div class="loader-container">
+                <img src="./assets/images/spellbook.gif" alt="Cargando..." class="loading-gif">
+                <p class="loading-text">CARGANDO...</p>
+            </div>
         </div>
-    </main>
-
     </div>
     <div id="deck-modal" class="login-modal" hidden>
         <div class="login-modal-backdrop" data-close-deck-modal></div>
@@ -670,7 +680,7 @@
                     <path fill="currentColor" d="M18.3 5.71L12 12l6.3 6.29-1.41 1.42L10.59 13.4 4.3 19.71 2.89 18.3 9.17 12 2.89 5.71 4.3 4.29l6.29 6.3 6.3-6.3z"/>
                 </svg>
             </button>
-            <h3 id="deck-rival-title">🃏 Deck de <span class="modal-rival-nombre"></span></h3>
+            <h3 id="deck-rival-title">🎴 Deck de <span class="modal-rival-nombre"></span></h3>
             <div class="modal-deck-content">
                 <p class="standings-loading">Cargando deck...</p>
             </div>
@@ -736,7 +746,22 @@
             </form>
         </div>
     </div>
-    <!-- Toast container -->
+    <div id="session-error-modal" class="login-modal" hidden>
+        <div class="login-modal-backdrop" data-close-session-error></div>
+        <div class="login-modal-box" style="max-width: 460px; text-align: center;">
+            <h3 style="margin-bottom: 0.5rem;">🔌 Error de conexión</h3>
+            <p style="margin-bottom: 1.5rem; color: var(--text-muted);">
+                Hemos tenido un problema al recuperar tus datos desde el servidor.<br><br>
+                Para garantizar la seguridad de tu cuenta, es necesario que cierres la sesión y vuelvas a iniciarla.
+            </p>
+            <div style="display: flex; justify-content: center;">
+                <button id="session-error-accept" class="btn btn-primary" style="min-width: 120px;">
+                    Aceptar y salir
+                </button>
+            </div>
+        </div>
+    </div>
+    <div id="toast-container"></div>
 
 
 <!-- Modal de confirmación -->
@@ -751,7 +776,11 @@
         </div>
     </div>
 </div>
+
+
+<script defer src="./assets/js/utils.js?v=4"></script>
 <script defer src="./assets/js/intro.js?v=4"></script>
+<script defer src="./assets/js/toast.js?v=4"></script>
 <script defer src="./assets/js/admission.js?v=4"></script>
 <script defer src="./assets/js/back-to-top.js?v=4"></script>
 <script defer src="./assets/js/broadcast.js?v=4"></script>
@@ -759,10 +788,8 @@
 <script defer src="./assets/js/reveal.js?v=4"></script>
 <script defer src="./assets/js/smooth-scroll.js?v=4"></script>
 <script defer src="./assets/js/standings-slider.js?v=4"></script>
-<script defer src="./assets/js/utils.js?v=4"></script>
 <script defer src="./assets/js/auth.js?v=4"></script>
 <script defer src="./assets/js/member.js?v=4"></script>
-<script defer src="./assets/js/toast.js?v=4"></script>
 <script defer src="./assets/js/confirm.js?v=4"></script>
 <script defer src="./assets/js/app.js?v=4"></script>
 

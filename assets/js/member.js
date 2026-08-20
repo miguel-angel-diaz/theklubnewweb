@@ -59,14 +59,17 @@ function initLogout() {
 // ==========================================================
 
 function initMemberView() {
-    document.addEventListener('klub:mostrar-miembro', () => {
+    mostrarPantallaCarga();
+    document.addEventListener('klub:mostrar-miembro', async () => {
         mostrarVistaMiembro(window.klubUsername);
-        cargarMisTorneos();
-        cargarMisDecks();
-        cargarEstadoTorneos();
-        cargarMisPendientes();
-        cargarTodasPartidas();
+        await cargarMisTorneos();
+        await cargarMisDecks();
+        await cargarEstadoTorneos();
+        await cargarMisPendientes();
+        await cargarTodasPartidas();
         initAgendarModal();
+        initSessionErrorModal();
+        ocultarPantallaCarga();
     });
 
     document.addEventListener('klub:logout', () => {
@@ -95,15 +98,16 @@ async function cargarMisTorneos() {
     contenedor.innerHTML = '<p class="standings-loading">Cargando tus torneos...</p>';
 
     try {
-        // 1️⃣ Obtener torneos finalizados (de la caché)
-        const resFinalizados = await fetch(`${AUTH_API_BASE}/api/mis-torneos?session=${token}`);
-        const dataFinalizados = await resFinalizados.json();
+        const res = await fetch(`${AUTH_API_BASE}/api/mis-torneos?session=${token}`);
+        const dataFinalizados = await res.json();
         const torneosFinalizados = dataFinalizados.torneos || [];
+        if (res.status === 401 || res.status === 502) {
+            showSessionErrorModal(); 
+            return; // Salimos de la función, no seguimos renderizando
+        }
 
-        // 3️⃣ Unir ambas listas
         let todosLosTorneos = [];
 
-        // Torneos finalizados: formatear al mismo esquema
         torneosFinalizados.forEach(t => {
             todosLosTorneos.push({
                 codigo: t.torneo_codigo,
@@ -116,7 +120,7 @@ async function cargarMisTorneos() {
                 total_participantes: t.total_participantes,
                 fecha: t.fecha_fin,
                 tipo: 'finalizado',
-                tieneDeck: false, // no tenemos esa info desde este endpoint, pero se puede ignorar
+                tieneDeck: false,
             });
         });
 
@@ -125,7 +129,6 @@ async function cargarMisTorneos() {
             return;
         }
 
-        // 4️⃣ Renderizar todas las tarjetas (con paneles)
         let html = '';
         todosLosTorneos.forEach(t => {
             const esActivo = t.tipo === 'abierto' || t.tipo === 'en desarrollo';
@@ -151,7 +154,7 @@ async function cargarMisTorneos() {
                     <div class="mi-torneo-panel" style="display: none;">
                         <div class="mi-torneo-tabs">
                             <button class="tab-btn active" data-tab="clasificacion">📊 Clasificación</button>
-                            <button class="tab-btn" data-tab="deck">🃏 Deck</button>
+                            <button class="tab-btn" data-tab="deck">� Deck</button>
                             <button class="tab-btn" data-tab="enfrentamientos">⚔️ Enfrentamientos</button>
                         </div>
                         <div class="mi-torneo-panel-content">
@@ -170,6 +173,7 @@ async function cargarMisTorneos() {
     } catch (err) {
         console.error(err);
         contenedor.innerHTML = '<p class="standings-error">No se pudieron cargar tus torneos.</p>';
+        Toast.error('Error al cargar tus torneos. Recarga la página.');
     }
 }
 
@@ -255,6 +259,7 @@ async function cargarContenidoTab(card, tab) {
 // ------------------------------------------------------------
 
 async function cargarClasificacionEnPanel(codigo, container) {
+    mostrarPantallaCarga();
     const token = sessionStorage.getItem(SESSION_STORAGE_KEY);
     if (!token) {
         container.innerHTML = '<p class="empty-state">Debes iniciar sesión.</p>';
@@ -268,6 +273,10 @@ async function cargarClasificacionEnPanel(codigo, container) {
         if (res.status === 404) {
             container.innerHTML = '<p class="empty-state">Este torneo aún no tiene clasificación.</p>';
             return;
+        }
+        if (res.status === 401 || res.status === 502) {
+            showSessionErrorModal(); 
+            return; // Salimos de la función, no seguimos renderizando
         }
         if (!res.ok) {
             const errorData = await res.json();
@@ -284,7 +293,6 @@ async function cargarClasificacionEnPanel(codigo, container) {
         let html = `<table><thead><tr><th>#</th><th>Jugador</th><th>Pts</th><th>W-L-D</th></tr></thead><tbody>`;
         const miDiscordId = window.klubDiscordId;
         clasificacion.forEach((j, i) => {
-            // Comparar por discord_id o por nombre (fallback)
             let esMiFila = false;
             if (miDiscordId && j.discord_id === miDiscordId) {
                 esMiFila = true;
@@ -299,9 +307,11 @@ async function cargarClasificacionEnPanel(codigo, container) {
         });
         html += '</tbody></table>';
         container.innerHTML = html;
+        ocultarPantallaCarga();
     } catch (err) {
         console.error(err);
         container.innerHTML = `<p class="standings-error">${err.message}</p>`;
+        ocultarPantallaCarga();
     }
 }
 
@@ -317,6 +327,10 @@ async function cargarDeckEnPanel(codigo, container) {
 
     try {
         const res = await fetch(`${AUTH_API_BASE}/api/mis-decks?session=${token}`);
+        if (res.status === 401 || res.status === 502) {
+            showSessionErrorModal(); 
+            return; // Salimos de la función, no seguimos renderizando
+        }
         if (!res.ok) throw new Error('Error al obtener decks');
         const data = await res.json();
 
@@ -339,7 +353,7 @@ async function cargarDeckEnPanel(codigo, container) {
             return;
         }
 
-        let html = `<h4 style="margin:0 0 0.5rem 0;color:#fff;">🃏 ${deck.nombre_deck}</h4>`;
+        let html = `<h4 style="margin:0 0 0.5rem 0;color:#fff;">� ${deck.nombre_deck}</h4>`;
         html += `<p><strong>Arquetipo:</strong> ${deck.archetype}</p>`;
         html += `<p><strong>Decklist:</strong></p><pre class="deck-list">${deck.decklist}</pre>`;
         if (deck.sideboard && deck.sideboard !== 'N/A') {
@@ -357,6 +371,7 @@ async function cargarDeckEnPanel(codigo, container) {
 // ------------------------------------------------------------
 
 async function cargarEnfrentamientosEnPanel(codigo, container) {
+    mostrarPantallaCarga();
     const token = sessionStorage.getItem(SESSION_STORAGE_KEY);
     if (!token) {
         container.innerHTML = '<p class="empty-state">Debes iniciar sesión.</p>';
@@ -367,13 +382,20 @@ async function cargarEnfrentamientosEnPanel(codigo, container) {
 
     try {
         const res = await fetch(`${AUTH_API_BASE}/api/torneo-enfrentamientos?session=${token}&torneo=${codigo}`);
+        if (res.status === 401 || res.status === 502) {
+            showSessionErrorModal(); 
+            return; // Salimos de la función, no seguimos renderizando
+        }
         if (!res.ok) {
             const errorData = await res.json();
             throw new Error(errorData.error || 'Error al cargar enfrentamientos');
         }
+
         const data = await res.json();
         const rondas = data.rondas || [];
 
+        // ✅ CORREGIDO: Solo mostramos el mensaje de vacío si NO hay rondas en absoluto.
+        // Si hay 1 ronda (aunque esté pendiente), la renderizamos para que el usuario vea su enfrentamiento.
         if (!rondas.length) {
             container.innerHTML = `
                 <div class="empty-state">
@@ -401,42 +423,43 @@ async function cargarEnfrentamientosEnPanel(codigo, container) {
                 if (p.jugador2 === null) {
                     html += `<li style="padding: 0.2rem 0; color: var(--text-muted);">${p.jugador1} → BYE</li>`;
                 } else {
-                    const resultado = p.resultado || '⏳ Pendiente';
-                    // Determinar si esta es mi partida (para mostrar botón de agendar)
+                    // Calcular el estado y el texto
+                    let estadoTexto = '⏳ Pendiente';
+                    let estadoClase = 'estado-pendiente';
+
+                    if (p.resultado) {
+                        estadoTexto = p.resultado;
+                        estadoClase = 'estado-completado';
+                    } else if (p.agendada) {
+                        estadoTexto = '📅 Agendada';
+                        estadoClase = 'estado-agendada';
+                    }
+
                     const miDiscordId = window.klubDiscordId;
                     const esMiPartida = (p.jugador1_id == miDiscordId || p.jugador2_id == miDiscordId);
-                    const esClickable = esMiPartida && !p.resultado; // Solo si es mi partida y no tiene resultado
-
-                    // Botón agendar (solo para Swiss, pero lo dejamos)
-                    let botonAgendar = '';
-                    if (esClickable) {
-                        botonAgendar = `
-                            <button class="btn btn-sm btn-primary agendar-partida" 
-                                    data-codigo="${codigo}" 
-                                    data-j1="${p.jugador1_id}" 
-                                    data-j2="${p.jugador2_id}" 
-                                    data-nombre1="${p.jugador1}" 
-                                    data-nombre2="${p.jugador2}"
-                                    data-ronda="${rondaNum}">
-                                Agendar
-                            </button>
+                    let botonVerDeck = '';
+                    if (esMiPartida) {
+                        if (rivalId && rivalId !== 'null' && rivalId !== 'undefined' && r.completa) {
+                            botonVerDeck = `
+                                <button class="btn btn-sm btn-primary ver-deck-rival" 
+                                    data-codigo="${codigo}"
+                                    data-rival="${p.jugador1_id == miDiscordId? p.jugador2_id: p.jugador1_id}" 
+                                    data-nombre="${p.jugador1_id == miDiscordId? p.jugador2: p.jugador1}">
+                                    🎴 Ver deck 
+                                </button>
+                            `;
+                        }
+                        html += `
+                            <li style="padding: 0.2rem 0; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                                <span>
+                                    ${p.jugador1} vs ${p.jugador2} — <strong class="${estadoClase}">${estadoTexto}</strong>
+                                </span>
+                                <span>
+                                    ${botonVerDeck}
+                                </span>
+                            </li>
                         `;
                     }
-
-                    // Hacemos que el nombre del rival sea clickeable para ver su deck
-                    // Si no tenemos ID del rival (por ejemplo en Challonge si no está en el servidor), evitamos el enlace
-                    const rivalId = p.jugador2_id;
-                    let rivalDisplay = p.jugador2;
-                    if (rivalId && rivalId !== 'null' && rivalId !== 'undefined' && r.completa) {
-                        rivalDisplay = `<a href="#" class="ver-deck-rival" data-codigo="${codigo}" data-rival="${rivalId}" data-nombre="${p.jugador2}">${p.jugador2}</a>`;
-                    }
-
-                    html += esMiPartida?`
-                        <li style="padding: 0.2rem 0; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                            <span>${p.jugador1} vs ${rivalDisplay} — <strong>${resultado}</strong></span>
-                            ${botonAgendar}
-                        </li>
-                    `:``;
                 }
             });
             html += `
@@ -448,7 +471,6 @@ async function cargarEnfrentamientosEnPanel(codigo, container) {
         html += `</div>`;
         container.innerHTML = html;
 
-        // Asignar eventos a los botones de agendar
         container.querySelectorAll('.agendar-partida').forEach(btn => {
             btn.addEventListener('click', function() {
                 const codigo = this.dataset.codigo;
@@ -461,7 +483,6 @@ async function cargarEnfrentamientosEnPanel(codigo, container) {
             });
         });
 
-        // Asignar eventos a los enlaces "ver deck rival"
         container.querySelectorAll('.ver-deck-rival').forEach(link => {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -473,10 +494,11 @@ async function cargarEnfrentamientosEnPanel(codigo, container) {
                 }
             });
         });
-
+    ocultarPantallaCarga();
     } catch (err) {
         console.error(err);
         container.innerHTML = `<p class="standings-error">Error al cargar enfrentamientos: ${err.message}</p>`;
+        ocultarPantallaCarga();
     }
 }
 
@@ -503,6 +525,10 @@ async function cargarDeckRival(codigo, rivalId) {
 
     try {
         const res = await fetch(`${AUTH_API_BASE}/api/deck-rival?session=${token}&torneo=${codigo}&rival=${rivalId}`);
+        if (res.status === 401 || res.status === 502) {
+            showSessionErrorModal(); 
+            return; // Salimos de la función, no seguimos renderizando
+        }
         if (!res.ok) {
             const errorData = await res.json();
             throw new Error(errorData.error || 'Error al cargar deck');
@@ -516,7 +542,7 @@ async function cargarDeckRival(codigo, rivalId) {
         }
 
         let html = `
-            <h4>🃏 ${deck.nombre || 'Deck sin nombre'}</h4>
+            <h4>� ${deck.nombre || 'Deck sin nombre'}</h4>
             <p><strong>Arquetipo:</strong> ${deck.archetype || 'Desconocido'}</p>
             <p><strong>Decklist:</strong></p>
             <pre class="deck-list">${deck.decklist || 'Vacío'}</pre>
@@ -573,12 +599,6 @@ function abrirModalReporte(codigo, nombre1, nombre2, ronda, j1, j2) {
 
     modal.hidden = false;
     document.body.classList.add('no-scroll');
-    const status = document.querySelector('#reporte-status');
-    if (status) {
-        status.textContent = '';
-        status.className = 'form-status';
-        showToast(status.textContent, status.className);
-    }
 }
 
 function cerrarModalReporte() {
@@ -594,7 +614,6 @@ function cerrarModalReporte() {
 async function reportarResultado(e) {
     e.preventDefault();
     const form = document.querySelector('#reporte-form');
-    const status = document.querySelector('#reporte-status');
     const submitBtn = form.querySelector('button[type="submit"]');
 
     const codigo = document.querySelector('#reporte-codigo').value;
@@ -603,9 +622,7 @@ async function reportarResultado(e) {
     const resultado = document.querySelector('#reporte-resultado').value.trim();
 
     if (!resultado || !resultado.match(/^\d+-\d+$/)) {
-        status.textContent = 'Formato incorrecto. Usa X-Y (ej: 2-1)';
-        status.className = 'form-status error';
-        showToast(status.textContent, status.className);
+        Toast.error('Formato incorrecto. Usa X-Y (ej: 2-1)');
         return;
     }
 
@@ -614,9 +631,6 @@ async function reportarResultado(e) {
 
     submitBtn.disabled = true;
     submitBtn.textContent = 'Reportando...';
-    status.textContent = '';
-    status.className = 'form-status';
-    showToast(status.textContent, status.className);
 
     try {
         const res = await fetch(`${AUTH_API_BASE}/api/reportar-resultado`, {
@@ -631,20 +645,21 @@ async function reportarResultado(e) {
             })
         });
         const data = await res.json();
+        if (res.status === 401 || res.status === 502) {
+            showSessionErrorModal(); 
+            return; // Salimos de la función, no seguimos renderizando
+        }
         if (!res.ok) throw new Error(data.error || 'Error al reportar');
 
-        status.textContent = '✅ ' + data.mensaje;
-        status.className = 'form-status success';
-        showToast(status.textContent, status.className);
+        Toast.success(data.mensaje);
         setTimeout(() => {
             cerrarModalReporte();
             cargarMisPendientes();
         }, 1500);
 
     } catch (err) {
-        status.textContent = '❌ ' + err.message;
-        status.className = 'form-status error';
-        showToast(status.textContent, status.className);
+        console.error(err);
+        Toast.error('Error al reportar el resultado. Verifica los datos.');
     } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = 'Reportar';
@@ -698,7 +713,10 @@ async function cargarMisDecks() {
     try {
         const res = await fetch(`${AUTH_API_BASE}/api/mis-decks?session=${token}`);
         const data = await res.json();
-
+        if (res.status === 401 || res.status === 502) {
+            showSessionErrorModal(); 
+            return; // Salimos de la función, no seguimos renderizando
+        }
         if (!res.ok || !data.decks || !data.decks.length) {
             contenedor.innerHTML = '<p class="standings-error">Todavía no has subido ningún deck.</p>';
             return;
@@ -719,6 +737,7 @@ async function cargarMisDecks() {
     } catch (err) {
         console.error(err);
         contenedor.innerHTML = '<p class="standings-error">No se pudieron cargar tus decks.</p>';
+        Toast.error('Error al cargar tus decks.');
     }
 }
 
@@ -736,7 +755,10 @@ async function cargarEstadoTorneos() {
     try {
         const res = await fetch(`${AUTH_API_BASE}/api/estado-torneos?session=${token}`);
         const data = await res.json();
-
+        if (res.status === 401 || res.status === 502) {
+            showSessionErrorModal(); 
+            return; // Salimos de la función, no seguimos renderizando
+        }
         if (!res.ok || !data.torneos) {
             contenedor.innerHTML = `
                 <div class="torneo-banner torneo-banner-quiet">
@@ -767,7 +789,7 @@ async function cargarEstadoTorneos() {
         torneos.forEach(t => {
             const inscrito = t.inscrito;
             const tieneDeck = t.tiene_deck;
-            const estado = t.estado; // 'abierto' o 'en desarrollo'
+            const estado = t.estado;
             const deckEdited = t.deck_edited || 0;
             const puedeEditar = estado === 'abierto' || (estado === 'en desarrollo' && deckEdited < 1);
             const statusClass = estado === 'abierto' ? 'abierto' : 'desarrollo';
@@ -790,7 +812,7 @@ async function cargarEstadoTorneos() {
                         <div class="torneo-banner-info">
                             <h3>${t.nombre}</h3>
                             <span class="torneo-banner-status ${statusClass}">${statusText}</span>
-                            ${tieneDeck ? `<span class="torneo-banner-deck-status">🃏</span>` : ''}
+                            ${tieneDeck ? `<span class="torneo-banner-deck-status">🎴</span>` : ''}
                             <span class="torneo-banner-meta">📅 ${fecha} · 👥 ${inscritos}</span>
                         </div>
                         <div class="torneo-banner-actions">
@@ -804,10 +826,6 @@ async function cargarEstadoTorneos() {
 
         contenedor.innerHTML = html;
 
-        // ============================================================
-        // EVENTOS
-        // ============================================================
-        // 🔥 Toggle de expansión (flecha) - abre/cierra el panel
         contenedor.querySelectorAll('.banner-toggle').forEach(btn => {
             btn.addEventListener('click', function(e) {
                 e.stopPropagation();
@@ -837,6 +855,7 @@ async function cargarEstadoTorneos() {
     } catch (err) {
         console.error(err);
         contenedor.innerHTML = '';
+        Toast.error('Error al cargar el estado de los torneos.');
     }
 }
 
@@ -858,14 +877,18 @@ async function inscribirseEnTorneo(codigoTorneo, btn) {
         });
 
         const data = await res.json();
-
+        if (res.status === 401 || res.status === 502) {
+            showSessionErrorModal(); 
+            return; // Salimos de la función, no seguimos renderizando
+        }
         if (!res.ok) throw new Error(data.error || 'Error al inscribirse');
 
         Toast.success(data.mensaje || '✅ Inscripción completada');
         cargarEstadoTorneos();
 
     } catch (err) {
-        Toast.error(err.message || 'No se pudo completar la inscripción');
+        console.error(err);
+        Toast.error('No se pudo completar la inscripción. Inténtalo de nuevo.');
         btn.disabled = false;
         btn.textContent = 'Apuntarme';
     }
@@ -884,13 +907,6 @@ function cerrarDeckModal() {
 
     const form = document.querySelector('#subir-deck-form');
     if (form) form.reset();
-
-    const status = document.querySelector('#subir-deck-status');
-    if (status) {
-        status.textContent = '';
-        status.className = 'form-status';
-        showToast(status.textContent, status.className);
-    }
 }
 
 function initDeckModal() {
@@ -921,6 +937,10 @@ async function cargarArquetipos(seleccionado = null) {
 
     try {
         const res = await fetch(`${AUTH_API_BASE}/api/arquetipos`);
+        if (res.status === 401 || res.status === 502) {
+            showSessionErrorModal(); 
+            return; // Salimos de la función, no seguimos renderizando
+        }
         if (!res.ok) throw new Error('Error al cargar arquetipos');
         const data = await res.json();
         const arquetipos = data.arquetipos || [];
@@ -953,7 +973,6 @@ async function cargarArquetipos(seleccionado = null) {
 function initSubirDeckForm() {
     const form = document.querySelector('#subir-deck-form');
     const submitBtn = document.querySelector('#subir-deck-submit');
-    const status = document.querySelector('#subir-deck-status');
 
     if (!form) return;
 
@@ -962,9 +981,7 @@ function initSubirDeckForm() {
 
         const token = sessionStorage.getItem(SESSION_STORAGE_KEY);
         if (!token) {
-            status.textContent = 'No hay sesión activa.';
-            status.className = 'form-status error';
-            showToast(status.textContent, status.className);
+            Toast.error('No hay sesión activa.');
             return;
         }
 
@@ -978,17 +995,12 @@ function initSubirDeckForm() {
         };
 
         if (!payload.codigo_torneo || !payload.nombre_deck || !payload.archetype || !payload.decklist) {
-            status.textContent = 'Rellena todos los campos obligatorios.';
-            status.className = 'form-status error';
-            showToast(status.textContent, status.className);
+            Toast.error('Rellena todos los campos obligatorios.');
             return;
         }
 
         submitBtn.disabled = true;
         submitBtn.textContent = 'Enviando...';
-        status.textContent = '';
-        status.className = 'form-status';
-        showToast(status.textContent, status.className);
 
         const esEdicion = form.dataset.edicion === 'true';
 
@@ -1011,11 +1023,8 @@ function initSubirDeckForm() {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error);
 
-            status.textContent = esEdicion ? '✅ Deck actualizado con éxito' : '✅ Deck subido con éxito';
-            status.className = 'form-status success';
-            showToast(status.textContent, status.className);
+            Toast.success(esEdicion ? 'Deck actualizado correctamente.' : 'Deck subido correctamente.');
 
-            // Limpiar estado de edición (si existía)
             delete form.dataset.edicion;
             delete form.dataset.codigoDeck;
             submitBtn.textContent = 'Subir Deck';
@@ -1027,9 +1036,8 @@ function initSubirDeckForm() {
             }, 1200);
 
         } catch (err) {
-            status.textContent = '❌ ' + err.message;
-            status.className = 'form-status error';
-            showToast(status.textContent, status.className);
+            console.error(err);
+            Toast.error('Error al guardar el deck. Revisa los datos.');
         } finally {
             submitBtn.disabled = false;
             submitBtn.textContent = esEdicion ? 'Actualizar Deck' : 'Subir Deck';
@@ -1048,6 +1056,10 @@ async function cargarTodasPartidas() {
     contenedor.innerHTML = `<p class="standings-loading">Cargando todas las partidas...</p>`;
     try {
         const res = await fetch(`${AUTH_API_BASE}/api/todas-partidas?session=${token}`);
+        if (res.status === 401 || res.status === 502) {
+            showSessionErrorModal(); 
+            return; // Salimos de la función, no seguimos renderizando
+        }
         if (!res.ok) {
             const errorData = await res.json();
             throw new Error(errorData.error || 'Error al cargar partidas');
@@ -1161,6 +1173,7 @@ async function cargarTodasPartidas() {
     } catch (err) {
         console.error(err);
         contenedor.innerHTML = `<p class="standings-error">Error al cargar partidas: ${err.message}</p>`;
+        Toast.error('Error al cargar el listado de partidas.');
     }
 }
 
@@ -1172,7 +1185,6 @@ async function cargarMisPendientes() {
     const contenedor = document.querySelector('#mis-pendientes-container');
     if (!contenedor) return;
 
-    // Control para evitar múltiples llamadas seguidas
     if (window._cargandoPendientes) return;
     window._cargandoPendientes = true;
 
@@ -1187,6 +1199,10 @@ async function cargarMisPendientes() {
 
     try {
         const res = await fetch(`${AUTH_API_BASE}/api/mis-torneos-pendientes?session=${token}`);
+        if (res.status === 401 || res.status === 502) {
+            showSessionErrorModal(); 
+            return; // Salimos de la función, no seguimos renderizando
+        }
         if (!res.ok) {
             const errorData = await res.json();
             throw new Error(errorData.error || 'Error al cargar pendientes');
@@ -1194,10 +1210,8 @@ async function cargarMisPendientes() {
         const data = await res.json();
         const torneos = data.torneos || [];
 
-        // ✅ Obtener tu ID de Discord
         const miDiscordId = window.klubDiscordId;
 
-        // Filtrar: solo nos quedamos con los torneos que tengan al menos una partida tuya
         const misTorneos = torneos.map(t => {
             const misPendientes = t.pendientes.filter(p => 
                 p.jugador1_id == miDiscordId || p.jugador2_id == miDiscordId
@@ -1220,7 +1234,6 @@ async function cargarMisPendientes() {
             return;
         }
 
-        // 🔹 Generar HTML con tablas en lugar de listas
         let html = `<h3>⚔️ Mis partidas pendientes</h3>`;
 
         misTorneos.forEach(t => {
@@ -1295,7 +1308,6 @@ async function cargarMisPendientes() {
 
         contenedor.innerHTML = html;
 
-        // 🔹 Asignar eventos a los botones
         contenedor.querySelectorAll('.agendar-pendiente').forEach(btn => {
             btn.addEventListener('click', function(e) {
                 e.stopPropagation();
@@ -1325,6 +1337,7 @@ async function cargarMisPendientes() {
     } catch (err) {
         console.error(err);
         contenedor.innerHTML = `<p class="standings-error">Error al cargar tus pendientes: ${err.message}</p>`;
+        Toast.error('Error al cargar tus partidas pendientes.');
     } finally {
         window._cargandoPendientes = false;
     }
@@ -1334,7 +1347,6 @@ async function cargarMisPendientes() {
 // 17. FUNCIONES GLOBALES PARA ONCLICK
 // ==========================================================
 
-// Desinscribirse (usada en botones)
 async function desinscribirse(codigo) {
     const confirmado = await Confirm.show(`¿Quieres desinscribirte del torneo ${codigo}?`, 'Desinscripción');
     if (!confirmado) return;
@@ -1352,14 +1364,19 @@ async function desinscribirse(codigo) {
             body: JSON.stringify({ session: token, codigo_torneo: codigo })
         });
         const data = await res.json();
+        if (res.status === 401 || res.status === 502) {
+            showSessionErrorModal(); 
+            return; // Salimos de la función, no seguimos renderizando
+        }
         if (data.ok) {
             Toast.success(data.mensaje);
             cargarEstadoTorneos();
         } else {
-            Toast.error(data.error || 'Error al desinscribirse');
+            Toast.error('Error al desinscribirte del torneo.');
         }
     } catch (error) {
-        Toast.error('Error al desinscribirse: ' + error.message);
+        console.error(error);
+        Toast.error('Error al desinscribirte del torneo.');
     }
 }
 
@@ -1368,14 +1385,12 @@ async function toggleDeckDisplay(codigo, btn) {
     const deckDisplay = banner.querySelector('.deck-display');
     if (!deckDisplay) return;
 
-    // Si ya está visible, lo ocultamos
     if (deckDisplay.style.display === 'block') {
         deckDisplay.style.display = 'none';
         btn.textContent = 'Ver deck';
         return;
     }
 
-    // Mostrar y cargar deck
     deckDisplay.style.display = 'block';
     btn.textContent = 'Ocultar deck';
     deckDisplay.innerHTML = '<p class="standings-loading">Cargando deck...</p>';
@@ -1384,9 +1399,12 @@ async function toggleDeckDisplay(codigo, btn) {
         const token = sessionStorage.getItem(SESSION_STORAGE_KEY);
         const res = await fetch(`${AUTH_API_BASE}/api/mis-decks?session=${token}`);
         const data = await res.json();
+        if (res.status === 401 || res.status === 502) {
+            showSessionErrorModal(); 
+            return; // Salimos de la función, no seguimos renderizando
+        }
         if (!res.ok) throw new Error('Error al cargar decks');
 
-        // Buscar el deck del torneo
         let deck = data.decks.find(d => d.codigo_torneo === codigo);
         if (!deck) {
             deck = data.decks.find(d => d.codigo_deck && d.codigo_deck.startsWith(codigo + '_'));
@@ -1402,7 +1420,7 @@ async function toggleDeckDisplay(codigo, btn) {
 
         let html = `
             <div class="deck-card">
-                <h4>🃏 ${deck.nombre_deck}</h4>
+                <h4>� ${deck.nombre_deck}</h4>
                 <p><strong>Arquetipo:</strong> ${deck.archetype}</p>
                 <details>
                     <summary>Ver decklist</summary>
@@ -1423,91 +1441,80 @@ async function toggleDeckDisplay(codigo, btn) {
         deckDisplay.innerHTML = `<p class="standings-error">Error al cargar deck: ${err.message}</p>`;
     }
 }
-/**
- * Abre el modal de subir/editar deck.
- * Si se pasa un código de torneo, carga los datos del deck desde el backend
- * y rellena el formulario para editar.
- */
+
 async function abrirDeckModal(codigoTorneo = null) {
     const modal = document.querySelector('#deck-modal');
     if (!modal) return;
 
-    // Resetear el formulario y el status
     const form = document.querySelector('#subir-deck-form');
-    const status = document.querySelector('#subir-deck-status');
-    if (status) {
-        status.textContent = '';
-        status.className = 'form-status';
-        showToast(status.textContent, status.className);
-    }
+    const submitBtn = document.querySelector('#subir-deck-submit');
+    const toggleBtn = document.querySelector('#deck-modal-title');
 
-    // Si no hay código, solo abrir el modal vacío para subir nuevo deck
+    // Resetear los datasets de edición antes de abrir
+    delete form.dataset.edicion;
+    delete form.dataset.codigoDeck;
+
     if (!codigoTorneo) {
         modal.hidden = false;
         document.body.classList.add('no-scroll');
         cargarTorneosDisponibles();
         cargarArquetipos();
+        if (toggleBtn) toggleBtn.textContent = '+ Subir nuevo deck';
         return;
     }
 
-    // Mostrar loading en el modal
     modal.hidden = false;
     document.body.classList.add('no-scroll');
     
-    // Cargar torneos disponibles y arquetipos
     await cargarTorneosDisponibles(codigoTorneo);
-    // Al iniciar, añadir este listener al input
     await cargarArquetipos();
 
-    // Cargar los decks del usuario para encontrar el de este torneo
     const token = sessionStorage.getItem(SESSION_STORAGE_KEY);
     if (!token) {
-        status.textContent = 'No hay sesión activa.';
-        status.className = 'form-status error';
-        showToast(status.textContent, status.className);
+        Toast.error('No hay sesión activa.');
         return;
     }
 
     try {
         const res = await fetch(`${AUTH_API_BASE}/api/mis-decks?session=${token}`);
+        if (res.status === 401 || res.status === 502) {
+            showSessionErrorModal(); 
+            return; // Salimos de la función, no seguimos renderizando
+        }
         if (!res.ok) throw new Error('Error al obtener tus decks');
         const data = await res.json();
         const decks = data.decks || [];
 
-        // Buscar el deck para este torneo (por codigo_torneo)
         let deck = decks.find(d => d.codigo_torneo === codigoTorneo);
         if (!deck) {
-            // Fallback: buscar por codigo_deck que empiece con el código
             deck = decks.find(d => d.codigo_deck && d.codigo_deck.startsWith(codigoTorneo + '_'));
         }
 
         if (deck) {
-            // Rellenar el formulario con los datos del deck
+            // 1. Rellenar los datos en el formulario
             document.querySelector('#deck-nombre').value = deck.nombre_deck || '';
             document.querySelector('#deck-archetype').value = deck.archetype || '';
             document.querySelector('#deck-decklist').value = deck.decklist || '';
             document.querySelector('#deck-sideboard').value = deck.sideboard || '';
-            
-            // Cambiar el texto del botón a "Actualizar Deck"
-            const submitBtn = document.querySelector('#subir-deck-submit');
+
+            // 2. ✅ ESTO ES LO QUE FALTABA: Marcar el formulario como edición y pasar el ID
+            form.dataset.edicion = 'true';
+            form.dataset.codigoDeck = deck.codigo_deck; // Asegúrate de que 'codigo_deck' sea el campo correcto en tu backend
+            if (toggleBtn) toggleBtn.textContent = '✏️ Editar deck';
+            // 3. Cambiar el botón a "Actualizar Deck"
             if (submitBtn) submitBtn.textContent = 'Actualizar Deck';
         } else {
-            // No tiene deck, dejamos el formulario vacío para subir
-            const submitBtn = document.querySelector('#subir-deck-submit');
+            // Modo creación (no tiene deck)
             if (submitBtn) submitBtn.textContent = 'Subir Deck';
+             if (toggleBtn) toggleBtn.textContent = '+ Subir nuevo deck';
         }
 
-        // Asegurar que el select de torneo tenga el código seleccionado
         const select = document.querySelector('#deck-torneo');
         if (select) select.value = codigoTorneo;
 
     } catch (err) {
         console.error(err);
-        if (status) {
-            status.textContent = 'Error al cargar tu deck: ' + err.message;
-            status.className = 'form-status error';
-            showToast(status.textContent, status.className);
-        }
+        Toast.error('Error al cargar tu deck. Por favor, recarga la página.');
     }
 }
 
@@ -1525,6 +1532,10 @@ async function cargarTorneosDisponibles(seleccionado = null) {
 
     try {
         const res = await fetch(`${AUTH_API_BASE}/api/torneos-disponibles?session=${token}`);
+        if (res.status === 401 || res.status === 502) {
+            showSessionErrorModal(); 
+            return; // Salimos de la función, no seguimos renderizando
+        }
         if (!res.ok) throw new Error('Error al cargar torneos');
         const data = await res.json();
         const torneos = data.torneos || [];
@@ -1552,6 +1563,7 @@ async function cargarTorneosDisponibles(seleccionado = null) {
     } catch (err) {
         console.error('Error cargando torneos:', err);
         select.innerHTML = '<option value="">Error al cargar torneos</option>';
+        Toast.error('Error al cargar la lista de torneos.');
     }
 }
 
@@ -1565,12 +1577,8 @@ async function verMiDeck(codigoTorneo, contenedor, puedeEditar = false, tieneDec
     }
 
     try {
-        // 🔥 Si el torneo está EN DESARROLLO → mostrar panel completo con pestañas
         if (estado === 'en desarrollo') {
-        
-            // Opcional: obtener la ronda actual del torneo (desde el dataset o desde la API)
-            // Si no la tienes, puedes omitirla o mostrarla genérica.
-            const rondaActual = '?'; // podrías obtenerlo de algún lado
+            const rondaActual = '?'; 
 
             const panelHtml = `
                 <div class="mi-torneo-panel mi-torneo-panel-desarrollo">
@@ -1580,7 +1588,7 @@ async function verMiDeck(codigoTorneo, contenedor, puedeEditar = false, tieneDec
                     </div>
                     <div class="mi-torneo-tabs">
                         <button class="tab-btn active" data-tab="clasificacion">📊 Clasificación</button>
-                        <button class="tab-btn" data-tab="deck">🃏 Deck</button>
+                        <button class="tab-btn" data-tab="deck">� Deck</button>
                         <button class="tab-btn" data-tab="enfrentamientos">⚔️ Enfrentamientos</button>
                     </div>
                     <div class="mi-torneo-panel-content">
@@ -1591,8 +1599,6 @@ async function verMiDeck(codigoTorneo, contenedor, puedeEditar = false, tieneDec
                 </div>
             `;
 
-         
-
             contenedor.innerHTML = panelHtml;
 
             const panel = contenedor.querySelector('.mi-torneo-panel');
@@ -1600,23 +1606,19 @@ async function verMiDeck(codigoTorneo, contenedor, puedeEditar = false, tieneDec
             const contentDivDeck = panel.querySelector('.tab-content[data-tab="deck"]');
             const contentDivEnfrentamientos = panel.querySelector('.tab-content[data-tab="enfrentamientos"]');
 
-            // Cargar clasificación (activa por defecto)
             if (contentDivClasificacion) {
                 await cargarClasificacionEnPanel(codigoTorneo, contentDivClasificacion);
             }
 
-            // Asignar eventos a las pestañas
             panel.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.addEventListener('click', async function() {
                     const tab = this.dataset.tab;
-                    // Marcar activa
                     panel.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
                     this.classList.add('active');
                     panel.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
                     const target = panel.querySelector(`.tab-content[data-tab="${tab}"]`);
                     if (target) target.classList.add('active');
 
-                    // Cargar contenido si no tiene
                     if (target && target.innerHTML.includes('standings-loading')) {
                         if (tab === 'clasificacion') {
                             await cargarClasificacionEnPanel(codigoTorneo, target);
@@ -1629,13 +1631,14 @@ async function verMiDeck(codigoTorneo, contenedor, puedeEditar = false, tieneDec
                 });
             });
 
-            return; // Salir, ya hemos renderizado todo
+            return;
         }
 
-        // ============================================================
-        // Comportamiento original para torneos ABIERTOS o FINALIZADOS
-        // ============================================================
         const res = await fetch(`${AUTH_API_BASE}/api/mis-decks?session=${token}`);
+        if (res.status === 401 || res.status === 502) {
+            showSessionErrorModal(); 
+            return; // Salimos de la función, no seguimos renderizando
+        }
         if (!res.ok) throw new Error('Error al obtener decks');
         const data = await res.json();
         const decks = data.decks || [];
@@ -1649,7 +1652,6 @@ async function verMiDeck(codigoTorneo, contenedor, puedeEditar = false, tieneDec
         let accionesHtml = '';
         let deckHtml = '';
 
-        // Acciones del torneo
         if(estado !== 'en desarrollo'){
             if (inscrito) {
                 if (estado === 'abierto') {
@@ -1664,7 +1666,6 @@ async function verMiDeck(codigoTorneo, contenedor, puedeEditar = false, tieneDec
             }
         }
 
-        // Deck
         if (!deck) {
             deckHtml = `
                 <div class="deck-preview">
@@ -1680,7 +1681,7 @@ async function verMiDeck(codigoTorneo, contenedor, puedeEditar = false, tieneDec
 
             deckHtml = `
                 <div class="deck-preview">
-                    <h4>🃏 ${deck.nombre_deck}</h4>
+                    <h4>� ${deck.nombre_deck}</h4>
                     <p><strong>Arquetipo:</strong> <span class="deck-archetype">${deck.archetype}</span></p>
                     <p><strong>Decklist:</strong></p>
                     <pre class="deck-list">${deck.decklist}</pre>
@@ -1704,7 +1705,6 @@ async function verMiDeck(codigoTorneo, contenedor, puedeEditar = false, tieneDec
 
         contenedor.innerHTML = html;
 
-        // Asignar eventos a los botones
         contenedor.querySelectorAll('[data-inscribir]').forEach(btn => {
             btn.addEventListener('click', () => inscribirseEnTorneo(btn.dataset.inscribir, btn));
         });
@@ -1721,8 +1721,10 @@ async function verMiDeck(codigoTorneo, contenedor, puedeEditar = false, tieneDec
     } catch (err) {
         console.error(err);
         contenedor.innerHTML = `<p class="standings-error">Error al cargar panel: ${err.message}</p>`;
+        Toast.error('Error al cargar el panel del torneo.');
     }
 }
+
 // ==========================================================
 // 13. MODAL PARA AGENDAR PARTIDA
 // ==========================================================
@@ -1738,7 +1740,6 @@ function abrirModalAgendar(codigo, nombre1, nombre2, ronda, j1, j2, opciones = {
     const fechaActual = opciones.fecha_actual || '';
     const horaActual = opciones.hora_actual || '';
 
-    // Cambiar título y botón según modo
     const titulo = modal.querySelector('h3');
     const submitBtn = modal.querySelector('#agendar-form button[type="submit"]');
     const infoActual = modal.querySelector('.agendar-info-actual');
@@ -1753,7 +1754,6 @@ function abrirModalAgendar(codigo, nombre1, nombre2, ronda, j1, j2, opciones = {
         if (infoActual) infoActual.textContent = '';
     }
 
-    // Rellenar campos comunes
     modal.querySelector('.agendar-codigo').textContent = codigo || '';
     modal.querySelector('.agendar-j1').textContent = nombre1;
     modal.querySelector('.agendar-j2').textContent = nombre2;
@@ -1762,7 +1762,6 @@ function abrirModalAgendar(codigo, nombre1, nombre2, ronda, j1, j2, opciones = {
     document.querySelector('#agendar-j1').value = j1;
     document.querySelector('#agendar-j2').value = j2;
 
-    // Campos de edición
     if (esEdicion) {
         document.querySelector('#agendar-fecha').value = fechaActual;
         document.querySelector('#agendar-hora').value = horaActual;
@@ -1779,14 +1778,7 @@ function abrirModalAgendar(codigo, nombre1, nombre2, ronda, j1, j2, opciones = {
 
     modal.hidden = false;
     document.body.classList.add('no-scroll');
-    const status = document.querySelector('#agendar-status');
-    if (status) {
-        status.textContent = '';
-        status.className = 'form-status';
-        showToast(status.textContent, status.className);
-    }
 }
-
 
 function cerrarModalAgendar() {
     const modal = document.querySelector('#agendar-modal');
@@ -1801,7 +1793,6 @@ function cerrarModalAgendar() {
 async function agendarPartida(e) {
     e.preventDefault();
     const form = document.querySelector('#agendar-form');
-    const status = document.querySelector('#agendar-status');
     const submitBtn = form.querySelector('button[type="submit"]');
 
     const codigo = document.querySelector('#agendar-codigo').value;
@@ -1813,33 +1804,23 @@ async function agendarPartida(e) {
     const fecha_actual = document.querySelector('#agendar-fecha-actual').value;
     const hora_actual = document.querySelector('#agendar-hora-actual').value;
 
-    // Validaciones comunes
     if (!fecha || !fecha.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
-        status.textContent = 'Fecha inválida. Usa DD/MM/YYYY.';
-        status.className = 'form-status error';
-        showToast(status.textContent, status.className);
+        Toast.error('Fecha inválida. Usa DD/MM/YYYY.');
         return;
     }
     if (!hora || !hora.match(/^\d{2}:\d{2}$/)) {
-        status.textContent = 'Hora inválida. Usa HH:MM.';
-        status.className = 'form-status error';
-        showToast(status.textContent, status.className);
+        Toast.error('Hora inválida. Usa HH:MM.');
         return;
     }
 
     const token = sessionStorage.getItem(SESSION_STORAGE_KEY);
     if (!token) {
-        status.textContent = 'No hay sesión activa.';
-        status.className = 'form-status error';
-        showToast(status.textContent, status.className);
+        Toast.error('No hay sesión activa.');
         return;
     }
 
     submitBtn.disabled = true;
     submitBtn.textContent = modo === 'editar' ? 'Guardando...' : 'Agendando...';
-    status.textContent = '';
-    status.className = 'form-status';
-    showToast(status.textContent, status.className);
 
     try {
         let endpoint, payload;
@@ -1875,18 +1856,15 @@ async function agendarPartida(e) {
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Error al procesar la solicitud');
 
-        status.textContent = '✅ ' + data.mensaje;
-        status.className = 'form-status success';
-        showToast(status.textContent, status.className);
+        Toast.success(data.mensaje);
         setTimeout(() => {
             cerrarModalAgendar();
             cargarTodasPartidas();
         }, 1500);
 
     } catch (err) {
-        status.textContent = '❌ ' + err.message;
-        status.className = 'form-status error';
-        showToast(status.textContent, status.className);
+        console.error(err);
+        Toast.error('Error al agendar la partida. Inténtalo de nuevo.');
     } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = modo === 'editar' ? 'Guardar cambios' : 'Agendar';
@@ -1915,7 +1893,7 @@ async function eliminarPartida(fecha, hora, j1, j2) {
 
     const token = sessionStorage.getItem(SESSION_STORAGE_KEY);
     if (!token) {
-        showToast('No hay sesión activa.', 'error');
+        Toast.error('No hay sesión activa.');
         return;
     }
 
@@ -1932,52 +1910,69 @@ async function eliminarPartida(fecha, hora, j1, j2) {
             })
         });
         const data = await res.json();
+        if (res.status === 401 || res.status === 502) {
+            showSessionErrorModal(); 
+            return; // Salimos de la función, no seguimos renderizando
+        }
         if (!res.ok) throw new Error(data.error || 'Error al eliminar');
 
-        showToast(data.mensaje, 'success');
+        Toast.success(data.mensaje);
         cargarTodasPartidas();
     } catch (err) {
-        showToast('Error: ' + err.message, 'error');
+        console.error(err);
+        Toast.error('Error al eliminar la partida.');
     }
 }
+// ==========================================================
+// MODAL DE ERROR DE CARGA (401 / 502)
+// ==========================================================
 
-function showToast(message, type = 'success') {
-    const container = document.getElementById('toast-container');
-    if (!container) return;
+function initSessionErrorModal() {
+    const modal = document.querySelector('#session-error-modal');
+    if (!modal) return;
 
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    toast.textContent = message;
+    const acceptBtn = modal.querySelector('#session-error-accept');
+    const backdrop = modal.querySelector('[data-close-session-error]');
 
-    // Estilos en línea (puedes moverlos a CSS)
-    Object.assign(toast.style, {
-        padding: '1rem 1.5rem',
-        borderRadius: '12px',
-        background: type === 'success' ? 'rgba(74, 222, 128, 0.15)' : 'rgba(255, 107, 107, 0.15)',
-        border: `1px solid ${type === 'success' ? 'rgba(74, 222, 128, 0.3)' : 'rgba(255, 107, 107, 0.3)'}`,
-        color: type === 'success' ? '#4ade80' : '#ff6b6b',
-        backdropFilter: 'blur(12px)',
-        boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
-        fontSize: '0.95rem',
-        fontWeight: '500',
-        animation: 'toastIn 0.4s ease',
-        transform: 'translateX(0)',
-        transition: 'opacity 0.4s ease, transform 0.4s ease',
-        opacity: '1',
-        fontFamily: 'var(--font-body)',
-        maxWidth: '100%',
+    // Función que ejecuta la limpieza total y el cambio de vistas
+    const limpiarYSalir = () => {
+        // 1. Limpiar TODOS los datos de sesión
+        sessionStorage.clear();
+        window.klubUsername = null;
+        window.klubDiscordId = null;
+
+        // 2. Ocultar la vista de miembro y mostrar la pública
+        const publicView = document.querySelector('#public-view');
+        const memberView = document.querySelector('#member-view');
+        if (publicView) publicView.hidden = false;
+        if (memberView) memberView.hidden = true;
+
+        // 3. Cerrar el modal y quitar el bloqueo de scroll
+        modal.hidden = true;
+        document.body.classList.remove('no-scroll');
+
+        // 4. Aviso opcional (para que sepan que han salido)
+        Toast.info('Sesión cerrada por seguridad. Vuelve a iniciar cuando quieras.');
+    };
+
+    if (acceptBtn) acceptBtn.addEventListener('click', limpiarYSalir);
+    if (backdrop) backdrop.addEventListener('click', limpiarYSalir);
+
+    // Cerrar también con la tecla ESC
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !modal.hidden) {
+            limpiarYSalir();
+        }
     });
+}
 
-    container.appendChild(toast);
+// Función pública para mostrar el modal desde cualquier parte
+function showSessionErrorModal() {
+    const modal = document.querySelector('#session-error-modal');
+    if (!modal) return;
 
-    // Auto-eliminar después de 4 segundos
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateX(30px)';
-        setTimeout(() => {
-            if (toast.parentNode) toast.remove();
-        }, 400);
-    }, 4000);
+    modal.hidden = false;
+    document.body.classList.add('no-scroll');
 }
 
 window.verDeckRival = verDeckRival;
