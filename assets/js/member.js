@@ -154,7 +154,7 @@ async function cargarMisTorneos() {
                     <div class="mi-torneo-panel" style="display: none;">
                         <div class="mi-torneo-tabs">
                             <button class="tab-btn active" data-tab="clasificacion">📊 Clasificación</button>
-                            <button class="tab-btn" data-tab="deck">� Deck</button>
+                            <button class="tab-btn" data-tab="deck">🎴 Deck</button>
                             <button class="tab-btn" data-tab="enfrentamientos">⚔️ Enfrentamientos</button>
                         </div>
                         <div class="mi-torneo-panel-content">
@@ -353,7 +353,7 @@ async function cargarDeckEnPanel(codigo, container) {
             return;
         }
 
-        let html = `<h4 style="margin:0 0 0.5rem 0;color:#fff;">� ${deck.nombre_deck}</h4>`;
+        let html = `<h4 style="margin:0 0 0.5rem 0;color:#fff;">🎴 ${deck.nombre_deck}</h4>`;
         html += `<p><strong>Arquetipo:</strong> ${deck.archetype}</p>`;
         html += `<p><strong>Decklist:</strong></p><pre class="deck-list">${deck.decklist}</pre>`;
         if (deck.sideboard && deck.sideboard !== 'N/A') {
@@ -543,7 +543,7 @@ async function cargarDeckRival(codigo, rivalId) {
         }
 
         let html = `
-            <h4>� ${deck.nombre || 'Deck sin nombre'}</h4>
+            <h4>🎴 ${deck.nombre || 'Deck sin nombre'}</h4>
             <p><strong>Arquetipo:</strong> ${deck.archetype || 'Desconocido'}</p>
             <p><strong>Decklist:</strong></p>
             <pre class="deck-list">${deck.decklist || 'Vacío'}</pre>
@@ -1421,7 +1421,7 @@ async function toggleDeckDisplay(codigo, btn) {
 
         let html = `
             <div class="deck-card">
-                <h4>� ${deck.nombre_deck}</h4>
+                <h4>🎴 ${deck.nombre_deck}</h4>
                 <p><strong>Arquetipo:</strong> ${deck.archetype}</p>
                 <details>
                     <summary>Ver decklist</summary>
@@ -1589,7 +1589,7 @@ async function verMiDeck(codigoTorneo, contenedor, puedeEditar = false, tieneDec
                     </div>
                     <div class="mi-torneo-tabs">
                         <button class="tab-btn active" data-tab="clasificacion">📊 Clasificación</button>
-                        <button class="tab-btn" data-tab="deck">� Deck</button>
+                        <button class="tab-btn" data-tab="deck">🎴 Deck</button>
                         <button class="tab-btn" data-tab="enfrentamientos">⚔️ Enfrentamientos</button>
                     </div>
                     <div class="mi-torneo-panel-content">
@@ -1682,7 +1682,7 @@ async function verMiDeck(codigoTorneo, contenedor, puedeEditar = false, tieneDec
 
             deckHtml = `
                 <div class="deck-preview">
-                    <h4>� ${deck.nombre_deck}</h4>
+                    <h4>🎴 ${deck.nombre_deck}</h4>
                     <p><strong>Arquetipo:</strong> <span class="deck-archetype">${deck.archetype}</span></p>
                     <p><strong>Decklist:</strong></p>
                     <pre class="deck-list">${deck.decklist}</pre>
