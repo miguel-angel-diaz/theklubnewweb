@@ -437,6 +437,7 @@ async function cargarEnfrentamientosEnPanel(codigo, container) {
 
                     const miDiscordId = window.klubDiscordId;
                     const esMiPartida = (p.jugador1_id == miDiscordId || p.jugador2_id == miDiscordId);
+                    const rivalId = p.jugador1_id == miDiscordId? p.jugador2_id: p.jugador1_id;
                     let botonVerDeck = '';
                     if (esMiPartida) {
                         if (rivalId && rivalId !== 'null' && rivalId !== 'undefined' && r.completa) {
