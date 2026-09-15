@@ -712,12 +712,10 @@ async function cargarMisDecks() {
     contenedor.innerHTML = '<p class="standings-loading">Cargando tus decks...</p>';
 
     try {
-        const res = await fetch(`${AUTH_API_BASE}/api/mis-decks?session=${token}`);
+        // ✅ Añadir timestamp para evitar caché del navegador
+        const res = await fetch(`${AUTH_API_BASE}/api/mis-decks?session=${token}&_t=${Date.now()}`);
         const data = await res.json();
-        if (res.status === 401 || res.status === 502) {
-            showSessionErrorModal(); 
-            return; // Salimos de la función, no seguimos renderizando
-        }
+
         if (!res.ok || !data.decks || !data.decks.length) {
             contenedor.innerHTML = '<p class="standings-error">Todavía no has subido ningún deck.</p>';
             return;
@@ -738,9 +736,12 @@ async function cargarMisDecks() {
     } catch (err) {
         console.error(err);
         contenedor.innerHTML = '<p class="standings-error">No se pudieron cargar tus decks.</p>';
-        Toast.error('Error al cargar tus decks.');
     }
 }
+
+
+
+
 
 // ==========================================================
 // 11. BANNER DE TORNEOS ACTIVOS
@@ -754,12 +755,10 @@ async function cargarEstadoTorneos() {
     if (!token) return;
 
     try {
-        const res = await fetch(`${AUTH_API_BASE}/api/estado-torneos?session=${token}`);
+        // ✅ Añadir timestamp para evitar caché
+        const res = await fetch(`${AUTH_API_BASE}/api/estado-torneos?session=${token}&_t=${Date.now()}`);
         const data = await res.json();
-        if (res.status === 401 || res.status === 502) {
-            showSessionErrorModal(); 
-            return; // Salimos de la función, no seguimos renderizando
-        }
+
         if (!res.ok || !data.torneos) {
             contenedor.innerHTML = `
                 <div class="torneo-banner torneo-banner-quiet">
@@ -813,7 +812,7 @@ async function cargarEstadoTorneos() {
                         <div class="torneo-banner-info">
                             <h3>${t.nombre}</h3>
                             <span class="torneo-banner-status ${statusClass}">${statusText}</span>
-                            ${tieneDeck ? `<span class="torneo-banner-deck-status">🎴</span>` : ''}
+                            ${tieneDeck ? `<span class="torneo-banner-deck-status">🃏</span>` : ''}
                             <span class="torneo-banner-meta">📅 ${fecha} · 👥 ${inscritos}</span>
                         </div>
                         <div class="torneo-banner-actions">
@@ -827,6 +826,9 @@ async function cargarEstadoTorneos() {
 
         contenedor.innerHTML = html;
 
+        // ============================================================
+        // EVENTOS: Toggle de expansión
+        // ============================================================
         contenedor.querySelectorAll('.banner-toggle').forEach(btn => {
             btn.addEventListener('click', function(e) {
                 e.stopPropagation();
@@ -856,7 +858,6 @@ async function cargarEstadoTorneos() {
     } catch (err) {
         console.error(err);
         contenedor.innerHTML = '';
-        Toast.error('Error al cargar el estado de los torneos.');
     }
 }
 
@@ -930,17 +931,17 @@ function initDeckModal() {
     });
 }
 
-async function cargarArquetipos(seleccionado = null) {
+async function cargarArquetipos(seleccionado = null, formato = 'Premodern') {
     const select = document.querySelector('#deck-archetype');
     if (!select) return;
 
     select.innerHTML = '<option value="">Cargando arquetipos...</option>';
 
     try {
-        const res = await fetch(`${AUTH_API_BASE}/api/arquetipos`);
+        const res = await fetch(`${AUTH_API_BASE}/api/arquetipos?formato=${encodeURIComponent(formato)}`);
         if (res.status === 401 || res.status === 502) {
-            showSessionErrorModal(); 
-            return; // Salimos de la función, no seguimos renderizando
+            showSessionErrorModal();
+            return;
         }
         if (!res.ok) throw new Error('Error al cargar arquetipos');
         const data = await res.json();
@@ -974,8 +975,16 @@ async function cargarArquetipos(seleccionado = null) {
 function initSubirDeckForm() {
     const form = document.querySelector('#subir-deck-form');
     const submitBtn = document.querySelector('#subir-deck-submit');
+    const formatoSelect = document.querySelector('#deck-formato');
 
     if (!form) return;
+
+    // 🔹 Cuando cambia el formato, recargar arquetipos
+    if (formatoSelect) {
+        formatoSelect.addEventListener('change', () => {
+            cargarArquetipos(null, formatoSelect.value);
+        });
+    }
 
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -989,6 +998,7 @@ function initSubirDeckForm() {
         const payload = {
             session: token,
             codigo_torneo: form.codigo_torneo.value.trim(),
+            formato: form.formato ? form.formato.value.trim() : 'Premodern',
             nombre_deck: form.nombre_deck.value.trim(),
             archetype: form.archetype.value.trim(),
             decklist: form.decklist.value.trim(),
@@ -1034,11 +1044,24 @@ function initSubirDeckForm() {
                 cerrarDeckModal();
                 cargarMisDecks();
                 cargarEstadoTorneos();
+
+                document.querySelectorAll('.torneo-banner-deck.visible').forEach(container => {
+                    const banner = container.closest('.torneo-banner');
+                    if (banner) {
+                        const codigo = banner.dataset.torneo;
+                        const puedeEditar = banner.dataset.puedeEditar === 'true';
+                        const tieneDeck = banner.dataset.tieneDeck === 'true';
+                        const inscrito = banner.dataset.inscrito === 'true';
+                        const estado = banner.dataset.estado;
+                        verMiDeck(codigo, container, puedeEditar, tieneDeck, inscrito, estado);
+                    }
+                });
+
             }, 1200);
 
         } catch (err) {
             console.error(err);
-            Toast.error('Error al guardar el deck. Revisa los datos.');
+            Toast.error(err.message || 'Error al guardar el deck. Revisa los datos.');
         } finally {
             submitBtn.disabled = false;
             submitBtn.textContent = esEdicion ? 'Actualizar Deck' : 'Subir Deck';
@@ -1450,6 +1473,7 @@ async function abrirDeckModal(codigoTorneo = null) {
     const form = document.querySelector('#subir-deck-form');
     const submitBtn = document.querySelector('#subir-deck-submit');
     const toggleBtn = document.querySelector('#deck-modal-title');
+    const formatoSelect = document.querySelector('#deck-formato');
 
     // Resetear los datasets de edición antes de abrir
     delete form.dataset.edicion;
@@ -1458,17 +1482,17 @@ async function abrirDeckModal(codigoTorneo = null) {
     if (!codigoTorneo) {
         modal.hidden = false;
         document.body.classList.add('no-scroll');
+        if (formatoSelect) formatoSelect.value = 'Premodern';
         cargarTorneosDisponibles();
-        cargarArquetipos();
+        cargarArquetipos(null, formatoSelect ? formatoSelect.value : 'Premodern');
         if (toggleBtn) toggleBtn.textContent = '+ Subir nuevo deck';
         return;
     }
 
     modal.hidden = false;
     document.body.classList.add('no-scroll');
-    
+
     await cargarTorneosDisponibles(codigoTorneo);
-    await cargarArquetipos();
 
     const token = sessionStorage.getItem(SESSION_STORAGE_KEY);
     if (!token) {
@@ -1479,8 +1503,8 @@ async function abrirDeckModal(codigoTorneo = null) {
     try {
         const res = await fetch(`${AUTH_API_BASE}/api/mis-decks?session=${token}`);
         if (res.status === 401 || res.status === 502) {
-            showSessionErrorModal(); 
-            return; // Salimos de la función, no seguimos renderizando
+            showSessionErrorModal();
+            return;
         }
         if (!res.ok) throw new Error('Error al obtener tus decks');
         const data = await res.json();
@@ -1492,22 +1516,26 @@ async function abrirDeckModal(codigoTorneo = null) {
         }
 
         if (deck) {
-            // 1. Rellenar los datos en el formulario
+            // Cargar el formato del deck (si lo tiene guardado)
+            const formatoDeck = deck.formato || 'Premodern';
+            if (formatoSelect) formatoSelect.value = formatoDeck;
+
+            // Cargar arquetipos del formato correcto y preseleccionar el actual
+            await cargarArquetipos(deck.archetype || null, formatoDeck);
+
             document.querySelector('#deck-nombre').value = deck.nombre_deck || '';
-            document.querySelector('#deck-archetype').value = deck.archetype || '';
             document.querySelector('#deck-decklist').value = deck.decklist || '';
             document.querySelector('#deck-sideboard').value = deck.sideboard || '';
 
-            // 2. ✅ ESTO ES LO QUE FALTABA: Marcar el formulario como edición y pasar el ID
             form.dataset.edicion = 'true';
-            form.dataset.codigoDeck = deck.codigo_deck; // Asegúrate de que 'codigo_deck' sea el campo correcto en tu backend
+            form.dataset.codigoDeck = deck.codigo_deck;
             if (toggleBtn) toggleBtn.textContent = '✏️ Editar deck';
-            // 3. Cambiar el botón a "Actualizar Deck"
             if (submitBtn) submitBtn.textContent = 'Actualizar Deck';
         } else {
-            // Modo creación (no tiene deck)
+            if (formatoSelect) formatoSelect.value = 'Premodern';
+            await cargarArquetipos(null, 'Premodern');
             if (submitBtn) submitBtn.textContent = 'Subir Deck';
-             if (toggleBtn) toggleBtn.textContent = '+ Subir nuevo deck';
+            if (toggleBtn) toggleBtn.textContent = '+ Subir nuevo deck';
         }
 
         const select = document.querySelector('#deck-torneo');
