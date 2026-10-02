@@ -62,7 +62,7 @@ function initLoginModal() {
 
 }
 
-function loginCompletado(sessionToken, username) {
+async function loginCompletado(sessionToken, username) {
 
     sessionStorage.setItem(SESSION_STORAGE_KEY, sessionToken);
     sessionStorage.setItem(SESSION_USERNAME_KEY, username);   // NUEVO
@@ -71,6 +71,7 @@ function loginCompletado(sessionToken, username) {
 
     cerrarLoginModal();
 
+    await comprobarSesionActiva();
     document.dispatchEvent(new CustomEvent('klub:mostrar-miembro'));
 
 }

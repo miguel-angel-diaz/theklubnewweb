@@ -318,7 +318,8 @@ async function cargarClasificacionEnPanel(codigo, container) {
 // ------------------------------------------------------------
 // 7b. Deck
 // ------------------------------------------------------------
-async function cargarDeckEnPanel(codigo, container) {
+
+async function cargarDeckEnPanel(codigo, container, puedeEditar = false, inscrito = false, estado = 'abierto') {
     const token = sessionStorage.getItem(SESSION_STORAGE_KEY);
     if (!token) {
         container.innerHTML = '<p class="empty-state">Debes iniciar sesión.</p>';
@@ -329,7 +330,7 @@ async function cargarDeckEnPanel(codigo, container) {
         const res = await fetch(`${AUTH_API_BASE}/api/mis-decks?session=${token}`);
         if (res.status === 401 || res.status === 502) {
             showSessionErrorModal(); 
-            return; // Salimos de la función, no seguimos renderizando
+            return;
         }
         if (!res.ok) throw new Error('Error al obtener decks');
         const data = await res.json();
@@ -348,18 +349,59 @@ async function cargarDeckEnPanel(codigo, container) {
             });
         }
 
+        // Si no hay deck subido
         if (!deck) {
-            container.innerHTML = `<p class="empty-state">No has subido deck para este torneo.</p>`;
+            let emptyHtml = `<p class="empty-state">No has subido deck para este torneo.</p>`;
+            
+            // Si estoy inscrito y el torneo lo permite, añado el botón de subir
+            if (inscrito && estado === 'abierto') {
+                emptyHtml += `
+                    <div class="panel-actions" style="margin-top: 1rem;">
+                        <button class="btn btn-sm btn-primary" data-subir-deck="${codigo}">Subir deck</button>
+                    </div>
+                `;
+            }
+            container.innerHTML = emptyHtml;
+
+            container.querySelectorAll('[data-subir-deck]').forEach(btn => {
+                btn.addEventListener('click', () => abrirDeckModal(btn.dataset.subirDeck));
+            });
             return;
         }
 
+        // Renderizar el deck
         let html = `<h4 style="margin:0 0 0.5rem 0;color:#fff;">🎴 ${deck.nombre_deck}</h4>`;
         html += `<p><strong>Arquetipo:</strong> ${deck.archetype}</p>`;
         html += `<p><strong>Decklist:</strong></p><pre class="deck-list">${deck.decklist}</pre>`;
         if (deck.sideboard && deck.sideboard !== 'N/A') {
             html += `<p class="deck-sideboard-title">Sideboard</p><pre class="deck-list">${deck.sideboard}</pre>`;
         }
+
+        // 🔥 AÑADIR BOTÓN DE EDITAR/DESHABILITADO (igual que en el bot de Python)
+        if (estado === 'abierto' || (estado === 'en desarrollo' && puedeEditar)) {
+            // Puede editar: torneo abierto (ilimitado) o en desarrollo con ediciones disponibles
+            html += `
+                <div class="panel-actions" style="margin-top: 1rem;">
+                    <button class="btn btn-sm btn-warning" data-editar-deck="${codigo}">Editar deck</button>
+                </div>
+            `;
+        } else if (estado === 'en desarrollo' && !puedeEditar) {
+            // Torneo en desarrollo y ya usó su edición
+            html += `
+                <div class="panel-actions" style="margin-top: 1rem;">
+                    <button class="btn btn-sm btn-secondary" disabled>Edición única usada</button>
+                </div>
+            `;
+        }
+        // Si el torneo está finalizado, no muestra nada de edición (correcto)
+
         container.innerHTML = html;
+
+        // Asignar evento al botón de editar
+        container.querySelectorAll('[data-editar-deck]').forEach(btn => {
+            btn.addEventListener('click', () => abrirDeckModal(btn.dataset.editarDeck));
+        });
+
     } catch (err) {
         console.error(err);
         container.innerHTML = '<p class="empty-state">Error al cargar el deck.</p>';
@@ -384,7 +426,7 @@ async function cargarEnfrentamientosEnPanel(codigo, container) {
         const res = await fetch(`${AUTH_API_BASE}/api/torneo-enfrentamientos?session=${token}&torneo=${codigo}`);
         if (res.status === 401 || res.status === 502) {
             showSessionErrorModal(); 
-            return; // Salimos de la función, no seguimos renderizando
+            return;
         }
         if (!res.ok) {
             const errorData = await res.json();
@@ -394,8 +436,13 @@ async function cargarEnfrentamientosEnPanel(codigo, container) {
         const data = await res.json();
         const rondas = data.rondas || [];
 
-        // ✅ CORREGIDO: Solo mostramos el mensaje de vacío si NO hay rondas en absoluto.
-        // Si hay 1 ronda (aunque esté pendiente), la renderizamos para que el usuario vea su enfrentamiento.
+        // 🔍 DEBUG: Ver qué está llegando
+        console.log('🕵️ [Enfrentamientos] Mi discord_id:', window.klubDiscordId, '| Tipo:', typeof window.klubDiscordId);
+        console.log('🕵️ [Enfrentamientos] Rondas recibidas:', rondas.length);
+        if (rondas.length > 0 && rondas[0].partidos && rondas[0].partidos.length > 0) {
+            console.log('🕵️ [Enfrentamientos] Primer partido:', rondas[0].partidos[0]);
+        }
+
         if (!rondas.length) {
             container.innerHTML = `
                 <div class="empty-state">
@@ -406,63 +453,84 @@ async function cargarEnfrentamientosEnPanel(codigo, container) {
             return;
         }
 
+        // ✅ Normalizamos mi ID a string para comparaciones seguras
+        const miDiscordId = window.klubDiscordId != null ? String(window.klubDiscordId).trim() : '';
+
         let html = `
             <div class="enfrentamientos-container">
                 <h4 style="margin: 0 0 1rem 0; color: var(--text);">Todas las rondas</h4>
         `;
 
+        let partidasMostradas = 0;
+
         rondas.forEach(r => {
             const rondaNum = r.ronda;
             const completa = r.completa ? '✅ Completada' : '⏳ En curso';
+            
+            // 🔍 Filtrar las partidas para mostrar SOLO las mías en esta ronda
+            const misPartidasRonda = (r.partidos || []).filter(p => {
+                if (p.jugador2 === null) return false; // Saltamos BYEs huérfanos (los procesamos aparte si son míos)
+                const j1 = p.jugador1_id != null ? String(p.jugador1_id).trim() : '';
+                const j2 = p.jugador2_id != null ? String(p.jugador2_id).trim() : '';
+                return (j1 === miDiscordId || j2 === miDiscordId);
+            });
+
+            // Si no tengo partidas en esta ronda, no la pinto
+            if (misPartidasRonda.length === 0) return;
+
             html += `
                 <div class="ronda-block">
                     <h5 style="margin: 0.5rem 0; color: var(--text-muted);">Ronda ${rondaNum} — ${completa}</h5>
                     <ul style="list-style: none; padding-left: 0; margin: 0 0 1rem 0;">
             `;
-            r.partidos.forEach(p => {
-                if (p.jugador2 === null) {
-                    html += `<li style="padding: 0.2rem 0; color: var(--text-muted);">${p.jugador1} → BYE</li>`;
-                } else {
-                    // Calcular el estado y el texto
-                    let estadoTexto = '⏳ Pendiente';
-                    let estadoClase = 'estado-pendiente';
 
-                    if (p.resultado) {
-                        estadoTexto = p.resultado;
-                        estadoClase = 'estado-completado';
-                    } else if (p.agendada) {
-                        estadoTexto = '📅 Agendada';
-                        estadoClase = 'estado-agendada';
-                    }
+            misPartidasRonda.forEach(p => {
+                partidasMostradas++;
 
-                    const miDiscordId = window.klubDiscordId;
-                    const esMiPartida = (p.jugador1_id == miDiscordId || p.jugador2_id == miDiscordId);
-                    const rivalId = p.jugador1_id == miDiscordId? p.jugador2_id: p.jugador1_id;
-                    let botonVerDeck = '';
-                    if (esMiPartida) {
-                        if (rivalId && rivalId !== 'null' && rivalId !== 'undefined' && r.completa) {
-                            botonVerDeck = `
-                                <button class="btn btn-sm btn-primary ver-deck-rival" 
-                                    data-codigo="${codigo}"
-                                    data-rival="${p.jugador1_id == miDiscordId? p.jugador2_id: p.jugador1_id}" 
-                                    data-nombre="${p.jugador1_id == miDiscordId? p.jugador2: p.jugador1}">
-                                    🎴 Ver deck 
-                                </button>
-                            `;
-                        }
-                        html += `
-                            <li style="padding: 0.2rem 0; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
-                                <span>
-                                    ${p.jugador1} vs ${p.jugador2} — <strong class="${estadoClase}">${estadoTexto}</strong>
-                                </span>
-                                <span>
-                                    ${botonVerDeck}
-                                </span>
-                            </li>
-                        `;
-                    }
+                // Determinar estado y rival
+                let estadoTexto = '⏳ Pendiente';
+                let estadoClase = 'estado-pendiente';
+                if (p.resultado) {
+                    estadoTexto = p.resultado;
+                    estadoClase = 'estado-completado';
+                } else if (p.agendada) {
+                    estadoTexto = '📅 Agendada';
+                    estadoClase = 'estado-agendada';
                 }
+
+                // ✅ Calcular rival de forma robusta
+                const j1 = p.jugador1_id != null ? String(p.jugador1_id).trim() : '';
+                const j2 = p.jugador2_id != null ? String(p.jugador2_id).trim() : '';
+                const soyJugador1 = (j1 === miDiscordId);
+                const rivalId = soyJugador1 ? p.jugador2_id : p.jugador1_id;
+                const rivalNombre = soyJugador1 ? p.jugador2 : p.jugador1;
+                const miNombre = soyJugador1 ? p.jugador1 : p.jugador2;
+
+                // Botón "Ver deck" SOLO si la ronda está completada
+                let botonVerDeck = '';
+                if (r.completa && rivalId && rivalId !== 'null' && rivalId !== 'undefined') {
+                    botonVerDeck = `
+                        <button class="btn btn-sm btn-primary ver-deck-rival" 
+                                data-codigo="${codigo}"
+                                data-rival="${rivalId}" 
+                                data-nombre="${rivalNombre}">
+                            🎴 Ver deck
+                        </button>
+                    `;
+                }
+
+                html += `
+                    <li style="padding: 0.2rem 0; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                        <span>
+                            ${miNombre} vs ${rivalNombre} — <strong class="${estadoClase}">${estadoTexto}</strong>
+                        </span>
+                        <span>
+                            ${botonVerDeck}
+                        </span>
+                    </li>
+                `;
             });
+
             html += `
                     </ul>
                 </div>
@@ -470,20 +538,22 @@ async function cargarEnfrentamientosEnPanel(codigo, container) {
         });
 
         html += `</div>`;
+
+        // 🔍 Si no encontramos ninguna partida mía, mostramos un mensaje
+        if (partidasMostradas === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <p>⚔️ No tienes enfrentamientos registrados en este torneo.</p>
+                    <p style="font-size:.85rem; color:var(--muted);">Los enfrentamientos aparecerán aquí cuando se generen las rondas en las que participes.</p>
+                </div>
+            `;
+            ocultarPantallaCarga();
+            return;
+        }
+
         container.innerHTML = html;
 
-        container.querySelectorAll('.agendar-partida').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const codigo = this.dataset.codigo;
-                const j1 = this.dataset.j1;
-                const j2 = this.dataset.j2;
-                const nombre1 = this.dataset.nombre1;
-                const nombre2 = this.dataset.nombre2;
-                const ronda = this.dataset.ronda;
-                abrirModalAgendar(codigo, nombre1, nombre2, ronda, j1, j2);
-            });
-        });
-
+        // Listener para ver deck del rival
         container.querySelectorAll('.ver-deck-rival').forEach(link => {
             link.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -495,7 +565,8 @@ async function cargarEnfrentamientosEnPanel(codigo, container) {
                 }
             });
         });
-    ocultarPantallaCarga();
+
+        ocultarPantallaCarga();
     } catch (err) {
         console.error(err);
         container.innerHTML = `<p class="standings-error">Error al cargar enfrentamientos: ${err.message}</p>`;
@@ -1606,6 +1677,7 @@ async function verMiDeck(codigoTorneo, contenedor, puedeEditar = false, tieneDec
     }
 
     try {
+        // 🔥 SI EL TORNEO ESTÁ EN DESARROLLO → panel completo con pestañas
         if (estado === 'en desarrollo') {
             const rondaActual = '?'; 
 
@@ -1635,10 +1707,12 @@ async function verMiDeck(codigoTorneo, contenedor, puedeEditar = false, tieneDec
             const contentDivDeck = panel.querySelector('.tab-content[data-tab="deck"]');
             const contentDivEnfrentamientos = panel.querySelector('.tab-content[data-tab="enfrentamientos"]');
 
+            // Cargar clasificación (activa por defecto)
             if (contentDivClasificacion) {
                 await cargarClasificacionEnPanel(codigoTorneo, contentDivClasificacion);
             }
 
+            // Asignar eventos a las pestañas
             panel.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.addEventListener('click', async function() {
                     const tab = this.dataset.tab;
@@ -1652,7 +1726,8 @@ async function verMiDeck(codigoTorneo, contenedor, puedeEditar = false, tieneDec
                         if (tab === 'clasificacion') {
                             await cargarClasificacionEnPanel(codigoTorneo, target);
                         } else if (tab === 'deck') {
-                            await cargarDeckEnPanel(codigoTorneo, target);
+                            // 🔥 Le pasamos puedeEditar, inscrito y estado para que muestre los botones correctos
+                            await cargarDeckEnPanel(codigoTorneo, target, puedeEditar, inscrito, estado);
                         } else if (tab === 'enfrentamientos') {
                             await cargarEnfrentamientosEnPanel(codigoTorneo, target);
                         }
@@ -1660,13 +1735,16 @@ async function verMiDeck(codigoTorneo, contenedor, puedeEditar = false, tieneDec
                 });
             });
 
-            return;
+            return; // Salimos, ya hemos renderizado todo el panel con pestañas
         }
 
+        // ============================================================
+        // Comportamiento para torneos ABIERTOS o FINALIZADOS
+        // ============================================================
         const res = await fetch(`${AUTH_API_BASE}/api/mis-decks?session=${token}`);
         if (res.status === 401 || res.status === 502) {
             showSessionErrorModal(); 
-            return; // Salimos de la función, no seguimos renderizando
+            return;
         }
         if (!res.ok) throw new Error('Error al obtener decks');
         const data = await res.json();
@@ -1681,7 +1759,8 @@ async function verMiDeck(codigoTorneo, contenedor, puedeEditar = false, tieneDec
         let accionesHtml = '';
         let deckHtml = '';
 
-        if(estado !== 'en desarrollo'){
+        // Acciones del torneo (inscripción/desinscripción)
+        if (estado !== 'en desarrollo') {
             if (inscrito) {
                 if (estado === 'abierto') {
                     accionesHtml = `<button class="btn btn-sm btn-danger" data-desinscribir="${codigoTorneo}">Desinscribirme</button>`;
@@ -1695,6 +1774,7 @@ async function verMiDeck(codigoTorneo, contenedor, puedeEditar = false, tieneDec
             }
         }
 
+        // Deck
         if (!deck) {
             deckHtml = `
                 <div class="deck-preview">
@@ -1734,6 +1814,7 @@ async function verMiDeck(codigoTorneo, contenedor, puedeEditar = false, tieneDec
 
         contenedor.innerHTML = html;
 
+        // Asignar eventos a los botones
         contenedor.querySelectorAll('[data-inscribir]').forEach(btn => {
             btn.addEventListener('click', () => inscribirseEnTorneo(btn.dataset.inscribir, btn));
         });
