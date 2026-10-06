@@ -731,7 +731,7 @@ async function reportarResultado(e) {
 
     } catch (err) {
         console.error(err);
-        Toast.error('Error al reportar el resultado. Verifica los datos.');
+        Toast.error(err.message || 'Error al reportar el resultado. Verifica los datos.');
     } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = 'Reportar';
@@ -961,7 +961,7 @@ async function inscribirseEnTorneo(codigoTorneo, btn) {
 
     } catch (err) {
         console.error(err);
-        Toast.error('No se pudo completar la inscripción. Inténtalo de nuevo.');
+        Toast.error(err.message || 'No se pudo completar la inscripción. Inténtalo de nuevo.');
         btn.disabled = false;
         btn.textContent = 'Apuntarme';
     }
@@ -1467,7 +1467,7 @@ async function desinscribirse(codigo) {
             Toast.success(data.mensaje);
             cargarEstadoTorneos();
         } else {
-            Toast.error('Error al desinscribirte del torneo.');
+            Toast.error(data.error || 'Error al desinscribirte del torneo.');
         }
     } catch (error) {
         console.error(error);
@@ -1974,7 +1974,7 @@ async function agendarPartida(e) {
 
     } catch (err) {
         console.error(err);
-        Toast.error('Error al agendar la partida. Inténtalo de nuevo.');
+        Toast.error(err.message || 'Error al agendar la partida. Inténtalo de nuevo.');
     } finally {
         submitBtn.disabled = false;
         submitBtn.textContent = modo === 'editar' ? 'Guardar cambios' : 'Agendar';
@@ -2030,7 +2030,7 @@ async function eliminarPartida(fecha, hora, j1, j2) {
         cargarTodasPartidas();
     } catch (err) {
         console.error(err);
-        Toast.error('Error al eliminar la partida.');
+        Toast.error(err.message || 'Error al eliminar la partida.');
     }
 }
 // ==========================================================

@@ -476,8 +476,9 @@
                     <h3>Introduce tu código</h3>
                     <p>Revisa tus mensajes directos en Discord.</p>
                     <div class="form-group">
-                        <label for="login-codigo">Código de 6 dígitos</label>
-                        <input type="text" id="login-codigo" placeholder="000000" maxlength="6" inputmode="numeric">
+                        <label for="login-codigo">Código de acceso (8 caracteres, distingue mayúsculas)</label>
+                        <input type="text" id="login-codigo" placeholder="Ej: aB3#kP9!" maxlength="8"
+                               autocomplete="one-time-code" autocapitalize="none" autocorrect="off" spellcheck="false">
                     </div>
 										<div class="form-group-button">
 											<button id="login-verificar" class="btn btn-primary">Verificar</button>
@@ -796,7 +797,7 @@
 <script defer src="./assets/js/smooth-scroll.js?v=4"></script>
 <script defer src="./assets/js/standings-slider.js?v=4"></script>
 <script defer src="./assets/js/auth.js?v=4"></script>
-<script defer src="./assets/js/member.js?v=4"></script>
+<script defer src="./assets/js/member.js?v=5"></script>
 <script defer src="./assets/js/confirm.js?v=4"></script>
 <script defer src="./assets/js/app.js?v=4"></script>
 
