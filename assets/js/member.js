@@ -98,7 +98,7 @@ async function cargarMisTorneos() {
     contenedor.innerHTML = '<p class="standings-loading">Cargando tus torneos...</p>';
 
     try {
-        const res = await fetch(`${AUTH_API_BASE}/api/mis-torneos?session=${token}`);
+        const res = await fetch(`${AUTH_API_BASE}/api/mis-torneos`, { headers: headersAuth() });
         const dataFinalizados = await res.json();
         const torneosFinalizados = dataFinalizados.torneos || [];
         if (res.status === 401 || res.status === 502) {
@@ -269,7 +269,7 @@ async function cargarClasificacionEnPanel(codigo, container) {
     container.innerHTML = '<p class="standings-loading">Cargando clasificación...</p>';
 
     try {
-        const res = await fetch(`${AUTH_API_BASE}/api/clasificacion-torneo?codigo=${codigo}&session=${token}`);
+        const res = await fetch(`${AUTH_API_BASE}/api/clasificacion-torneo?codigo=${codigo}`, { headers: headersAuth() });
         if (res.status === 404) {
             container.innerHTML = '<p class="empty-state">Este torneo aún no tiene clasificación.</p>';
             return;
@@ -327,7 +327,7 @@ async function cargarDeckEnPanel(codigo, container, puedeEditar = false, inscrit
     }
 
     try {
-        const res = await fetch(`${AUTH_API_BASE}/api/mis-decks?session=${token}`);
+        const res = await fetch(`${AUTH_API_BASE}/api/mis-decks`, { headers: headersAuth() });
         if (res.status === 401 || res.status === 502) {
             showSessionErrorModal(); 
             return;
@@ -423,7 +423,7 @@ async function cargarEnfrentamientosEnPanel(codigo, container) {
     container.innerHTML = '<p class="standings-loading">Cargando enfrentamientos...</p>';
 
     try {
-        const res = await fetch(`${AUTH_API_BASE}/api/torneo-enfrentamientos?session=${token}&torneo=${codigo}`);
+        const res = await fetch(`${AUTH_API_BASE}/api/torneo-enfrentamientos?torneo=${codigo}`, { headers: headersAuth() });
         if (res.status === 401 || res.status === 502) {
             showSessionErrorModal(); 
             return;
@@ -596,7 +596,7 @@ async function cargarDeckRival(codigo, rivalId) {
     if (!token) return;
 
     try {
-        const res = await fetch(`${AUTH_API_BASE}/api/deck-rival?session=${token}&torneo=${codigo}&rival=${rivalId}`);
+        const res = await fetch(`${AUTH_API_BASE}/api/deck-rival?torneo=${codigo}&rival=${rivalId}`, { headers: headersAuth() });
         if (res.status === 401 || res.status === 502) {
             showSessionErrorModal(); 
             return; // Salimos de la función, no seguimos renderizando
@@ -707,9 +707,8 @@ async function reportarResultado(e) {
     try {
         const res = await fetch(`${AUTH_API_BASE}/api/reportar-resultado`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: headersAuth({ 'Content-Type': 'application/json' }),
             body: JSON.stringify({
-                session: token,
                 codigo_torneo: codigo,
                 jugador1_id: jugador1_id,
                 jugador2_id: jugador2_id,
@@ -784,7 +783,7 @@ async function cargarMisDecks() {
 
     try {
         // ✅ Añadir timestamp para evitar caché del navegador
-        const res = await fetch(`${AUTH_API_BASE}/api/mis-decks?session=${token}&_t=${Date.now()}`);
+        const res = await fetch(`${AUTH_API_BASE}/api/mis-decks?_t=${Date.now()}`, { headers: headersAuth() });
         const data = await res.json();
 
         if (!res.ok || !data.decks || !data.decks.length) {
@@ -827,7 +826,7 @@ async function cargarEstadoTorneos() {
 
     try {
         // ✅ Añadir timestamp para evitar caché
-        const res = await fetch(`${AUTH_API_BASE}/api/estado-torneos?session=${token}&_t=${Date.now()}`);
+        const res = await fetch(`${AUTH_API_BASE}/api/estado-torneos?_t=${Date.now()}`, { headers: headersAuth() });
         const data = await res.json();
 
         if (!res.ok || !data.torneos) {
@@ -945,8 +944,8 @@ async function inscribirseEnTorneo(codigoTorneo, btn) {
     try {
         const res = await fetch(`${AUTH_API_BASE}/api/inscribirse`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ session: token, codigo_torneo: codigoTorneo })
+            headers: headersAuth({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify({ codigo_torneo: codigoTorneo })
         });
 
         const data = await res.json();
@@ -1067,7 +1066,6 @@ function initSubirDeckForm() {
         }
 
         const payload = {
-            session: token,
             codigo_torneo: form.codigo_torneo.value.trim(),
             formato: form.formato ? form.formato.value.trim() : 'Premodern',
             nombre_deck: form.nombre_deck.value.trim(),
@@ -1098,7 +1096,7 @@ function initSubirDeckForm() {
 
             const res = await fetch(endpoint, {
                 method: method,
-                headers: { 'Content-Type': 'application/json' },
+                headers: headersAuth({ 'Content-Type': 'application/json' }),
                 body: JSON.stringify(payload)
             });
 
@@ -1150,7 +1148,7 @@ async function cargarTodasPartidas() {
     }
     contenedor.innerHTML = `<p class="standings-loading">Cargando todas las partidas...</p>`;
     try {
-        const res = await fetch(`${AUTH_API_BASE}/api/todas-partidas?session=${token}`);
+        const res = await fetch(`${AUTH_API_BASE}/api/todas-partidas`, { headers: headersAuth() });
         if (res.status === 401 || res.status === 502) {
             showSessionErrorModal(); 
             return; // Salimos de la función, no seguimos renderizando
@@ -1293,7 +1291,7 @@ async function cargarMisPendientes() {
     contenedor.innerHTML = `<p class="standings-loading">Cargando tus partidas pendientes...</p>`;
 
     try {
-        const res = await fetch(`${AUTH_API_BASE}/api/mis-torneos-pendientes?session=${token}`);
+        const res = await fetch(`${AUTH_API_BASE}/api/mis-torneos-pendientes`, { headers: headersAuth() });
         if (res.status === 401 || res.status === 502) {
             showSessionErrorModal(); 
             return; // Salimos de la función, no seguimos renderizando
@@ -1455,8 +1453,8 @@ async function desinscribirse(codigo) {
     try {
         const res = await fetch(`${AUTH_API_BASE}/api/desinscribirse`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ session: token, codigo_torneo: codigo })
+            headers: headersAuth({ 'Content-Type': 'application/json' }),
+            body: JSON.stringify({ codigo_torneo: codigo })
         });
         const data = await res.json();
         if (res.status === 401 || res.status === 502) {
@@ -1492,7 +1490,7 @@ async function toggleDeckDisplay(codigo, btn) {
 
     try {
         const token = sessionStorage.getItem(SESSION_STORAGE_KEY);
-        const res = await fetch(`${AUTH_API_BASE}/api/mis-decks?session=${token}`);
+        const res = await fetch(`${AUTH_API_BASE}/api/mis-decks`, { headers: headersAuth() });
         const data = await res.json();
         if (res.status === 401 || res.status === 502) {
             showSessionErrorModal(); 
@@ -1572,7 +1570,7 @@ async function abrirDeckModal(codigoTorneo = null) {
     }
 
     try {
-        const res = await fetch(`${AUTH_API_BASE}/api/mis-decks?session=${token}`);
+        const res = await fetch(`${AUTH_API_BASE}/api/mis-decks`, { headers: headersAuth() });
         if (res.status === 401 || res.status === 502) {
             showSessionErrorModal();
             return;
@@ -1631,7 +1629,7 @@ async function cargarTorneosDisponibles(seleccionado = null) {
     select.innerHTML = '<option value="">Cargando torneos...</option>';
 
     try {
-        const res = await fetch(`${AUTH_API_BASE}/api/torneos-disponibles?session=${token}`);
+        const res = await fetch(`${AUTH_API_BASE}/api/torneos-disponibles`, { headers: headersAuth() });
         if (res.status === 401 || res.status === 502) {
             showSessionErrorModal(); 
             return; // Salimos de la función, no seguimos renderizando
@@ -1741,7 +1739,7 @@ async function verMiDeck(codigoTorneo, contenedor, puedeEditar = false, tieneDec
         // ============================================================
         // Comportamiento para torneos ABIERTOS o FINALIZADOS
         // ============================================================
-        const res = await fetch(`${AUTH_API_BASE}/api/mis-decks?session=${token}`);
+        const res = await fetch(`${AUTH_API_BASE}/api/mis-decks`, { headers: headersAuth() });
         if (res.status === 401 || res.status === 502) {
             showSessionErrorModal(); 
             return;
@@ -1938,7 +1936,6 @@ async function agendarPartida(e) {
         if (modo === 'editar') {
             endpoint = `${AUTH_API_BASE}/api/modificar-partida`;
             payload = {
-                session: token,
                 jugador1_id: jugador1_id,
                 jugador2_id: jugador2_id,
                 fecha_actual: fecha_actual,
@@ -1949,7 +1946,6 @@ async function agendarPartida(e) {
         } else {
             endpoint = `${AUTH_API_BASE}/api/agendar-partida`;
             payload = {
-                session: token,
                 codigo_torneo: codigo,
                 jugador1_id: jugador1_id,
                 jugador2_id: jugador2_id,
@@ -1960,7 +1956,7 @@ async function agendarPartida(e) {
 
         const res = await fetch(endpoint, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: headersAuth({ 'Content-Type': 'application/json' }),
             body: JSON.stringify(payload)
         });
         const data = await res.json();
@@ -2010,9 +2006,8 @@ async function eliminarPartida(fecha, hora, j1, j2) {
     try {
         const res = await fetch(`${AUTH_API_BASE}/api/eliminar-partida`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: headersAuth({ 'Content-Type': 'application/json' }),
             body: JSON.stringify({
-                session: token,
                 jugador1_id: j1,
                 jugador2_id: j2,
                 fecha: fecha,

@@ -5,6 +5,13 @@ const DEV_MODE_FAKE_LOGIN = false;
 
 let nombreEnProceso = '';
 
+// Cabeceras para la API con el token de sesión (Authorization: Bearer <token>).
+// El token ya no viaja en la URL ni en el cuerpo, así no acaba en logs ni historiales.
+function headersAuth(extra = {}) {
+    const token = sessionStorage.getItem(SESSION_STORAGE_KEY);
+    return token ? { ...extra, 'Authorization': `Bearer ${token}` } : { ...extra };
+}
+
 function abrirLoginModal() {
 
     if (document.body.classList.contains('is-logged-in')) {
@@ -203,7 +210,7 @@ async function comprobarSesionActiva() {
     }
 
     try {
-        const res = await fetch(`${AUTH_API_BASE}/auth/verificar-sesion?session=${token}`);
+        const res = await fetch(`${AUTH_API_BASE}/auth/verificar-sesion`, { headers: headersAuth() });
         const data = await res.json();
 
         if (data.autenticado) {
