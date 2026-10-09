@@ -234,10 +234,19 @@ async function comprobarSesionActiva() {
 
 function cerrarSesion() {
 
+    // Invalida el token también en el servidor (si alguien lo hubiera copiado, deja de valer). keepalive: la
+    // petición sigue aunque la página cambie; si falla, la sesión local se cierra igual.
+    const token = sessionStorage.getItem(SESSION_STORAGE_KEY);
+    if (token) {
+        fetch(`${AUTH_API_BASE}/auth/logout`, { method: 'POST', headers: headersAuth(), keepalive: true })
+            .catch(() => {});
+    }
+
     sessionStorage.removeItem(SESSION_STORAGE_KEY);
-    sessionStorage.removeItem(SESSION_USERNAME_KEY);   // NUEVO
+    sessionStorage.removeItem(SESSION_USERNAME_KEY);
     document.body.classList.remove('is-logged-in');
     window.klubUsername = null;
+    window.klubDiscordId = null;
 
     document.dispatchEvent(new CustomEvent('klub:logout'));
 

@@ -74,6 +74,12 @@ function initMemberView() {
 
     document.addEventListener('klub:logout', () => {
         mostrarVistaPublica();
+        // Los datos de la zona de socios no se quedan en la página (oculta) tras cerrar sesión
+        ['#todas-partidas-container', '#torneo-banner-container', '#mis-pendientes-container',
+         '#mis-torneos-lista', '#mis-decks-lista', '.modal-deck-content'].forEach(sel => {
+            const el = document.querySelector(sel);
+            if (el) el.replaceChildren();
+        });
     });
 
     initMemberTabs();
