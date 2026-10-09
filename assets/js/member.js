@@ -134,14 +134,14 @@ async function cargarMisTorneos() {
             const esActivo = t.tipo === 'abierto' || t.tipo === 'en desarrollo';
             const estadoLabel = esActivo ? (t.tipo === 'abierto' ? '✅ Abierto' : '⚔️ En desarrollo') : '🏁 Finalizado';
             const infoLine = esActivo
-                ? `Inscrito · ${t.total_participantes} jugadores · ${t.fecha}`
-                : `${t.wins}-${t.losses}-${t.draws} · ${t.mp} pts · de ${t.total_participantes} jugadores`;
+                ? `Inscrito · ${escapeHtml(t.total_participantes)} jugadores · ${escapeHtml(t.fecha)}`
+                : `${escapeHtml(t.wins)}-${escapeHtml(t.losses)}-${escapeHtml(t.draws)} · ${escapeHtml(t.mp)} pts · de ${escapeHtml(t.total_participantes)} jugadores`;
 
             html += `
-                <div class="mi-torneo-card" data-torneo-codigo="${t.codigo}" data-tipo="${t.tipo}">
-                    <div class="mi-torneo-rank">${esActivo ? '📌' : '#' + (t.rank || '—')}</div>
+                <div class="mi-torneo-card" data-torneo-codigo="${escapeHtml(t.codigo)}" data-tipo="${escapeHtml(t.tipo)}">
+                    <div class="mi-torneo-rank">${esActivo ? '📌' : '#' + escapeHtml(t.rank || '—')}</div>
                     <div class="mi-torneo-info">
-                        <h3>${t.nombre} <span style="font-size:0.7rem; font-weight:normal; color:var(--text-muted);">${estadoLabel}</span></h3>
+                        <h3>${escapeHtml(t.nombre)} <span style="font-size:0.7rem; font-weight:normal; color:var(--text-muted);">${estadoLabel}</span></h3>
                         <p>${infoLine}</p>
                     </div>
                     <div class="mi-torneo-actions">
@@ -269,7 +269,7 @@ async function cargarClasificacionEnPanel(codigo, container) {
     container.innerHTML = '<p class="standings-loading">Cargando clasificación...</p>';
 
     try {
-        const res = await fetch(`${AUTH_API_BASE}/api/clasificacion-torneo?codigo=${codigo}`, { headers: headersAuth() });
+        const res = await fetch(`${AUTH_API_BASE}/api/clasificacion-torneo?codigo=${encodeURIComponent(codigo)}`, { headers: headersAuth() });
         if (res.status === 404) {
             container.innerHTML = '<p class="empty-state">Este torneo aún no tiene clasificación.</p>';
             return;
@@ -300,9 +300,9 @@ async function cargarClasificacionEnPanel(codigo, container) {
             const claseFila = esMiFila ? 'mi-fila' : '';
             html += `<tr class="${claseFila}">
                 <td>${i+1}</td>
-                <td>${esMiFila ? '⭐ ' : ''}${j.nombre}${esMiFila ? ' ⭐' : ''}</td>
-                <td>${j.mp}</td>
-                <td>${j.wins}-${j.losses}-${j.draws}</td>
+                <td>${esMiFila ? '⭐ ' : ''}${escapeHtml(j.nombre)}${esMiFila ? ' ⭐' : ''}</td>
+                <td>${escapeHtml(j.mp)}</td>
+                <td>${escapeHtml(j.wins)}-${escapeHtml(j.losses)}-${escapeHtml(j.draws)}</td>
             </tr>`;
         });
         html += '</tbody></table>';
@@ -310,7 +310,7 @@ async function cargarClasificacionEnPanel(codigo, container) {
         ocultarPantallaCarga();
     } catch (err) {
         console.error(err);
-        container.innerHTML = `<p class="standings-error">${err.message}</p>`;
+        container.innerHTML = `<p class="standings-error">${escapeHtml(err.message)}</p>`;
         ocultarPantallaCarga();
     }
 }
@@ -357,7 +357,7 @@ async function cargarDeckEnPanel(codigo, container, puedeEditar = false, inscrit
             if (inscrito && estado === 'abierto') {
                 emptyHtml += `
                     <div class="panel-actions" style="margin-top: 1rem;">
-                        <button class="btn btn-sm btn-primary" data-subir-deck="${codigo}">Subir deck</button>
+                        <button class="btn btn-sm btn-primary" data-subir-deck="${escapeHtml(codigo)}">Subir deck</button>
                     </div>
                 `;
             }
@@ -370,11 +370,11 @@ async function cargarDeckEnPanel(codigo, container, puedeEditar = false, inscrit
         }
 
         // Renderizar el deck
-        let html = `<h4 style="margin:0 0 0.5rem 0;color:#fff;">🎴 ${deck.nombre_deck}</h4>`;
-        html += `<p><strong>Arquetipo:</strong> ${deck.archetype}</p>`;
-        html += `<p><strong>Decklist:</strong></p><pre class="deck-list">${deck.decklist}</pre>`;
+        let html = `<h4 style="margin:0 0 0.5rem 0;color:#fff;">🎴 ${escapeHtml(deck.nombre_deck)}</h4>`;
+        html += `<p><strong>Arquetipo:</strong> ${escapeHtml(deck.archetype)}</p>`;
+        html += `<p><strong>Decklist:</strong></p><pre class="deck-list">${escapeHtml(deck.decklist)}</pre>`;
         if (deck.sideboard && deck.sideboard !== 'N/A') {
-            html += `<p class="deck-sideboard-title">Sideboard</p><pre class="deck-list">${deck.sideboard}</pre>`;
+            html += `<p class="deck-sideboard-title">Sideboard</p><pre class="deck-list">${escapeHtml(deck.sideboard)}</pre>`;
         }
 
         // 🔥 AÑADIR BOTÓN DE EDITAR/DESHABILITADO (igual que en el bot de Python)
@@ -382,7 +382,7 @@ async function cargarDeckEnPanel(codigo, container, puedeEditar = false, inscrit
             // Puede editar: torneo abierto (ilimitado) o en desarrollo con ediciones disponibles
             html += `
                 <div class="panel-actions" style="margin-top: 1rem;">
-                    <button class="btn btn-sm btn-warning" data-editar-deck="${codigo}">Editar deck</button>
+                    <button class="btn btn-sm btn-warning" data-editar-deck="${escapeHtml(codigo)}">Editar deck</button>
                 </div>
             `;
         } else if (estado === 'en desarrollo' && !puedeEditar) {
@@ -423,7 +423,7 @@ async function cargarEnfrentamientosEnPanel(codigo, container) {
     container.innerHTML = '<p class="standings-loading">Cargando enfrentamientos...</p>';
 
     try {
-        const res = await fetch(`${AUTH_API_BASE}/api/torneo-enfrentamientos?torneo=${codigo}`, { headers: headersAuth() });
+        const res = await fetch(`${AUTH_API_BASE}/api/torneo-enfrentamientos?torneo=${encodeURIComponent(codigo)}`, { headers: headersAuth() });
         if (res.status === 401 || res.status === 502) {
             showSessionErrorModal(); 
             return;
@@ -435,13 +435,6 @@ async function cargarEnfrentamientosEnPanel(codigo, container) {
 
         const data = await res.json();
         const rondas = data.rondas || [];
-
-        // 🔍 DEBUG: Ver qué está llegando
-        console.log('🕵️ [Enfrentamientos] Mi discord_id:', window.klubDiscordId, '| Tipo:', typeof window.klubDiscordId);
-        console.log('🕵️ [Enfrentamientos] Rondas recibidas:', rondas.length);
-        if (rondas.length > 0 && rondas[0].partidos && rondas[0].partidos.length > 0) {
-            console.log('🕵️ [Enfrentamientos] Primer partido:', rondas[0].partidos[0]);
-        }
 
         if (!rondas.length) {
             container.innerHTML = `
@@ -480,7 +473,7 @@ async function cargarEnfrentamientosEnPanel(codigo, container) {
 
             html += `
                 <div class="ronda-block">
-                    <h5 style="margin: 0.5rem 0; color: var(--text-muted);">Ronda ${rondaNum} — ${completa}</h5>
+                    <h5 style="margin: 0.5rem 0; color: var(--text-muted);">Ronda ${escapeHtml(rondaNum)} — ${completa}</h5>
                     <ul style="list-style: none; padding-left: 0; margin: 0 0 1rem 0;">
             `;
 
@@ -491,7 +484,7 @@ async function cargarEnfrentamientosEnPanel(codigo, container) {
                 let estadoTexto = '⏳ Pendiente';
                 let estadoClase = 'estado-pendiente';
                 if (p.resultado) {
-                    estadoTexto = p.resultado;
+                    estadoTexto = escapeHtml(p.resultado);
                     estadoClase = 'estado-completado';
                 } else if (p.agendada) {
                     estadoTexto = '📅 Agendada';
@@ -511,9 +504,9 @@ async function cargarEnfrentamientosEnPanel(codigo, container) {
                 if (r.completa && rivalId && rivalId !== 'null' && rivalId !== 'undefined') {
                     botonVerDeck = `
                         <button class="btn btn-sm btn-primary ver-deck-rival" 
-                                data-codigo="${codigo}"
-                                data-rival="${rivalId}" 
-                                data-nombre="${rivalNombre}">
+                                data-codigo="${escapeHtml(codigo)}"
+                                data-rival="${escapeHtml(rivalId)}" 
+                                data-nombre="${escapeHtml(rivalNombre)}">
                             🎴 Ver deck
                         </button>
                     `;
@@ -522,7 +515,7 @@ async function cargarEnfrentamientosEnPanel(codigo, container) {
                 html += `
                     <li style="padding: 0.2rem 0; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
                         <span>
-                            ${miNombre} vs ${rivalNombre} — <strong class="${estadoClase}">${estadoTexto}</strong>
+                            ${escapeHtml(miNombre)} vs ${escapeHtml(rivalNombre)} — <strong class="${estadoClase}">${estadoTexto}</strong>
                         </span>
                         <span>
                             ${botonVerDeck}
@@ -569,7 +562,7 @@ async function cargarEnfrentamientosEnPanel(codigo, container) {
         ocultarPantallaCarga();
     } catch (err) {
         console.error(err);
-        container.innerHTML = `<p class="standings-error">Error al cargar enfrentamientos: ${err.message}</p>`;
+        container.innerHTML = `<p class="standings-error">Error al cargar enfrentamientos: ${escapeHtml(err.message)}</p>`;
         ocultarPantallaCarga();
     }
 }
@@ -596,7 +589,7 @@ async function cargarDeckRival(codigo, rivalId) {
     if (!token) return;
 
     try {
-        const res = await fetch(`${AUTH_API_BASE}/api/deck-rival?torneo=${codigo}&rival=${rivalId}`, { headers: headersAuth() });
+        const res = await fetch(`${AUTH_API_BASE}/api/deck-rival?torneo=${encodeURIComponent(codigo)}&rival=${encodeURIComponent(rivalId)}`, { headers: headersAuth() });
         if (res.status === 401 || res.status === 502) {
             showSessionErrorModal(); 
             return; // Salimos de la función, no seguimos renderizando
@@ -614,19 +607,19 @@ async function cargarDeckRival(codigo, rivalId) {
         }
 
         let html = `
-            <h4>🎴 ${deck.nombre || 'Deck sin nombre'}</h4>
-            <p><strong>Arquetipo:</strong> ${deck.archetype || 'Desconocido'}</p>
+            <h4>🎴 ${escapeHtml(deck.nombre || 'Deck sin nombre')}</h4>
+            <p><strong>Arquetipo:</strong> ${escapeHtml(deck.archetype || 'Desconocido')}</p>
             <p><strong>Decklist:</strong></p>
-            <pre class="deck-list">${deck.decklist || 'Vacío'}</pre>
+            <pre class="deck-list">${escapeHtml(deck.decklist || 'Vacío')}</pre>
         `;
         if (deck.sideboard && deck.sideboard !== 'N/A') {
-            html += `<p class="deck-sideboard-title">Sideboard</p><pre class="deck-list">${deck.sideboard}</pre>`;
+            html += `<p class="deck-sideboard-title">Sideboard</p><pre class="deck-list">${escapeHtml(deck.sideboard)}</pre>`;
         }
         container.innerHTML = html;
 
     } catch (err) {
         console.error(err);
-        container.innerHTML = `<p class="standings-error">Error al cargar deck: ${err.message}</p>`;
+        container.innerHTML = `<p class="standings-error">Error al cargar deck: ${escapeHtml(err.message)}</p>`;
     }
 }
 
@@ -793,12 +786,12 @@ async function cargarMisDecks() {
 
         contenedor.innerHTML = data.decks.map(d => `
             <div class="mi-deck-card">
-                <h3>${d.nombre_deck} <span class="deck-archetype">${d.archetype}</span></h3>
-                <p class="deck-tournament">${d.codigo_torneo || ''}</p>
+                <h3>${escapeHtml(d.nombre_deck)} <span class="deck-archetype">${escapeHtml(d.archetype)}</span></h3>
+                <p class="deck-tournament">${escapeHtml(d.codigo_torneo || '')}</p>
                 <details>
                     <summary>Ver decklist</summary>
-                    <pre class="deck-list">${d.decklist}</pre>
-                    ${d.sideboard && d.sideboard !== 'N/A' ? `<p class="deck-sideboard-title">Sideboard</p><pre class="deck-list">${d.sideboard}</pre>` : ''}
+                    <pre class="deck-list">${escapeHtml(d.decklist)}</pre>
+                    ${d.sideboard && d.sideboard !== 'N/A' ? `<p class="deck-sideboard-title">Sideboard</p><pre class="deck-list">${escapeHtml(d.sideboard)}</pre>` : ''}
                 </details>
             </div>
         `).join('');
@@ -864,12 +857,12 @@ async function cargarEstadoTorneos() {
             const puedeEditar = estado === 'abierto' || (estado === 'en desarrollo' && deckEdited < 1);
             const statusClass = estado === 'abierto' ? 'abierto' : 'desarrollo';
             const statusText = estado === 'abierto' ? '✅ Abierto' : '⚔️ En curso';
-            const fecha = t.fecha_inicio || 'Sin fecha';
-            const inscritos = `${t.total_inscritos || 0}/${t.total_maximo || '∞'}`;
+            const fecha = escapeHtml(t.fecha_inicio || 'Sin fecha');
+            const inscritos = `${escapeHtml(t.total_inscritos || 0)}/${escapeHtml(t.total_maximo || '∞')}`;
             const bannerClass = estado === 'abierto' ? 'torneo-abierto' : 'torneo-desarrollo';
 
             const toggleHtml = `
-                <button class="mi-torneo-toggle banner-toggle" aria-label="Ver más" data-torneo="${t.codigo}">
+                <button class="mi-torneo-toggle banner-toggle" aria-label="Ver más" data-torneo="${escapeHtml(t.codigo)}">
                     <svg class="icon-arrow-down" viewBox="0 0 24 24" width="24" height="24">
                         <path fill="currentColor" d="M7 10l5 5 5-5z"/>
                     </svg>
@@ -877,10 +870,10 @@ async function cargarEstadoTorneos() {
             `;
 
             html += `
-                <div class="torneo-banner ${bannerClass}" data-torneo="${t.codigo}" data-puede-editar="${puedeEditar}" data-tiene-deck="${tieneDeck}" data-inscrito="${inscrito}" data-estado="${estado}">
+                <div class="torneo-banner ${bannerClass}" data-torneo="${escapeHtml(t.codigo)}" data-puede-editar="${puedeEditar}" data-tiene-deck="${escapeHtml(tieneDeck)}" data-inscrito="${escapeHtml(inscrito)}" data-estado="${escapeHtml(estado)}">
                     <div class="torneo-banner-header">
                         <div class="torneo-banner-info">
-                            <h3>${t.nombre}</h3>
+                            <h3>${escapeHtml(t.nombre)}</h3>
                             <span class="torneo-banner-status ${statusClass}">${statusText}</span>
                             ${tieneDeck ? `<span class="torneo-banner-deck-status">🃏</span>` : ''}
                             <span class="torneo-banner-meta">📅 ${fecha} · 👥 ${inscritos}</span>
@@ -889,7 +882,7 @@ async function cargarEstadoTorneos() {
                             ${toggleHtml}
                         </div>
                     </div>
-                    <div class="torneo-banner-deck" id="deck-${t.codigo}"></div>
+                    <div class="torneo-banner-deck" id="deck-${escapeHtml(t.codigo)}"></div>
                 </div>
             `;
         });
@@ -1192,26 +1185,20 @@ async function cargarTodasPartidas() {
             const esMiPartida = (p.jugador1_id == window.klubDiscordId || p.jugador2_id == window.klubDiscordId);
             let accionesHtml = '';
             if (esMiPartida) {
+                // Los nombres de Discord los controla cada jugador: escapados también dentro de los atributos
+                const datosPartida = `data-fecha="${escapeHtml(p.fecha)}" data-hora="${escapeHtml(p.hora)}"
+                            data-j1="${escapeHtml(p.jugador1_id)}" data-j2="${escapeHtml(p.jugador2_id)}"
+                            data-nombre1="${escapeHtml(p.jugador1)}" data-nombre2="${escapeHtml(p.jugador2)}"`;
                 accionesHtml = `
                     <button class="btn btn-sm btn-secondary editar-partida-btn" 
-                            data-fecha="${p.fecha}" 
-                            data-hora="${p.hora}" 
-                            data-j1="${p.jugador1_id}" 
-                            data-j2="${p.jugador2_id}"
-                            data-nombre1="${p.jugador1}"
-                            data-nombre2="${p.jugador2}"
+                            ${datosPartida}
                             title="Editar fecha/hora">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
                             <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
                         </svg>
                     </button>
                     <button class="btn btn-sm btn-danger eliminar-partida-btn" 
-                            data-fecha="${p.fecha}" 
-                            data-hora="${p.hora}" 
-                            data-j1="${p.jugador1_id}" 
-                            data-j2="${p.jugador2_id}"
-                            data-nombre1="${p.jugador1}"
-                            data-nombre2="${p.jugador2}"
+                            ${datosPartida}
                             title="Eliminar partida">
                         <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
                             <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
@@ -1224,10 +1211,10 @@ async function cargarTodasPartidas() {
 
             html += `
                 <tr>
-                    <td><strong>${p.fecha}</strong></td>
-                    <td>${p.hora}</td>
-                    <td>${p.jugador1}</td>
-                    <td>${p.jugador2}</td>
+                    <td><strong>${escapeHtml(p.fecha)}</strong></td>
+                    <td>${escapeHtml(p.hora)}</td>
+                    <td>${escapeHtml(p.jugador1)}</td>
+                    <td>${escapeHtml(p.jugador2)}</td>
                     <td>${accionesHtml}</td>
                 </tr>
             `;
@@ -1265,7 +1252,7 @@ async function cargarTodasPartidas() {
 
     } catch (err) {
         console.error(err);
-        contenedor.innerHTML = `<p class="standings-error">Error al cargar partidas: ${err.message}</p>`;
+        contenedor.innerHTML = `<p class="standings-error">Error al cargar partidas: ${escapeHtml(err.message)}</p>`;
         Toast.error('Error al cargar el listado de partidas.');
     }
 }
@@ -1332,7 +1319,7 @@ async function cargarMisPendientes() {
         misTorneos.forEach(t => {
             html += `
                 <div class="torneo-pendiente-card">
-                    <h4>${t.nombre} — Ronda ${t.ronda}</h4>
+                    <h4>${escapeHtml(t.nombre)} — Ronda ${escapeHtml(t.ronda)}</h4>
                     <div class="partidas-table-wrap">
                         <table class="partidas-table pendientes-table">
                             <thead>
@@ -1348,14 +1335,13 @@ async function cargarMisPendientes() {
             t.pendientes.forEach(p => {
                 const estaAgendada = p.agendada || false;
                 const estado = estaAgendada ? '✅ Agendada' : '⏳ Pendiente';
+                // Los nombres de Discord los controla cada jugador: escapados también dentro de los atributos
+                const datosPartida = `data-codigo="${escapeHtml(t.codigo)}" data-ronda="${escapeHtml(t.ronda)}"
+                            data-j1="${escapeHtml(p.jugador1_id)}" data-j2="${escapeHtml(p.jugador2_id)}"
+                            data-nombre1="${escapeHtml(p.jugador1)}" data-nombre2="${escapeHtml(p.jugador2)}"`;
                 const botonAgendar = !estaAgendada ? `
                     <button class="btn btn-sm btn-primary agendar-pendiente" 
-                            data-codigo="${t.codigo}" 
-                            data-j1="${p.jugador1_id}" 
-                            data-j2="${p.jugador2_id}" 
-                            data-nombre1="${p.jugador1}" 
-                            data-nombre2="${p.jugador2}"
-                            data-ronda="${t.ronda}">
+                            ${datosPartida}>
                         Agendar
                     </button>
                 ` : '';
@@ -1363,7 +1349,7 @@ async function cargarMisPendientes() {
                 if (p.jugador2 === 'BYE') {
                     html += `
                         <tr>
-                            <td>${p.jugador1}</td>
+                            <td>${escapeHtml(p.jugador1)}</td>
                             <td>BYE</td>
                             <td><span style="color: var(--muted);">—</span></td>
                             <td>—</td>
@@ -1372,18 +1358,13 @@ async function cargarMisPendientes() {
                 } else {
                     html += `
                         <tr>
-                            <td>${p.jugador1}</td>
-                            <td>${p.jugador2}</td>
+                            <td>${escapeHtml(p.jugador1)}</td>
+                            <td>${escapeHtml(p.jugador2)}</td>
                             <td>${estado}</td>
                             <td>
                                 ${botonAgendar}
                                 <button class="btn btn-sm btn-success reportar-pendiente" 
-                                        data-codigo="${t.codigo}" 
-                                        data-j1="${p.jugador1_id}" 
-                                        data-j2="${p.jugador2_id}" 
-                                        data-nombre1="${p.jugador1}" 
-                                        data-nombre2="${p.jugador2}"
-                                        data-ronda="${t.ronda}">
+                                        ${datosPartida}>
                                     Reportar
                                 </button>
                             </td>
@@ -1429,7 +1410,7 @@ async function cargarMisPendientes() {
 
     } catch (err) {
         console.error(err);
-        contenedor.innerHTML = `<p class="standings-error">Error al cargar tus pendientes: ${err.message}</p>`;
+        contenedor.innerHTML = `<p class="standings-error">Error al cargar tus pendientes: ${escapeHtml(err.message)}</p>`;
         Toast.error('Error al cargar tus partidas pendientes.');
     } finally {
         window._cargandoPendientes = false;
@@ -1470,68 +1451,6 @@ async function desinscribirse(codigo) {
     } catch (error) {
         console.error(error);
         Toast.error('Error al desinscribirte del torneo.');
-    }
-}
-
-async function toggleDeckDisplay(codigo, btn) {
-    const banner = btn.closest('.torneo-banner');
-    const deckDisplay = banner.querySelector('.deck-display');
-    if (!deckDisplay) return;
-
-    if (deckDisplay.style.display === 'block') {
-        deckDisplay.style.display = 'none';
-        btn.textContent = 'Ver deck';
-        return;
-    }
-
-    deckDisplay.style.display = 'block';
-    btn.textContent = 'Ocultar deck';
-    deckDisplay.innerHTML = '<p class="standings-loading">Cargando deck...</p>';
-
-    try {
-        const token = sessionStorage.getItem(SESSION_STORAGE_KEY);
-        const res = await fetch(`${AUTH_API_BASE}/api/mis-decks`, { headers: headersAuth() });
-        const data = await res.json();
-        if (res.status === 401 || res.status === 502) {
-            showSessionErrorModal(); 
-            return; // Salimos de la función, no seguimos renderizando
-        }
-        if (!res.ok) throw new Error('Error al cargar decks');
-
-        let deck = data.decks.find(d => d.codigo_torneo === codigo);
-        if (!deck) {
-            deck = data.decks.find(d => d.codigo_deck && d.codigo_deck.startsWith(codigo + '_'));
-        }
-        if (!deck) {
-            deck = data.decks.find(d => d.codigo_torneo && d.codigo_torneo.includes(codigo));
-        }
-
-        if (!deck) {
-            deckDisplay.innerHTML = '<p class="empty-state">No has subido deck para este torneo.</p>';
-            return;
-        }
-
-        let html = `
-            <div class="deck-card">
-                <h4>🎴 ${deck.nombre_deck}</h4>
-                <p><strong>Arquetipo:</strong> ${deck.archetype}</p>
-                <details>
-                    <summary>Ver decklist</summary>
-                    <pre class="deck-list">${deck.decklist}</pre>
-                </details>
-                ${deck.sideboard && deck.sideboard !== 'N/A' ? `
-                    <details>
-                        <summary>Ver sideboard</summary>
-                        <pre class="deck-list">${deck.sideboard}</pre>
-                    </details>
-                ` : ''}
-            </div>
-        `;
-        deckDisplay.innerHTML = html;
-
-    } catch (err) {
-        console.error(err);
-        deckDisplay.innerHTML = `<p class="standings-error">Error al cargar deck: ${err.message}</p>`;
     }
 }
 
@@ -1761,11 +1680,11 @@ async function verMiDeck(codigoTorneo, contenedor, puedeEditar = false, tieneDec
         if (estado !== 'en desarrollo') {
             if (inscrito) {
                 if (estado === 'abierto') {
-                    accionesHtml = `<button class="btn btn-sm btn-danger" data-desinscribir="${codigoTorneo}">Desinscribirme</button>`;
+                    accionesHtml = `<button class="btn btn-sm btn-danger" data-desinscribir="${escapeHtml(codigoTorneo)}">Desinscribirme</button>`;
                 }
             } else {
                 if (estado === 'abierto') {
-                    accionesHtml = `<button class="btn btn-sm btn-primary" data-inscribir="${codigoTorneo}">Apuntarme</button>`;
+                    accionesHtml = `<button class="btn btn-sm btn-primary" data-inscribir="${escapeHtml(codigoTorneo)}">Apuntarme</button>`;
                 } else {
                     accionesHtml = `<button class="btn btn-sm btn-secondary" disabled>Cerrado</button>`;
                 }
@@ -1781,26 +1700,26 @@ async function verMiDeck(codigoTorneo, contenedor, puedeEditar = false, tieneDec
             `;
         } else {
             if (puedeEditar) {
-                botonEditar = `<button class="btn btn-sm btn-warning" data-editar-deck="${codigoTorneo}">Editar deck</button>`;
+                botonEditar = `<button class="btn btn-sm btn-warning" data-editar-deck="${escapeHtml(codigoTorneo)}">Editar deck</button>`;
             } else {
                 botonEditar = `<button class="btn btn-sm btn-secondary" disabled>Edición única usada</button>`;
             }
 
             deckHtml = `
                 <div class="deck-preview">
-                    <h4>🎴 ${deck.nombre_deck}</h4>
-                    <p><strong>Arquetipo:</strong> <span class="deck-archetype">${deck.archetype}</span></p>
+                    <h4>🎴 ${escapeHtml(deck.nombre_deck)}</h4>
+                    <p><strong>Arquetipo:</strong> <span class="deck-archetype">${escapeHtml(deck.archetype)}</span></p>
                     <p><strong>Decklist:</strong></p>
-                    <pre class="deck-list">${deck.decklist}</pre>
+                    <pre class="deck-list">${escapeHtml(deck.decklist)}</pre>
             `;
             if (deck.sideboard && deck.sideboard !== 'N/A') {
-                deckHtml += `<p class="deck-sideboard-title">Sideboard</p><pre class="deck-list">${deck.sideboard}</pre>`;
+                deckHtml += `<p class="deck-sideboard-title">Sideboard</p><pre class="deck-list">${escapeHtml(deck.sideboard)}</pre>`;
             }
             deckHtml += `</div>`;
         }
 
         let buttonsHtml = !deck
-            ? `<button class="btn btn-sm btn-primary" data-subir-deck="${codigoTorneo}">Subir deck</button>`
+            ? `<button class="btn btn-sm btn-primary" data-subir-deck="${escapeHtml(codigoTorneo)}">Subir deck</button>`
             : botonEditar;
 
         const html = `
@@ -1828,7 +1747,7 @@ async function verMiDeck(codigoTorneo, contenedor, puedeEditar = false, tieneDec
 
     } catch (err) {
         console.error(err);
-        contenedor.innerHTML = `<p class="standings-error">Error al cargar panel: ${err.message}</p>`;
+        contenedor.innerHTML = `<p class="standings-error">Error al cargar panel: ${escapeHtml(err.message)}</p>`;
         Toast.error('Error al cargar el panel del torneo.');
     }
 }

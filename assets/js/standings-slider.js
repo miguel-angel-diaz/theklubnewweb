@@ -11,32 +11,33 @@ let slideActual = 0;
 function formatearDiff(diff) {
     const clase = diff > 0 ? 'diff-positive' : diff < 0 ? 'diff-negative' : 'diff-neutral';
     const signo = diff > 0 ? '+' : '';
-    return `<span class="${clase}">${signo}${diff}</span>`;
+    return `<span class="${clase}">${signo}${escapeHtml(diff)}</span>`;
 }
 
+// Página pública: el nombre de Discord y el del torneo los controlan otros, todo dato va escapado (utils.js)
 function renderSlide(torneo) {
 
     const filas = torneo.clasificacion.map(p => `
         <tr>
-            <td class="standings-rank">${p.rank}</td>
+            <td class="standings-rank">${escapeHtml(p.rank)}</td>
             <td>
                 <div class="standings-player">
-                    ${p.avatar ? `<img src="${p.avatar}" alt="" class="standings-avatar">` : ''}
-                    <span>@${p.nombre}</span>
+                    ${p.avatar ? `<img src="${safeUrl(p.avatar)}" alt="" class="standings-avatar">` : ''}
+                    <span>@${escapeHtml(p.nombre)}</span>
                 </div>
             </td>
-            <td>${p.wins}-${p.losses}-${p.draws}</td>
-            <td>${p.mp}</td>
-            <td>${p.omw.toFixed(3)}</td>
-            <td>${p.buchholz.toFixed(5)}</td>
+            <td>${escapeHtml(p.wins)}-${escapeHtml(p.losses)}-${escapeHtml(p.draws)}</td>
+            <td>${escapeHtml(p.mp)}</td>
+            <td>${Number(p.omw || 0).toFixed(3)}</td>
+            <td>${Number(p.buchholz || 0).toFixed(5)}</td>
             <td>${formatearDiff(p.diff)}</td>
         </tr>
     `).join('');
 
     return `
         <div class="slide-header">
-            <h3>${torneo.nombre}</h3>
-            <span class="slide-meta">${torneo.participantes_count} jugadores · Finalizado el ${formatearFecha(torneo.fecha_fin)}</span>
+            <h3>${escapeHtml(torneo.nombre)}</h3>
+            <span class="slide-meta">${escapeHtml(torneo.participantes_count)} jugadores · Finalizado el ${escapeHtml(formatearFecha(torneo.fecha_fin))}</span>
         </div>
         <div class="standings-table-wrap">
             <table class="standings-table">

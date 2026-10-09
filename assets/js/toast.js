@@ -24,9 +24,11 @@ const Toast = {
         toast.className = `toast toast-${type}`;
         toast.innerHTML = `
             <span class="toast-icon">${icons[type] || 'ℹ️'}</span>
-            <span class="toast-content">${message}</span>
+            <span class="toast-content"></span>
             <button class="toast-close" aria-label="Cerrar notificación">✕</button>
         `;
+        // El mensaje suele venir de la API (data.error / data.mensaje): siempre como texto, nunca como HTML
+        toast.querySelector('.toast-content').textContent = message;
 
         // Cerrar con botón
         toast.querySelector('.toast-close').addEventListener('click', () => {

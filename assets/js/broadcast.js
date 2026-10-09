@@ -6,12 +6,19 @@ const PODCAST_API = 'https://mydiscordbot-production-3e6a.up.railway.app/api/pod
 const ARTICULOS_API = 'https://mydiscordbot-production-3e6a.up.railway.app/api/articulos';
 
 function extraerEpisodio(titulo) {
-    const match = titulo.match(/^(Temp\.\s*\d+\s*Ep\.\s*\d+)/i);
+    const match = String(titulo || '').match(/^(Temp\.\s*\d+\s*Ep\.\s*\d+)/i);
     return match ? match[1] : null;
 }
 
 function limpiarTitulo(titulo) {
-    return titulo.replace(/^Temp\.\s*\d+\s*Ep\.\s*\d+\s*-\s*/i, '');
+    return String(titulo || '').replace(/^Temp\.\s*\d+\s*Ep\.\s*\d+\s*-\s*/i, '');
+}
+
+// Los RSS (iVoox, Medium) traen HTML que no controlamos: se pasa a texto plano (DOMParser no ejecuta nada)
+// y luego se escapa. Así tampoco quedan etiquetas cortadas por el recorte a 200 caracteres.
+function textoPlano(html) {
+    const doc = new DOMParser().parseFromString(String(html || ''), 'text/html');
+    return (doc.body.textContent || '').replace(/\s+/g, ' ').trim();
 }
 
 async function cargarEpisodios() {
@@ -35,16 +42,16 @@ async function cargarEpisodios() {
             const tituloLimpio = limpiarTitulo(ep.titulo);
 
             return `
-                <a href="${ep.enlace}" target="_blank" class="episode-card" data-reveal="left">
+                <a href="${safeUrl(ep.enlace)}" target="_blank" rel="noopener noreferrer" class="episode-card" data-reveal="left">
                     ${ep.imagen ? `
                         <div class="episode-card-image">
-                            <img src="${ep.imagen}" alt="${tituloLimpio}" loading="lazy">
+                            <img src="${safeUrl(ep.imagen)}" alt="${escapeHtml(textoPlano(tituloLimpio))}" loading="lazy">
                         </div>
                     ` : ''}
-                    ${etiqueta ? `<span class="episode-card-tag">${etiqueta}</span>` : ''}
-                    <h3>${tituloLimpio}</h3>
-                    <p>${ep.descripcion}...</p>
-                    <span class="episode-card-date">${formatearFecha(ep.fecha)}</span>
+                    ${etiqueta ? `<span class="episode-card-tag">${escapeHtml(etiqueta)}</span>` : ''}
+                    <h3>${escapeHtml(textoPlano(tituloLimpio))}</h3>
+                    <p>${escapeHtml(textoPlano(ep.descripcion))}...</p>
+                    <span class="episode-card-date">${escapeHtml(formatearFecha(ep.fecha))}</span>
                 </a>
             `;
 
@@ -77,11 +84,11 @@ async function cargarArticulos() {
         }
 
         contenedor.innerHTML = data.articulos.map(art => `
-            <a href="${art.enlace}" target="_blank" class="article-card" data-reveal="left">
+            <a href="${safeUrl(art.enlace)}" target="_blank" rel="noopener noreferrer" class="article-card" data-reveal="left">
                 <div class="article-card-icon">✎</div>
-                <h3>${art.titulo}</h3>
-                <p>${art.descripcion}...</p>
-                <span class="article-card-date">${formatearFecha(art.fecha)}</span>
+                <h3>${escapeHtml(textoPlano(art.titulo))}</h3>
+                <p>${escapeHtml(textoPlano(art.descripcion))}...</p>
+                <span class="article-card-date">${escapeHtml(formatearFecha(art.fecha))}</span>
             </a>
         `).join('');
 
