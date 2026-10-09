@@ -2,8 +2,7 @@
    VARIABLES Y RESET
 ========================================================== */
 
-/* Importación de fuentes (ya las tienes en el HTML, pero por si acaso) */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Space+Grotesk:wght@400;500;700&display=swap');
+/* Las fuentes (Inter, Space Grotesk) se cargan desde assets/css/fonts.css, alojadas en la propia web */
 
 :root {
     /* Brand */
@@ -3065,3 +3064,29 @@ body.is-logged-in .login-nav-btn {
         max-width: 200px;
     }
 }
+
+/* ==========================================================
+   UTILIDADES (antes eran style="..." inline en index.html y member.js)
+   La CSP del .htaccess no permite estilos inline. Llevan !important para conservar la prioridad que tenía el
+   atributo style; .panel-cerrado no, porque member.js abre el panel con panel.style.display = 'block'.
+========================================================== */
+.panel-cerrado { display: none; }
+.u-hint { font-size: .85rem !important; color: var(--muted) !important; }
+.u-muted { color: var(--muted) !important; }
+.u-muted-sm { color: var(--muted) !important; font-size: .8rem !important; }
+.u-estado-mini { font-size: .7rem !important; font-weight: normal !important; color: var(--text-muted) !important; }
+.u-mt-1 { margin-top: 1rem !important; }
+.u-mb-05 { margin-bottom: .5rem !important; }
+.u-mb-075 { margin-bottom: .75rem !important; }
+.u-deck-titulo { margin: 0 0 .5rem 0 !important; color: #fff !important; }
+.u-titulo-rondas { margin: 0 0 1rem 0 !important; color: var(--text) !important; }
+.u-ronda-titulo { margin: .5rem 0 !important; color: var(--text-muted) !important; }
+.u-lista-limpia { list-style: none !important; padding-left: 0 !important; margin: 0 0 1rem 0 !important; }
+.u-fila-enfrentamiento { padding: .2rem 0 !important; display: flex !important; justify-content: space-between !important;
+                         align-items: center !important; gap: .5rem !important; flex-wrap: wrap !important; }
+.u-modal-460 { max-width: 460px !important; text-align: center !important; }
+.u-modal-480 { max-width: 480px !important; }
+.u-texto-modal { margin-bottom: 1.5rem !important; color: var(--text-muted) !important; }
+.u-flex-centro { display: flex !important; justify-content: center !important; }
+.u-min-w-120 { min-width: 120px !important; }
+.u-acciones-modal { display: flex !important; gap: 1rem !important; justify-content: flex-end !important; margin-top: 2rem !important; }

@@ -141,7 +141,7 @@ async function cargarMisTorneos() {
                 <div class="mi-torneo-card" data-torneo-codigo="${escapeHtml(t.codigo)}" data-tipo="${escapeHtml(t.tipo)}">
                     <div class="mi-torneo-rank">${esActivo ? '📌' : '#' + escapeHtml(t.rank || '—')}</div>
                     <div class="mi-torneo-info">
-                        <h3>${escapeHtml(t.nombre)} <span style="font-size:0.7rem; font-weight:normal; color:var(--text-muted);">${estadoLabel}</span></h3>
+                        <h3>${escapeHtml(t.nombre)} <span class="u-estado-mini">${estadoLabel}</span></h3>
                         <p>${infoLine}</p>
                     </div>
                     <div class="mi-torneo-actions">
@@ -151,7 +151,7 @@ async function cargarMisTorneos() {
                             </svg>
                         </button>
                     </div>
-                    <div class="mi-torneo-panel" style="display: none;">
+                    <div class="mi-torneo-panel panel-cerrado">
                         <div class="mi-torneo-tabs">
                             <button class="tab-btn active" data-tab="clasificacion">📊 Clasificación</button>
                             <button class="tab-btn" data-tab="deck">🎴 Deck</button>
@@ -356,7 +356,7 @@ async function cargarDeckEnPanel(codigo, container, puedeEditar = false, inscrit
             // Si estoy inscrito y el torneo lo permite, añado el botón de subir
             if (inscrito && estado === 'abierto') {
                 emptyHtml += `
-                    <div class="panel-actions" style="margin-top: 1rem;">
+                    <div class="panel-actions u-mt-1">
                         <button class="btn btn-sm btn-primary" data-subir-deck="${escapeHtml(codigo)}">Subir deck</button>
                     </div>
                 `;
@@ -370,7 +370,7 @@ async function cargarDeckEnPanel(codigo, container, puedeEditar = false, inscrit
         }
 
         // Renderizar el deck
-        let html = `<h4 style="margin:0 0 0.5rem 0;color:#fff;">🎴 ${escapeHtml(deck.nombre_deck)}</h4>`;
+        let html = `<h4 class="u-deck-titulo">🎴 ${escapeHtml(deck.nombre_deck)}</h4>`;
         html += `<p><strong>Arquetipo:</strong> ${escapeHtml(deck.archetype)}</p>`;
         html += `<p><strong>Decklist:</strong></p><pre class="deck-list">${escapeHtml(deck.decklist)}</pre>`;
         if (deck.sideboard && deck.sideboard !== 'N/A') {
@@ -381,14 +381,14 @@ async function cargarDeckEnPanel(codigo, container, puedeEditar = false, inscrit
         if (estado === 'abierto' || (estado === 'en desarrollo' && puedeEditar)) {
             // Puede editar: torneo abierto (ilimitado) o en desarrollo con ediciones disponibles
             html += `
-                <div class="panel-actions" style="margin-top: 1rem;">
+                <div class="panel-actions u-mt-1">
                     <button class="btn btn-sm btn-warning" data-editar-deck="${escapeHtml(codigo)}">Editar deck</button>
                 </div>
             `;
         } else if (estado === 'en desarrollo' && !puedeEditar) {
             // Torneo en desarrollo y ya usó su edición
             html += `
-                <div class="panel-actions" style="margin-top: 1rem;">
+                <div class="panel-actions u-mt-1">
                     <button class="btn btn-sm btn-secondary" disabled>Edición única usada</button>
                 </div>
             `;
@@ -440,7 +440,7 @@ async function cargarEnfrentamientosEnPanel(codigo, container) {
             container.innerHTML = `
                 <div class="empty-state">
                     <p>⚔️ No hay enfrentamientos registrados para este torneo.</p>
-                    <p style="font-size:.85rem; color:var(--muted);">Los enfrentamientos aparecerán aquí cuando se generen las rondas.</p>
+                    <p class="u-hint">Los enfrentamientos aparecerán aquí cuando se generen las rondas.</p>
                 </div>
             `;
             return;
@@ -451,7 +451,7 @@ async function cargarEnfrentamientosEnPanel(codigo, container) {
 
         let html = `
             <div class="enfrentamientos-container">
-                <h4 style="margin: 0 0 1rem 0; color: var(--text);">Todas las rondas</h4>
+                <h4 class="u-titulo-rondas">Todas las rondas</h4>
         `;
 
         let partidasMostradas = 0;
@@ -473,8 +473,8 @@ async function cargarEnfrentamientosEnPanel(codigo, container) {
 
             html += `
                 <div class="ronda-block">
-                    <h5 style="margin: 0.5rem 0; color: var(--text-muted);">Ronda ${escapeHtml(rondaNum)} — ${completa}</h5>
-                    <ul style="list-style: none; padding-left: 0; margin: 0 0 1rem 0;">
+                    <h5 class="u-ronda-titulo">Ronda ${escapeHtml(rondaNum)} — ${completa}</h5>
+                    <ul class="u-lista-limpia">
             `;
 
             misPartidasRonda.forEach(p => {
@@ -513,7 +513,7 @@ async function cargarEnfrentamientosEnPanel(codigo, container) {
                 }
 
                 html += `
-                    <li style="padding: 0.2rem 0; display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                    <li class="u-fila-enfrentamiento">
                         <span>
                             ${escapeHtml(miNombre)} vs ${escapeHtml(rivalNombre)} — <strong class="${estadoClase}">${estadoTexto}</strong>
                         </span>
@@ -537,7 +537,7 @@ async function cargarEnfrentamientosEnPanel(codigo, container) {
             container.innerHTML = `
                 <div class="empty-state">
                     <p>⚔️ No tienes enfrentamientos registrados en este torneo.</p>
-                    <p style="font-size:.85rem; color:var(--muted);">Los enfrentamientos aparecerán aquí cuando se generen las rondas en las que participes.</p>
+                    <p class="u-hint">Los enfrentamientos aparecerán aquí cuando se generen las rondas en las que participes.</p>
                 </div>
             `;
             ocultarPantallaCarga();
@@ -1206,7 +1206,7 @@ async function cargarTodasPartidas() {
                     </button>
                 `;
             } else {
-                accionesHtml = `<span style="color: var(--muted); font-size:0.8rem;"></span>`;
+                accionesHtml = `<span class="u-muted-sm"></span>`;
             }
 
             html += `
@@ -1307,7 +1307,7 @@ async function cargarMisPendientes() {
             contenedor.innerHTML = `
                 <div class="empty-state">
                     <p>🎉 No tienes partidas pendientes en ningún torneo.</p>
-                    <p style="font-size:.85rem; color:var(--muted);">Todas tus rondas están completadas.</p>
+                    <p class="u-hint">Todas tus rondas están completadas.</p>
                 </div>
             `;
             window._cargandoPendientes = false;
@@ -1351,7 +1351,7 @@ async function cargarMisPendientes() {
                         <tr>
                             <td>${escapeHtml(p.jugador1)}</td>
                             <td>BYE</td>
-                            <td><span style="color: var(--muted);">—</span></td>
+                            <td><span class="u-muted">—</span></td>
                             <td>—</td>
                         </tr>
                     `;
@@ -1602,7 +1602,7 @@ async function verMiDeck(codigoTorneo, contenedor, puedeEditar = false, tieneDec
                 <div class="mi-torneo-panel mi-torneo-panel-desarrollo">
                     <div class="mi-torneo-panel-header">
                         <span class="badge-en-curso">⚔️ Torneo en curso</span>
-                        <span style="color: var(--muted); font-size: 0.8rem;">Ronda ${rondaActual}</span>
+                        <span class="u-muted-sm">Ronda ${rondaActual}</span>
                     </div>
                     <div class="mi-torneo-tabs">
                         <button class="tab-btn active" data-tab="clasificacion">📊 Clasificación</button>
@@ -1724,7 +1724,7 @@ async function verMiDeck(codigoTorneo, contenedor, puedeEditar = false, tieneDec
 
         const html = `
             ${deckHtml}
-            <div class="panel-actions" style="margin-bottom: 0.75rem;">
+            <div class="panel-actions u-mb-075">
                 ${accionesHtml} ${buttonsHtml}
             </div>
         `;

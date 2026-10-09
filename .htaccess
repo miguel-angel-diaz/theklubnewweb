@@ -1,0 +1,54 @@
+# ==========================================================
+# The Klub · theklubmtg.es · configuración de Apache (hosting compartido, Apache 2.4)
+# Cabeceras de seguridad, https y bloqueo de ficheros que no deben servirse.
+# Todo va dentro de <IfModule>: si al hosting le falta un módulo, esa parte se ignora en vez de dar un error 500.
+# ==========================================================
+
+Options -Indexes
+ServerSignature Off
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Los retos de Let's Encrypt (renovación del certificado) pasan sin tocar
+    RewriteRule ^\.well-known/acme-challenge/ - [L]
+
+    # http -> https. También detrás del proxy del hosting (X-Forwarded-Proto), para no entrar en bucle
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # Nunca servir .git, ficheros ocultos (.htaccess, .env...) ni copias de seguridad o de editor
+    RewriteRule (^|/)\.(?!well-known/) - [F,L]
+    RewriteRule \.(bak|old|orig|swp|tmp|log|sql|zip|tar|gz|env|ini|md|py|sh)$ - [F,L,NC]
+</IfModule>
+
+<IfModule mod_headers.c>
+    # Solo https durante un año (los navegadores ignoran esta cabecera si llega por http, así que no hace falta condición)
+    Header always set Strict-Transport-Security "max-age=31536000"
+
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "DENY"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+    Header always set Cross-Origin-Opener-Policy "same-origin"
+
+    # CSP: solo se ejecuta JS de la propia web (ni inline, ni de terceros) y solo se habla con la API del bot.
+    #   - img https: las portadas del podcast llegan del RSS desde dominios que cambian; data: para iconos SVG.
+    #   - estilos y fuentes solo de la propia web: sin style="..." inline (tarea 21) y fuentes en assets/fonts (tarea 22).
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https:; media-src 'self'; connect-src 'self' https://mydiscordbot-production-3e6a.up.railway.app; frame-src 'none'; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
+
+    Header unset X-Powered-By
+</IfModule>
+
+# Caché de estáticos: los JS y CSS llevan ?v=N, así que se pueden guardar unos días
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 7 days"
+    ExpiresByType application/javascript "access plus 7 days"
+    ExpiresByType text/javascript "access plus 7 days"
+    ExpiresByType image/webp "access plus 30 days"
+    ExpiresByType image/png "access plus 30 days"
+    ExpiresByType font/woff2 "access plus 30 days"
+    ExpiresByType text/html "access plus 0 seconds"
+</IfModule>
