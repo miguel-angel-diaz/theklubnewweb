@@ -1,0 +1,23 @@
+# Cabeceras de seguridad para Cloudflare Pages (la web se despliega ahí al hacer push a main; Pages no lee .htaccess).
+# Formato: https://developers.cloudflare.com/pages/configuration/headers/
+#
+# CSP: solo se ejecuta JS de la propia web (ni inline, ni de terceros), estilos y fuentes solo de aquí y solo se habla
+# con la API del bot. img https: las portadas del podcast llegan del RSS desde dominios que cambian; data: para SVG.
+# Si en Cloudflare se activan Web Analytics o Rocket Loader, inyectan scripts que esta CSP bloquea: no activarlos
+# (o añadir aquí su origen).
+/*
+  Strict-Transport-Security: max-age=31536000
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+  Cross-Origin-Opener-Policy: same-origin
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https:; media-src 'self'; connect-src 'self' https://mydiscordbot-production-3e6a.up.railway.app; frame-src 'none'; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests
+
+# Los JS y CSS llevan ?v=N en index.html: se pueden guardar unos días; las fuentes, más
+/assets/js/*
+  Cache-Control: public, max-age=604800
+/assets/css/*
+  Cache-Control: public, max-age=604800
+/assets/fonts/*
+  Cache-Control: public, max-age=2592000
