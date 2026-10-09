@@ -24,9 +24,9 @@
     <meta name="twitter:image" content="https://theklubmtg.es/assets/images/image.jpg">
 
     <meta name="theme-color" content="#ff8800">
-    <link rel="canonical" href="https://pngpremodern.com">
+    <link rel="canonical" href="https://theklubmtg.es/">
     <link rel="icon" href="./assets/logo/favicon.ico">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="256x256" href="./assets/logo/png-definitivo-256.png">
     <!-- <link rel="manifest" href="./manifest.webmanifest"> -->
     <link rel="preload" as="image" href="./assets/logo/logo.webp">
     <link href="./assets/css/fonts.css?v=1" rel="stylesheet">
@@ -278,10 +278,10 @@
                 </header>
 
                 <div class="broadcast-links" data-reveal="left">
-                    <a href="https://www.ivoox.com/podcast-the-klubcast_sq_f12806786_1.html" target="_blank" class="btn btn-secondary">
+                    <a href="https://www.ivoox.com/podcast-the-klubcast_sq_f12806786_1.html" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">
                         Escuchar en iVoox
                     </a>
-                    <a href="https://open.spotify.com/show/1sVKOsmD4qeOVaig8HpjDa" target="_blank" class="btn btn-secondary">
+                    <a href="https://open.spotify.com/show/1sVKOsmD4qeOVaig8HpjDa" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">
                         Escuchar en Spotify
                     </a>
                 </div>
@@ -303,7 +303,7 @@
                 </header>
 
                 <div class="broadcast-links" data-reveal="left">
-                    <a href="https://medium.com/@theklubmtg" target="_blank" class="btn btn-secondary">
+                    <a href="https://medium.com/@theklubmtg" target="_blank" rel="noopener noreferrer" class="btn btn-secondary">
                         Ver en Medium
                     </a>
                 </div>
@@ -456,8 +456,8 @@
                     <h3 id="login-modal-title">Accede con tu Discord</h3>
                     <p>Te enviaremos un código por DM para verificar que eres miembro de The Klub.</p>
                     <div class="form-group">
-                        <label for="login-nombre">Tu usuario de Discord</label>
-                        <input type="text" id="login-nombre" placeholder="tu usuario" autocomplete="off">
+                        <label for="login-nombre">Tu usuario o apodo de Discord, exacto</label>
+                        <input type="text" id="login-nombre" placeholder="tal cual aparece en el servidor" autocomplete="off">
                     </div>
                     <div class="form-group-button">
                       <button id="login-solicitar" class="btn btn-primary">Enviar código</button>
@@ -468,6 +468,7 @@
                 <div class="login-step" id="login-step-2" hidden>
                     <h3>Introduce tu código</h3>
                     <p>Revisa tus mensajes directos en Discord.</p>
+                    <p class="u-hint">Si no te llega en un minuto, comprueba que escribiste tu usuario exacto y que tienes los mensajes directos abiertos para miembros del servidor.</p>
                     <div class="form-group">
                         <label for="login-codigo">Código de acceso (8 caracteres, distingue mayúsculas)</label>
                         <input type="text" id="login-codigo" placeholder="Ej: aB3#kP9!" maxlength="8"
@@ -782,15 +783,15 @@
 <script defer src="./assets/js/utils.js?v=5"></script>
 <script defer src="./assets/js/intro.js?v=4"></script>
 <script defer src="./assets/js/toast.js?v=5"></script>
-<script defer src="./assets/js/admission.js?v=4"></script>
+<script defer src="./assets/js/admission.js?v=5"></script>
 <script defer src="./assets/js/back-to-top.js?v=4"></script>
 <script defer src="./assets/js/broadcast.js?v=5"></script>
 <script defer src="./assets/js/navbar.js?v=4"></script>
 <script defer src="./assets/js/reveal.js?v=4"></script>
 <script defer src="./assets/js/smooth-scroll.js?v=4"></script>
 <script defer src="./assets/js/standings-slider.js?v=5"></script>
-<script defer src="./assets/js/auth.js?v=6"></script>
-<script defer src="./assets/js/member.js?v=9"></script>
+<script defer src="./assets/js/auth.js?v=7"></script>
+<script defer src="./assets/js/member.js?v=10"></script>
 <script defer src="./assets/js/confirm.js?v=4"></script>
 <script defer src="./assets/js/app.js?v=4"></script>
 
@@ -802,8 +803,8 @@
         "@context":"https://schema.org",
         "@type":"Organization",
         "name":"The Klub",
-        "url":"https://pngpremodern.com",
-        "logo":"https://pngpremodern.com/./assets/logo/logo.webp",
+        "url":"https://theklubmtg.es/",
+        "logo":"https://theklubmtg.es/assets/logo/logo.webp",
         "description":"Private Premodern community.",
         "sameAs":[
           "https://www.youtube.com/@TheKlubMtg",

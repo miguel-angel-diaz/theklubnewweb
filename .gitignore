@@ -1,0 +1,16 @@
+# La web se publica tal cual en Cloudflare Pages: nada de esto debe acabar en producción
+.env
+.env.*
+*.log
+*.bak
+*.tmp
+*.swp
+.DS_Store
+Thumbs.db
+desktop.ini
+node_modules/
+.vscode/
+.idea/
+
+# Retos de Let's Encrypt: Cloudflare gestiona el certificado
+.well-known/acme-challenge/

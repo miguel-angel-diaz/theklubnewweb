@@ -764,19 +764,6 @@ async function cargarMisDecks() {
     const token = sessionStorage.getItem(SESSION_STORAGE_KEY);
     if (!token) return;
 
-    if (typeof DEV_MODE_FAKE_LOGIN !== 'undefined' && DEV_MODE_FAKE_LOGIN && token === 'dev-fake-session-token') {
-        contenedor.innerHTML = `
-            <div class="mi-deck-card">
-                <h3>FastVourer <span class="deck-archetype">Devourer</span></h3>
-                <p class="deck-tournament">Torneo de Prueba (datos simulados)</p>
-                <details>
-                    <summary>Ver decklist</summary>
-                    <pre class="deck-list">4 Phyrexian Devourer\n4 Altar of Dementia\n4 Defense Grid\n...</pre>
-                </details>
-            </div>
-        `;
-        return;
-    }
 
     contenedor.innerHTML = '<p class="standings-loading">Cargando tus decks...</p>';
 

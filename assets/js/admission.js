@@ -36,14 +36,16 @@ function initAdmission() {
     }
 
     form.addEventListener('submit', async (e) => {
-       // Si ya agotó los intentos, bloqueamos directamente al cargar
-      if (obtenerIntentosAdmision() >= ADMISSION_MAX_INTENTOS) {
-          if (content) content.hidden = true;
-          if (blockedBox) blockedBox.hidden = false;
-          return;
-      }
-
+        // Lo primero: el formulario no tiene action y, sin esto, el navegador lo enviaría por GET a la propia página,
+        // con el email en la URL (historial, logs). El límite real de solicitudes está en el servidor (3 por hora).
         e.preventDefault();
+
+        // Si agotó los intentos en otra pestaña mientras esta seguía abierta
+        if (obtenerIntentosAdmision() >= ADMISSION_MAX_INTENTOS) {
+            if (content) content.hidden = true;
+            if (blockedBox) blockedBox.hidden = false;
+            return;
+        }
 
         const discordNick = form.discord_nick.value.trim();
         const email = form.email.value.trim();

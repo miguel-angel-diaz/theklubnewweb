@@ -1,7 +1,6 @@
 const AUTH_API_BASE = 'https://mydiscordbot-production-3e6a.up.railway.app';
 const SESSION_STORAGE_KEY = 'klub_session';
-const SESSION_USERNAME_KEY = 'klub_username';   // NUEVO
-const DEV_MODE_FAKE_LOGIN = false;
+const SESSION_USERNAME_KEY = 'klub_username';
 
 let nombreEnProceso = '';
 
@@ -106,18 +105,6 @@ function initLogin() {
         status1.textContent = '';
         status1.className = 'form-status';
 
-        if (DEV_MODE_FAKE_LOGIN) {
-            console.warn('⚠️ DEV_MODE_FAKE_LOGIN activo — no se está llamando al backend real');
-            setTimeout(() => {
-                nombreEnProceso = nombre;
-                step1.hidden = true;
-                step2.hidden = false;
-                btnSolicitar.disabled = false;
-                btnSolicitar.textContent = 'Enviar código';
-            }, 300);
-            return;
-        }
-
         try {
 
             const res = await fetch(`${AUTH_API_BASE}/auth/solicitar-codigo`, {
@@ -154,16 +141,6 @@ function initLogin() {
         status2.textContent = '';
         status2.className = 'form-status';
 
-        if (DEV_MODE_FAKE_LOGIN) {
-            console.warn('⚠️ DEV_MODE_FAKE_LOGIN activo — código aceptado sin verificar');
-            setTimeout(() => {
-                loginCompletado('dev-fake-session-token', nombreEnProceso || 'Usuario de Prueba');
-                btnVerificar.disabled = false;
-                btnVerificar.textContent = 'Verificar';
-            }, 300);
-            return;
-        }
-
         try {
 
             const res = await fetch(`${AUTH_API_BASE}/auth/verificar-codigo`, {
@@ -197,16 +174,6 @@ async function comprobarSesionActiva() {
     if (usernameGuardado) {
         window.klubUsername = usernameGuardado;
         document.body.classList.add('is-logged-in');
-    }
-
-    if (DEV_MODE_FAKE_LOGIN && token === 'dev-fake-session-token') {
-        window.klubUsername = usernameGuardado || 'Usuario de Prueba';
-        window.klubDiscordId = 'dev-fake-discord-id';
-        sessionStorage.setItem(SESSION_USERNAME_KEY, window.klubUsername);
-        document.body.classList.add('is-logged-in');
-        // Disparar evento para mostrar la vista de miembro
-        document.dispatchEvent(new CustomEvent('klub:mostrar-miembro'));
-        return;
     }
 
     try {
